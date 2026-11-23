@@ -163,23 +163,6 @@ export function PatternSequence({
     }
   };
 
-  const handlePalettePointerUp = (
-    e: React.PointerEvent<HTMLButtonElement>,
-    itemId: string
-  ) => {
-    if (disabled) return;
-    // Allow drag-release directly onto a missing slot element
-    const target = document.elementFromPoint(e.clientX, e.clientY);
-    const slotEl = target?.closest("[data-missing-pos]") as HTMLElement | null;
-    if (slotEl) {
-      const pos = Number(slotEl.dataset.missingPos);
-      if (Number.isInteger(pos) && pos >= 0) {
-        placeInSlot(pos, itemId);
-        return;
-      }
-    }
-  };
-
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <p className="text-xs text-ink-muted text-center">
@@ -273,7 +256,6 @@ export function PatternSequence({
                     prev === item.id ? null : item.id
                   )
                 }
-                onPointerUp={(e) => handlePalettePointerUp(e, item.id)}
                 className={`manipulative-target flex min-h-[64px] min-w-[64px] flex-col items-center justify-center gap-1 rounded-2xl border-2 px-3 py-2 transition-colors ${
                   isSelected
                     ? "border-accent bg-accent-soft ring-2 ring-accent/40 shadow-xs"

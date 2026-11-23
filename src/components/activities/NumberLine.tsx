@@ -72,13 +72,20 @@ export function NumberLine({
     [min, tickStep]
   );
 
-  // Center active start value in scroll container on mount
+  // Keep active value visible inside horizontal scroll container on mount and step changes
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const targetX = valueToX(startValue);
-    container.scrollLeft = Math.max(0, targetX - container.clientWidth / 2 + 40);
-  }, [startValue, valueToX]);
+    const targetX = valueToX(currentValue);
+    const viewLeft = container.scrollLeft;
+    const viewRight = viewLeft + container.clientWidth;
+    if (targetX - 48 < viewLeft || targetX + 48 > viewRight) {
+      container.scrollLeft = Math.max(
+        0,
+        targetX - container.clientWidth / 2 + 20
+      );
+    }
+  }, [currentValue, valueToX]);
 
   const moveToValue = useCallback(
     (nextVal: number) => {
@@ -135,12 +142,30 @@ export function NumberLine({
     }
   };
 
-  const handleMarkerPointerUp = () => {
+  const handleMarkerPointerUp = (e: React.PointerEvent<SVGGElement>) => {
     if (!isDragging) return;
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // ignore synthetic events
+    }
     setIsDragging(false);
     setJumpStops((prev) =>
       prev[prev.length - 1] === currentValue ? prev : [...prev, currentValue]
     );
+  };
+
+  const handleMarkerPointerCancel = (e: React.PointerEvent<SVGGElement>) => {
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // ignore synthetic events
+    }
+    setIsDragging(false);
   };
 
   const markerX = valueToX(currentValue);
@@ -264,7 +289,7 @@ export function NumberLine({
               <g
                 key={`tick-${val}`}
                 data-testid={`tick-${val}`}
-                className="manipulative-target cursor-pointer"
+                className="manipulative-target touch-pan-x cursor-pointer"
                 role="button"
                 tabIndex={disabled ? -1 : 0}
                 aria-pressed={isActive}
@@ -351,10 +376,11 @@ export function NumberLine({
           {/* Draggable active marker */}
           <g
             data-testid="number-line-marker"
-            className="manipulative-target cursor-grab active:cursor-grabbing"
+            className="manipulative-target touch-drag-surface cursor-grab active:cursor-grabbing"
             onPointerDown={handleMarkerPointerDown}
             onPointerMove={handleMarkerPointerMove}
             onPointerUp={handleMarkerPointerUp}
+            onPointerCancel={handleMarkerPointerCancel}
           >
             <rect
               x={markerX - 28}

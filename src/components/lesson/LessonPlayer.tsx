@@ -168,8 +168,8 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
 
   if (summary) {
     return (
-      <div className="min-h-screen bg-canvas flex flex-col">
-        <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-4 py-2.5">
+      <div className="min-h-dvh bg-canvas flex flex-col">
+        <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-3 sm:px-4 py-2.5">
           <div className="mx-auto flex max-w-xl items-center justify-between gap-2">
             <Link
               href="/learn"
@@ -272,19 +272,24 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
   );
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
-      {/* Calm distraction-free sticky header (zero countdown timers) */}
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-3 py-2.5">
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-2">
+    <div className="min-h-dvh bg-canvas flex flex-col">
+      {/* Calm distraction-free sticky header (two-row on <sm so 360px phones never crush controls) */}
+      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-2.5 sm:px-3 py-2 sm:py-2.5">
+        <div className="mx-auto flex max-w-xl flex-wrap sm:flex-nowrap items-center justify-between gap-x-2 gap-y-1.5">
           <Link
             href="/learn"
             data-testid="lesson-exit-btn"
-            className="khmer-chip inline-flex items-center rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-ink hover:bg-surface-subtle"
+            className="khmer-chip order-1 shrink-0 whitespace-nowrap inline-flex items-center rounded-xl border border-border bg-surface px-2.5 sm:px-3 text-sm font-semibold text-ink hover:bg-surface-subtle"
           >
             ចាកចេញ
           </Link>
 
-          <div className="flex-1 px-1">
+          <div className="order-2 sm:order-3 flex items-center gap-1.5 shrink-0">
+            <AudioToggle />
+            <NumeralToggle />
+          </div>
+
+          <div className="order-3 sm:order-2 w-full sm:w-auto sm:flex-1 sm:px-1">
             <div className="flex items-center justify-between text-xs font-semibold text-ink-muted mb-1">
               <span data-testid="step-counter">
                 ជំហាន {formatDisplayNumber(stepIndex + 1, numeralPref)} /{" "}
@@ -313,15 +318,10 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
               />
             </div>
           </div>
-
-          <div className="flex items-center gap-1.5">
-            <AudioToggle />
-            <NumeralToggle />
-          </div>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-3 py-4 pb-10">
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-2.5 sm:px-3 py-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
         {/* Lesson title + Concreteness Fading stage chip + Scratchpad toggle */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-ink-muted">
@@ -353,7 +353,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
         )}
 
         {/* Active Step Card */}
-        <section className="rounded-3xl border border-border bg-surface p-3.5 sm:p-5 shadow-xs space-y-4">
+        <section className="rounded-3xl border border-border bg-surface p-3 sm:p-5 shadow-xs space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <h1
               data-testid="step-prompt"

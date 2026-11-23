@@ -6,6 +6,7 @@ import type { StepAnswer } from "@/lib/math/grader";
 import {
   analyzeDrawnPolygon,
   canonicalEdgeKey,
+  clientPointToGridCell,
   parsePointKey,
   pointKey,
   type DrawnEdge,
@@ -54,7 +55,16 @@ export function GeometryDraw({
   const [edges, setEdges] = useState<DrawnEdge[]>([]);
   const [activePeg, setActivePeg] = useState<string | null>(null);
   const [paintedCells, setPaintedCells] = useState<string[]>([]);
-  const [isPointerPainting, setIsPointerPainting] = useState<boolean>(false);
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragPaintRef = useRef<{
+    active: boolean;
+    mode: "paint" | "erase";
+    visited: Set<string>;
+  }>({
+    active: false,
+    mode: "paint",
+    visited: new Set(),
+  });
 
   const onAnswerChangeRef = useRef(onAnswerChange);
   useEffect(() => {
@@ -78,6 +88,10 @@ export function GeometryDraw({
   const polyAnalysis = useMemo(() => analyzeDrawnPolygon(edges), [edges]);
 
   const svgSize = 320;
+  const gridSvgWidth =
+    mode === "dot-connect" ? svgSize : Math.max(320, gridCols * 64 + 16);
+  const gridSvgHeight =
+    mode === "dot-connect" ? svgSize : Math.max(320, gridRows * 64 + 16);
   const halfCols = Math.floor(gridCols / 2);
   const templateSet = useMemo(
     () => new Set(templateLeftCells),
@@ -134,12 +148,12 @@ export function GeometryDraw({
     setPaintedCells([]);
   };
 
-  const toggleGridCell = (key: string, forceAdd = false) => {
+  const applyCellPaintMode = (key: string, paintMode: "paint" | "erase") => {
     if (disabled) return;
     setPaintedCells((prev) => {
       const exists = prev.includes(key);
-      if (exists && !forceAdd) {
-        return prev.filter((k) => k !== key);
+      if (paintMode === "erase") {
+        return exists ? prev.filter((k) => k !== key) : prev;
       }
       if (!exists) {
         playScaleNote(prev.length % 10, audioEnabled);
@@ -147,6 +161,73 @@ export function GeometryDraw({
       }
       return prev;
     });
+  };
+
+  const toggleGridCell = (key: string) => {
+    if (disabled) return;
+    const isPainted = paintedCells.includes(key);
+    applyCellPaintMode(key, isPainted ? "erase" : "paint");
+  };
+
+  const startCellPointerPaint = (
+    e: React.PointerEvent<SVGElement>,
+    key: string
+  ) => {
+    if (disabled) return;
+    e.stopPropagation();
+    const isPainted = paintedCells.includes(key);
+    const nextMode: "paint" | "erase" = isPainted ? "erase" : "paint";
+    dragPaintRef.current = {
+      active: true,
+      mode: nextMode,
+      visited: new Set([key]),
+    };
+    applyCellPaintMode(key, nextMode);
+    try {
+      svgRef.current?.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignore synthetic pointer events in tests
+    }
+  };
+
+  const handleSvgPointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
+    if (disabled || mode === "dot-connect" || !dragPaintRef.current.active) {
+      return;
+    }
+    const svg = svgRef.current;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const hit = clientPointToGridCell({
+      clientX: e.clientX,
+      clientY: e.clientY,
+      rect,
+      svgWidth: gridSvgWidth,
+      svgHeight: gridSvgHeight,
+      gridRows,
+      gridCols,
+      pad: 8,
+      lockLeftHalf: mode === "symmetry-mirror",
+    });
+    if (!hit || dragPaintRef.current.visited.has(hit.key)) {
+      return;
+    }
+    dragPaintRef.current.visited.add(hit.key);
+    applyCellPaintMode(hit.key, dragPaintRef.current.mode);
+  };
+
+  const stopCellPointerPaint = (e?: React.PointerEvent<SVGSVGElement>) => {
+    if (!dragPaintRef.current.active) return;
+    dragPaintRef.current.active = false;
+    dragPaintRef.current.visited.clear();
+    if (e) {
+      try {
+        if (svgRef.current?.hasPointerCapture?.(e.pointerId)) {
+          svgRef.current.releasePointerCapture(e.pointerId);
+        }
+      } catch {
+        // Ignore
+      }
+    }
   };
 
   // Closed polygon fill points for dot-connect visual delight
@@ -161,8 +242,8 @@ export function GeometryDraw({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [polyAnalysis, gridCols, gridRows]);
 
-  const cellW = (svgSize - 16) / gridCols;
-  const cellH = (svgSize - 16) / gridRows;
+  const cellW = (gridSvgWidth - 16) / gridCols;
+  const cellH = (gridSvgHeight - 16) / gridRows;
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -233,14 +314,30 @@ export function GeometryDraw({
       </p>
 
       {/* Safari-safe inline SVG drawing board (zero foreignObject, >= 56x56px targets) */}
-      <div className="w-full max-w-[340px] flex justify-center">
+      <div className="w-full overflow-x-auto flex justify-center">
         <svg
-          viewBox={`0 0 ${svgSize} ${svgSize}`}
-          className="w-full h-auto select-none rounded-2xl border-2 border-border bg-surface shadow-xs"
+          ref={svgRef}
+          viewBox={`0 0 ${gridSvgWidth} ${gridSvgHeight}`}
+          style={
+            gridSvgWidth > 320
+              ? {
+                  width: `${gridSvgWidth}px`,
+                  minWidth: `${gridSvgWidth}px`,
+                  height: `${gridSvgHeight}px`,
+                }
+              : undefined
+          }
+          className={`${
+            gridSvgWidth > 320 ? "block" : "w-full max-w-[340px] h-auto"
+          } ${
+            mode === "dot-connect" ? "" : "touch-drag-surface"
+          } select-none rounded-2xl border-2 border-border bg-surface shadow-xs`}
           role="group"
           aria-label="ក្ដារគូររូបគណិត"
-          onPointerUp={() => setIsPointerPainting(false)}
-          onPointerLeave={() => setIsPointerPainting(false)}
+          onPointerMove={handleSvgPointerMove}
+          onPointerUp={stopCellPointerPaint}
+          onPointerCancel={stopCellPointerPaint}
+          onPointerLeave={() => stopCellPointerPaint()}
         >
           {mode === "dot-connect" ? (
             <>
@@ -399,24 +496,16 @@ export function GeometryDraw({
                     <g
                       key={key}
                       data-testid={`draw-cell-${r}-${c}`}
-                      className="manipulative-target cursor-pointer"
+                      className="manipulative-target touch-drag-surface cursor-pointer"
                       role="button"
                       tabIndex={disabled ? -1 : 0}
                       aria-pressed={isUserPainted}
                       aria-label={`ប្រឡោះជួរ ${formatDisplayNumber(r + 1, numeralPref)} ជួរឈរ ${formatDisplayNumber(c + 1, numeralPref)}`}
-                      onPointerDown={() => {
-                        setIsPointerPainting(true);
-                        toggleGridCell(key, false);
-                      }}
-                      onPointerEnter={() => {
-                        if (isPointerPainting) {
-                          toggleGridCell(key, true);
-                        }
-                      }}
+                      onPointerDown={(e) => startCellPointerPaint(e, key)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();
-                          toggleGridCell(key, false);
+                          toggleGridCell(key);
                         }
                       }}
                     >
@@ -438,10 +527,10 @@ export function GeometryDraw({
               {/* Glowing vertical mirror symmetry axis */}
               {mode === "symmetry-mirror" && (
                 <line
-                  x1={svgSize / 2}
+                  x1={gridSvgWidth / 2}
                   y1={4}
-                  x2={svgSize / 2}
-                  y2={svgSize - 4}
+                  x2={gridSvgWidth / 2}
+                  y2={gridSvgHeight - 4}
                   stroke="#dc2626"
                   strokeWidth={3.5}
                   strokeDasharray="7 5"

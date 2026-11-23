@@ -140,19 +140,19 @@ export function ArrayGroups({
         </svg>
       </div>
 
-      {/* Stepper controls (>= 56x56 px) */}
-      <div className="grid grid-cols-2 gap-3 w-full max-w-[380px]">
+      {/* Stepper controls (>= 56x56 px, responsive so narrow phones never overflow) */}
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 gap-2.5 w-full max-w-[380px]">
         <div className="rounded-2xl border border-border bg-surface p-2.5 flex flex-col items-center gap-2">
           <span className="text-xs font-bold text-ink-muted">
             ចំនួនជួរ ({formatDisplayNumber(rows, numeralPref)})
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2 w-full">
             <button
               type="button"
               data-testid="array-rows-dec"
               disabled={disabled || rows <= 1}
               onClick={() => setRows((r) => Math.max(1, r - 1))}
-              className="manipulative-target rounded-xl border border-border bg-surface-subtle px-3 text-lg font-bold text-ink disabled:opacity-40"
+              className="manipulative-target flex-1 rounded-xl border border-border bg-surface-subtle px-3 text-lg font-bold text-ink disabled:opacity-40"
             >
               −
             </button>
@@ -161,7 +161,7 @@ export function ArrayGroups({
               data-testid="array-rows-inc"
               disabled={disabled || rows >= maxRows}
               onClick={() => setRows((r) => Math.min(maxRows, r + 1))}
-              className="manipulative-target rounded-xl bg-accent px-3 text-lg font-bold text-white disabled:opacity-40"
+              className="manipulative-target flex-1 rounded-xl bg-accent px-3 text-lg font-bold text-white disabled:opacity-40"
             >
               +
             </button>
@@ -172,13 +172,13 @@ export function ArrayGroups({
           <span className="text-xs font-bold text-ink-muted">
             ក្នុង ១ ជួរ ({formatDisplayNumber(cols, numeralPref)})
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-2 w-full">
             <button
               type="button"
               data-testid="array-cols-dec"
               disabled={disabled || cols <= 1}
               onClick={() => setCols((c) => Math.max(1, c - 1))}
-              className="manipulative-target rounded-xl border border-border bg-surface-subtle px-3 text-lg font-bold text-ink disabled:opacity-40"
+              className="manipulative-target flex-1 rounded-xl border border-border bg-surface-subtle px-3 text-lg font-bold text-ink disabled:opacity-40"
             >
               −
             </button>
@@ -187,7 +187,7 @@ export function ArrayGroups({
               data-testid="array-cols-inc"
               disabled={disabled || cols >= maxCols}
               onClick={() => setCols((c) => Math.min(maxCols, c + 1))}
-              className="manipulative-target rounded-xl bg-accent px-3 text-lg font-bold text-white disabled:opacity-40"
+              className="manipulative-target flex-1 rounded-xl bg-accent px-3 text-lg font-bold text-white disabled:opacity-40"
             >
               +
             </button>

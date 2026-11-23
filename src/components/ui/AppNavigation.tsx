@@ -168,7 +168,10 @@ export function AppNavigation() {
   return (
     <>
       {/* Bottom clearance spacer so fixed nav never obscures focused controls */}
-      <div aria-hidden="true" className="h-24 shrink-0" />
+      <div
+        aria-hidden="true"
+        className="h-[calc(5.5rem+env(safe-area-inset-bottom))] shrink-0"
+      />
 
       {/* Backdrop when More Menu sheet is open */}
       {moreOpen && (
@@ -185,7 +188,7 @@ export function AppNavigation() {
           id="nav-more-menu-panel"
           aria-label="ម៉ឺនុយបន្ថែម"
           data-testid="nav-more-menu"
-          className="fixed bottom-20 left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 rounded-3xl border-2 border-border bg-surface p-3 shadow-lg space-y-1.5"
+          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 max-h-[70dvh] overflow-y-auto overscroll-contain rounded-3xl border-2 border-border bg-surface p-3 shadow-lg space-y-1.5"
         >
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-xs font-bold text-ink-muted">
@@ -234,7 +237,7 @@ export function AppNavigation() {
       <nav
         aria-label="ម៉ឺនុយមេ"
         data-testid="app-bottom-nav"
-        className="fixed bottom-0 left-0 right-0 sm:bottom-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[calc(100%-2rem)] sm:max-w-xl z-40 border-t sm:border-2 border-border bg-surface/95 backdrop-blur sm:rounded-3xl shadow-md px-1.5 py-1.5"
+        className="fixed bottom-0 left-0 right-0 sm:bottom-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[calc(100%-2rem)] sm:max-w-xl z-40 border-t sm:border-2 border-border bg-surface/95 backdrop-blur sm:rounded-3xl shadow-md px-1.5 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:py-1.5"
       >
         <div className="grid grid-cols-5 gap-1">
           {PRIMARY_ITEMS.map((item) => {

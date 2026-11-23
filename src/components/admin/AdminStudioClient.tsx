@@ -149,7 +149,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
     null;
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
+    <div className="min-h-dvh bg-canvas flex flex-col">
       <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-4 py-3">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2">
           <Link
@@ -235,7 +235,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                   <label htmlFor="admin-lesson-select" className="sr-only">
                     ជ្រើសរើសមេរៀនដើម្បីកែសម្រួល
                   </label>
@@ -244,7 +244,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
                     data-testid="admin-lesson-select"
                     value={selectedId}
                     onChange={(e) => handleSelectLesson(e.target.value)}
-                    className="min-h-[44px] rounded-xl border border-border bg-canvas px-3 text-sm font-semibold text-ink"
+                    className="w-full sm:w-auto max-w-full min-h-[44px] rounded-xl border border-border bg-canvas px-3 text-sm font-semibold text-ink"
                   >
                     {initialLessons.map((l) => (
                       <option key={l.id} value={l.id}>
@@ -262,7 +262,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
                     onChange={(e) =>
                       setStatus(e.target.value as "draft" | "published")
                     }
-                    className="min-h-[44px] rounded-xl border border-border bg-canvas px-3 text-sm font-semibold text-ink"
+                    className="w-full sm:w-auto max-w-full min-h-[44px] rounded-xl border border-border bg-canvas px-3 text-sm font-semibold text-ink"
                   >
                     <option value="published">ផ្សាយ (Published)</option>
                     <option value="draft">ព្រាង (Draft)</option>

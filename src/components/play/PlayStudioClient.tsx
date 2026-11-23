@@ -706,7 +706,7 @@ export function PlayStudioClient() {
   const scaleTilt = scaleDiff === 0 ? 0 : scaleDiff > 0 ? -8 : 8;
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
+    <div className="min-h-dvh bg-canvas flex flex-col">
       <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-3 py-2.5">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
           <Link

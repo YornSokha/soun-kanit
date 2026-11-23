@@ -2,9 +2,11 @@
 
 import { stripZwsp } from "@/lib/khmer/numerals";
 
-let activeAudioEl: HTMLAudioElement | null = null;
+let sharedAudioEl: HTMLAudioElement | null = null;
 let activeObjectUrl: string | null = null;
 let activeFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+let activeOnEndCallback: (() => void) | null = null;
+let activeRequestId = 0;
 
 const AUDIO_CACHE_NAME = "konleuh-kanit-audio-v1";
 
@@ -15,15 +17,34 @@ export interface SpeakKhmerOptions {
   onEnd?: () => void;
 }
 
-export function stopKhmerSpeech(): void {
-  if (activeAudioEl) {
+function getOrCreateSharedAudio(): HTMLAudioElement | null {
+  if (typeof window === "undefined" || typeof Audio === "undefined") {
+    return null;
+  }
+  if (!sharedAudioEl) {
     try {
-      activeAudioEl.pause();
-      activeAudioEl.currentTime = 0;
+      sharedAudioEl = new Audio();
+      sharedAudioEl.preload = "auto";
+    } catch {
+      return null;
+    }
+  }
+  return sharedAudioEl;
+}
+
+export function stopKhmerSpeech(): void {
+  activeRequestId++;
+
+  if (sharedAudioEl) {
+    try {
+      sharedAudioEl.onplay = null;
+      sharedAudioEl.onended = null;
+      sharedAudioEl.onerror = null;
+      sharedAudioEl.pause();
+      sharedAudioEl.currentTime = 0;
     } catch {
       // ignore
     }
-    activeAudioEl = null;
   }
 
   if (activeObjectUrl) {
@@ -47,38 +68,59 @@ export function stopKhmerSpeech(): void {
       // ignore
     }
   }
+
+  if (activeOnEndCallback) {
+    const cb = activeOnEndCallback;
+    activeOnEndCallback = null;
+    cb();
+  }
 }
 
 async function playAudioSource(
+  audio: HTMLAudioElement | null,
   src: string,
+  requestId: number,
   onStart?: () => void,
   onEnd?: () => void
 ): Promise<boolean> {
+  if (!audio || requestId !== activeRequestId) {
+    return false;
+  }
+
   return new Promise<boolean>((resolve) => {
     try {
-      const audio = new Audio(src);
-      activeAudioEl = audio;
       let started = false;
 
       audio.onplay = () => {
+        if (requestId !== activeRequestId) return;
         started = true;
         onStart?.();
       };
       audio.onended = () => {
-        if (activeAudioEl === audio) activeAudioEl = null;
+        if (requestId !== activeRequestId) {
+          resolve(false);
+          return;
+        }
+        activeOnEndCallback = null;
         onEnd?.();
         resolve(true);
       };
       audio.onerror = () => {
-        if (activeAudioEl === audio) activeAudioEl = null;
+        if (started && requestId === activeRequestId) {
+          activeOnEndCallback = null;
+          onEnd?.();
+        }
         resolve(false);
       };
 
+      audio.src = src;
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.then === "function") {
         playPromise.catch(() => {
-          if (activeAudioEl === audio) activeAudioEl = null;
-          if (started) onEnd?.();
+          if (started && requestId === activeRequestId) {
+            activeOnEndCallback = null;
+            onEnd?.();
+          }
           resolve(false);
         });
       }
@@ -136,9 +178,12 @@ async function fetchCachedTtsBlobUrl(textKm: string): Promise<string | null> {
 
 function speakWithSpeechSynthesis(
   textKm: string,
+  requestId: number,
   onStart?: () => void,
   onEnd?: () => void
 ): void {
+  if (requestId !== activeRequestId) return;
+
   if (
     typeof window !== "undefined" &&
     "speechSynthesis" in window &&
@@ -155,9 +200,21 @@ function speakWithSpeechSynthesis(
         utterance.lang = "km-KH";
         utterance.voice = khmerVoice;
         utterance.rate = 0.92;
-        utterance.onstart = () => onStart?.();
-        utterance.onend = () => onEnd?.();
-        utterance.onerror = () => onEnd?.();
+        utterance.onstart = () => {
+          if (requestId === activeRequestId) onStart?.();
+        };
+        utterance.onend = () => {
+          if (requestId === activeRequestId) {
+            activeOnEndCallback = null;
+            onEnd?.();
+          }
+        };
+        utterance.onerror = () => {
+          if (requestId === activeRequestId) {
+            activeOnEndCallback = null;
+            onEnd?.();
+          }
+        };
         window.speechSynthesis.speak(utterance);
         return;
       }
@@ -170,7 +227,10 @@ function speakWithSpeechSynthesis(
   onStart?.();
   activeFallbackTimer = setTimeout(() => {
     activeFallbackTimer = null;
-    onEnd?.();
+    if (requestId === activeRequestId) {
+      activeOnEndCallback = null;
+      onEnd?.();
+    }
   }, 900);
 }
 
@@ -179,6 +239,9 @@ function speakWithSpeechSynthesis(
  * 1. Pre-generated local offline MP3 (`step.audioUrl`)
  * 2. Cached server-side Khmer TTS (`/api/tts`) stored in browser CacheStorage
  * 3. Browser SpeechSynthesis (`km-KH`) or calm visual read-along fallback
+ *
+ * Synchronously primes a shared HTMLAudioElement inside the user tap gesture so
+ * iOS Safari and Android Chrome allow playback after async fetches.
  */
 export function speakKhmerPrompt({
   textKm,
@@ -193,28 +256,58 @@ export function speakKhmerPrompt({
     return;
   }
 
+  const requestId = ++activeRequestId;
+  activeOnEndCallback = onEnd ?? null;
+
+  // Synchronously prime shared HTMLAudioElement inside the user tap call stack
+  const audioEl = getOrCreateSharedAudio();
+  if (audioEl) {
+    try {
+      audioEl.load();
+    } catch {
+      // ignore
+    }
+  }
+
   void (async () => {
     // 1. Try local recorded/generated MP3 first (instant & 100% offline)
     if (audioUrl) {
-      const playedStatic = await playAudioSource(audioUrl, onStart, onEnd);
-      if (playedStatic) return;
+      const playedStatic = await playAudioSource(
+        audioEl,
+        audioUrl,
+        requestId,
+        onStart,
+        onEnd
+      );
+      if (playedStatic || requestId !== activeRequestId) return;
     }
 
     // 2. Try cached / dynamic Khmer TTS MP3 endpoint
     const blobUrl = await fetchCachedTtsBlobUrl(textKm);
+    if (requestId !== activeRequestId) {
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
+      return;
+    }
+
     if (blobUrl) {
       activeObjectUrl = blobUrl;
-      const playedDynamic = await playAudioSource(blobUrl, onStart, () => {
-        if (activeObjectUrl === blobUrl) {
-          URL.revokeObjectURL(blobUrl);
-          activeObjectUrl = null;
+      const playedDynamic = await playAudioSource(
+        audioEl,
+        blobUrl,
+        requestId,
+        onStart,
+        () => {
+          if (activeObjectUrl === blobUrl) {
+            URL.revokeObjectURL(blobUrl);
+            activeObjectUrl = null;
+          }
+          onEnd?.();
         }
-        onEnd?.();
-      });
-      if (playedDynamic) return;
+      );
+      if (playedDynamic || requestId !== activeRequestId) return;
     }
 
     // 3. Fallback to OS Khmer speechSynthesis or gentle visual indicator
-    speakWithSpeechSynthesis(textKm, onStart, onEnd);
+    speakWithSpeechSynthesis(textKm, requestId, onStart, onEnd);
   })();
 }

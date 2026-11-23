@@ -17,7 +17,7 @@ export function NumeralToggle({ className = "" }: NumeralToggleProps) {
       data-testid="numeral-toggle"
       onClick={() => void toggleNumeralPref()}
       aria-pressed={!isKhmer}
-      className={`khmer-chip inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 text-sm font-semibold text-ink shadow-xs transition-colors hover:bg-surface-subtle ${className}`}
+      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border bg-surface px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-ink shadow-xs transition-colors hover:bg-surface-subtle ${className}`}
     >
       <span className="sr-only">
         {isKhmer ? "ប្ដូរទៅលេខអារ៉ាប់ " : "ប្ដូរទៅលេខខ្មែរ "}

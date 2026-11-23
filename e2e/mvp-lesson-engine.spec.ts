@@ -801,4 +801,159 @@ test.describe("Soun Kanit (សួនគណិត) E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("print-certificate-btn")).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 10: Mobile Touch UX, Scroll-Safe Tap Targets, Non-Crushing Header, Drag-Paint Symmetry, Wobble-Tap & Zero Overflow at 360x800", async ({
+    page,
+  }) => {
+    const expectZeroHorizontalOverflow = async (label: string) => {
+      const metrics = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+        innerWidth: window.innerWidth,
+      }));
+      expect(
+        metrics.scrollWidth,
+        `${label} should not overflow horizontally (${metrics.scrollWidth} > ${metrics.innerWidth})`
+      ).toBeLessThanOrEqual(metrics.innerWidth);
+    };
+
+    // 1. Verify zero horizontal overflow across primary hub routes at 360x800
+    for (const route of ["/", "/learn", "/play", "/garden", "/daily", "/review", "/parent", "/admin"]) {
+      await page.goto(route);
+      await expectZeroHorizontalOverflow(route);
+    }
+
+    // 2. Verify LessonPlayer header never crushes or overlaps on 360px phones (even with "បិទសំឡេង")
+    await page.goto("/learn/l07-making-ten");
+    await expectZeroHorizontalOverflow("/learn/l07-making-ten");
+
+    // Toggle audio off ("បិទសំឡេង" is wider than "សំឡេង")
+    await page.getByTestId("audio-toggle").click();
+    await expect(page.getByTestId("audio-toggle")).toContainText("បិទសំឡេង");
+    await expectZeroHorizontalOverflow("/learn/l07-making-ten (audio off)");
+
+    const exitBox = await page.getByTestId("lesson-exit-btn").boundingBox();
+    const audioBox = await page.getByTestId("audio-toggle").boundingBox();
+    const numBox = await page.getByTestId("numeral-toggle").boundingBox();
+    const stepBox = await page.getByTestId("step-counter").boundingBox();
+    expect(exitBox).not.toBeNull();
+    expect(audioBox).not.toBeNull();
+    expect(numBox).not.toBeNull();
+    expect(stepBox).not.toBeNull();
+    // Row 1 controls must not overlap horizontally, and step counter sits cleanly on Row 2 below Row 1
+    expect(exitBox!.x + exitBox!.width).toBeLessThanOrEqual(audioBox!.x + 1);
+    expect(audioBox!.x + audioBox!.width).toBeLessThanOrEqual(numBox!.x + 1);
+    expect(stepBox!.y).toBeGreaterThanOrEqual(exitBox!.y + exitBox!.height - 2);
+
+    // 3. Verify touch-action separation: tap buttons use manipulation, draggable tokens use none
+    const checkBtnTouchAction = await page
+      .getByTestId("check-answer-btn")
+      .evaluate((el) => window.getComputedStyle(el).touchAction);
+    expect(checkBtnTouchAction).toBe("manipulation");
+
+    const tokenTouchAction = await page
+      .getByTestId("outside-token-0")
+      .evaluate((el) => window.getComputedStyle(el).touchAction);
+    expect(tokenTouchAction).toBe("none");
+
+    // 4. CountingStage: slight finger drift (8px) during tap still selects token, and pointercancel recovers
+    const tok0 = page.getByTestId("outside-token-0");
+    const tokBox = await tok0.boundingBox();
+    expect(tokBox).not.toBeNull();
+    const cx = tokBox!.x + tokBox!.width / 2;
+    const cy = tokBox!.y + tokBox!.height / 2;
+
+    await tok0.dispatchEvent("pointerdown", {
+      pointerId: 1,
+      clientX: cx,
+      clientY: cy,
+      isPrimary: true,
+    });
+    await tok0.dispatchEvent("pointermove", {
+      pointerId: 1,
+      clientX: cx + 6,
+      clientY: cy + 5,
+      isPrimary: true,
+    });
+    await tok0.dispatchEvent("pointerup", {
+      pointerId: 1,
+      clientX: cx + 6,
+      clientY: cy + 5,
+      isPrimary: true,
+    });
+    await expect(tok0).toHaveAttribute("aria-pressed", "true");
+
+    // Simulate pointercancel during drag and verify token remains interactive
+    await tok0.dispatchEvent("pointerdown", {
+      pointerId: 2,
+      clientX: cx,
+      clientY: cy,
+      isPrimary: true,
+    });
+    await tok0.dispatchEvent("pointermove", {
+      pointerId: 2,
+      clientX: cx,
+      clientY: cy - 80,
+      isPrimary: true,
+    });
+    await tok0.dispatchEvent("pointercancel", {
+      pointerId: 2,
+      clientX: cx,
+      clientY: cy - 80,
+      isPrimary: true,
+    });
+    await page.getByTestId("frame-slot-8").click();
+    await expect(page.getByTestId("counting-in-frame-badge")).toContainText("៩");
+
+    // 5. PlaceValueBlocks (l08): verify non-overlapping >=56px targets and zero horizontal overflow
+    await page.goto("/learn/l08-tens-and-ones-99");
+    await expectZeroHorizontalOverflow("/learn/l08-tens-and-ones-99");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    const removeTenBox = await page.getByTestId("pv-remove-ten").boundingBox();
+    const addTenBox = await page.getByTestId("pv-add-ten").boundingBox();
+    expect(removeTenBox).not.toBeNull();
+    expect(addTenBox).not.toBeNull();
+    expect(removeTenBox!.x + removeTenBox!.width).toBeLessThanOrEqual(
+      addTenBox!.x + 1
+    );
+    await expectNoWcag22Violations(page);
+
+    // 6. GeometryDraw (Play Studio -> Symmetry mode): continuous single-finger drag paints multiple cells
+    await page.goto("/play");
+    await page.getByTestId("play-tab-draw").click();
+    await page.getByTestId("play-draw-sub-symmetry").click();
+    await expectZeroHorizontalOverflow("/play (draw symmetry)");
+
+    const cell03 = page.getByTestId("draw-cell-0-3");
+    const cell13 = page.getByTestId("draw-cell-1-3");
+    const box03 = await cell03.boundingBox();
+    const box13 = await cell13.boundingBox();
+    expect(box03).not.toBeNull();
+    expect(box13).not.toBeNull();
+
+    await cell03.dispatchEvent("pointerdown", {
+      pointerId: 5,
+      clientX: box03!.x + box03!.width / 2,
+      clientY: box03!.y + box03!.height / 2,
+      isPrimary: true,
+    });
+    const drawSvg = page.locator('[aria-label="ក្ដារគូររូបគណិត"]');
+    await drawSvg.dispatchEvent("pointermove", {
+      pointerId: 5,
+      clientX: box13!.x + box13!.width / 2,
+      clientY: box13!.y + box13!.height / 2,
+      isPrimary: true,
+    });
+    await drawSvg.dispatchEvent("pointerup", {
+      pointerId: 5,
+      clientX: box13!.x + box13!.width / 2,
+      clientY: box13!.y + box13!.height / 2,
+      isPrimary: true,
+    });
+
+    await expect(cell03).toHaveAttribute("aria-pressed", "true");
+    await expect(cell13).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("draw-area-badge")).toContainText("២");
+    await expectNoWcag22Violations(page);
+  });
 });

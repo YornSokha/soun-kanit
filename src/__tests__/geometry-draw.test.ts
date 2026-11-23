@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   analyzeDrawnPolygon,
   checkSymmetryMirror,
+  clientPointToGridCell,
   computeMirrorCells,
 } from "@/lib/math/geometryDraw";
 import { gradeStep } from "@/lib/math/grader";
@@ -65,6 +66,59 @@ describe("geometryDraw pure math engine", () => {
     const wrong = checkSymmetryMirror(4, left, ["0,3", "1,3"]);
     expect(wrong.isMatch).toBe(false);
     expect(wrong.missingCount).toBe(4);
+  });
+
+  it("maps touch client coordinates to unlocked grid cells via clientPointToGridCell", () => {
+    const rect = { left: 10, top: 20, width: 320, height: 320 };
+    // Top-right cell (row 0, col 3) in a 4x4 grid (pad = 8, each cell = 76x76)
+    const hitRight = clientPointToGridCell({
+      clientX: 10 + 8 + 76 * 3 + 38,
+      clientY: 20 + 8 + 38,
+      rect,
+      svgWidth: 320,
+      svgHeight: 320,
+      gridRows: 4,
+      gridCols: 4,
+      lockLeftHalf: true,
+    });
+    expect(hitRight).toEqual({ row: 0, col: 3, key: "0,3" });
+
+    // Left-half cell (row 1, col 1) returns null when lockLeftHalf is true
+    const hitLockedLeft = clientPointToGridCell({
+      clientX: 10 + 8 + 76 * 1 + 20,
+      clientY: 20 + 8 + 76 * 1 + 20,
+      rect,
+      svgWidth: 320,
+      svgHeight: 320,
+      gridRows: 4,
+      gridCols: 4,
+      lockLeftHalf: true,
+    });
+    expect(hitLockedLeft).toBeNull();
+
+    // Outside SVG padding returns null
+    const hitOutside = clientPointToGridCell({
+      clientX: 12,
+      clientY: 22,
+      rect,
+      svgWidth: 320,
+      svgHeight: 320,
+      gridRows: 4,
+      gridCols: 4,
+    });
+    expect(hitOutside).toBeNull();
+
+    // High-column 6x6 grid (svgWidth = 400) maps col 5 accurately
+    const hitSixCol = clientPointToGridCell({
+      clientX: 10 + 390,
+      clientY: 20 + 310,
+      rect: { left: 10, top: 20, width: 400, height: 336 },
+      svgWidth: 400,
+      svgHeight: 336,
+      gridRows: 5,
+      gridCols: 6,
+    });
+    expect(hitSixCol).toEqual({ row: 4, col: 5, key: "4,5" });
   });
 });
 

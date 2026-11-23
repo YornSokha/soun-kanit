@@ -50,7 +50,7 @@ export function AudioReadButton({
       aria-pressed={isSpeaking}
       disabled={!audioEnabled}
       onClick={handleClick}
-      className={`khmer-chip inline-flex items-center gap-1.5 rounded-full border px-3.5 text-xs font-bold transition-colors disabled:opacity-45 ${
+      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border px-3 sm:px-3.5 text-xs font-bold transition-colors disabled:opacity-45 ${
         isSpeaking
           ? "border-accent bg-accent text-white"
           : "border-border bg-surface-subtle text-ink hover:bg-accent-soft hover:border-accent"
@@ -91,7 +91,7 @@ export function AudioToggle({ className = "" }: { className?: string }) {
       data-testid="audio-toggle"
       aria-pressed={audioEnabled}
       onClick={handleToggle}
-      className={`khmer-chip inline-flex items-center gap-1.5 rounded-full border px-3 text-xs font-semibold shadow-xs transition-colors ${
+      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border px-2.5 sm:px-3 text-xs font-semibold shadow-xs transition-colors ${
         audioEnabled
           ? "border-border bg-surface text-ink hover:bg-surface-subtle"
           : "border-border bg-surface-subtle text-ink-muted"

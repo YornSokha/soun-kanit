@@ -203,9 +203,9 @@ export function CountingStage({
 
   const frameCols = 5;
   const frameRows = step.config.frameSize / 5;
-  const cellSize = 60;
+  const cellSize = 58;
   const cellGap = 4;
-  const svgWidth = 320;
+  const svgWidth = 310;
   const frameStartX = 2;
   const frameStartY = 30;
   const frameHeight = frameRows * cellSize + (frameRows - 1) * cellGap;
@@ -350,9 +350,20 @@ export function CountingStage({
     const dist = Math.hypot(pos.x - dragging.startX, pos.y - dragging.startY);
     setDragging((prev) =>
       prev
-        ? { ...prev, x: pos.x, y: pos.y, moved: prev.moved || dist > 8 }
+        ? { ...prev, x: pos.x, y: pos.y, moved: prev.moved || dist > 14 }
         : null
     );
+  };
+
+  const handleTokenPointerCancel = (e: React.PointerEvent<SVGGElement>) => {
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Ignore synthetic events
+    }
+    setDragging(null);
   };
 
   const handleTokenPointerUp = (
@@ -361,15 +372,21 @@ export function CountingStage({
   ) => {
     if (disabled) return;
     e.stopPropagation();
+    try {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // Ignore synthetic events
+    }
     const activeDrag = dragging;
     setDragging(null);
 
     if (activeDrag && activeDrag.moved) {
-      // Dropped via drag
-      const inFrameZone =
-        activeDrag.y >= frameStartY - 12 &&
-        activeDrag.y <= frameStartY + frameHeight + 12;
-      if (inFrameZone) {
+      // Forgiving drop zone split at midpoint between ten-frame and outside tray (zero dead zone)
+      const frameBottomY = frameStartY + frameHeight;
+      const midpointY = (frameBottomY + outsideStartY) / 2;
+      if (activeDrag.y <= midpointY) {
         const col = Math.max(
           0,
           Math.min(
@@ -385,7 +402,7 @@ export function CountingStage({
           )
         );
         moveTokenToFrameSlot(token.id, row * frameCols + col);
-      } else if (activeDrag.y >= outsideStartY - 16) {
+      } else {
         moveTokenToOutside(token.id);
       }
       return;
@@ -465,7 +482,7 @@ export function CountingStage({
         <svg
           ref={svgRef}
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full min-w-[320px] h-auto select-none overflow-visible"
+          className="w-full h-auto select-none overflow-visible"
           role="group"
           aria-label="ក្ដាររាប់វត្ថុ"
         >
@@ -609,7 +626,7 @@ export function CountingStage({
                 <g
                   key={tok.id}
                   data-testid={`frame-token-${idx}`}
-                  className="manipulative-target cursor-grab active:cursor-grabbing"
+                  className="manipulative-target touch-drag-surface cursor-grab active:cursor-grabbing"
                   role="button"
                   tabIndex={disabled ? -1 : 0}
                   aria-pressed={isSelected}
@@ -617,6 +634,7 @@ export function CountingStage({
                   onPointerDown={(e) => handleTokenPointerDown(e, tok)}
                   onPointerMove={handleTokenPointerMove}
                   onPointerUp={(e) => handleTokenPointerUp(e, tok)}
+                  onPointerCancel={handleTokenPointerCancel}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
@@ -652,7 +670,7 @@ export function CountingStage({
               <g
                 key={tok.id}
                 data-testid={`outside-token-${idx}`}
-                className="manipulative-target cursor-grab active:cursor-grabbing"
+                className="manipulative-target touch-drag-surface cursor-grab active:cursor-grabbing"
                 role="button"
                 tabIndex={disabled ? -1 : 0}
                 aria-pressed={isSelected}
@@ -660,6 +678,7 @@ export function CountingStage({
                 onPointerDown={(e) => handleTokenPointerDown(e, tok)}
                 onPointerMove={handleTokenPointerMove}
                 onPointerUp={(e) => handleTokenPointerUp(e, tok)}
+                onPointerCancel={handleTokenPointerCancel}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();

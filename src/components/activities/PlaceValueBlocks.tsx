@@ -183,51 +183,51 @@ export function PlaceValueBlocks({
         </svg>
       </div>
 
-      {/* Add / Remove controls (>= 56x56px targets) */}
-      <div className="grid grid-cols-2 gap-2.5 w-full max-w-[380px]">
-        <div className="flex items-center justify-between gap-1.5 rounded-xl border border-border bg-surface p-2">
+      {/* Add / Remove controls (>= 56x56px targets, responsive so 360px phones never overflow) */}
+      <div className="grid grid-cols-1 min-[390px]:grid-cols-2 gap-2.5 w-full max-w-[380px]">
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface p-2">
           <button
             type="button"
             data-testid="pv-remove-ten"
             disabled={disabled || tens <= 0}
             onClick={() => setTens((t) => Math.max(0, t - 1))}
-            className="manipulative-target rounded-lg border border-border bg-surface-subtle px-3 text-base font-bold text-ink disabled:opacity-40"
-            aria-label="ដកខ្ទង់ដប់ ១"
+            className="manipulative-target flex-1 rounded-lg border border-border bg-surface-subtle px-3 text-base font-bold text-ink disabled:opacity-40"
           >
             −{formatDisplayNumber(10, numeralPref)}
+            <span className="sr-only"> ខ្ទង់ដប់</span>
           </button>
           <button
             type="button"
             data-testid="pv-add-ten"
             disabled={disabled || tens >= 12}
             onClick={() => setTens((t) => Math.min(12, t + 1))}
-            className="manipulative-target rounded-lg bg-accent px-3 text-base font-bold text-white disabled:opacity-40"
-            aria-label="បន្ថែមខ្ទង់ដប់ ១"
+            className="manipulative-target flex-1 rounded-lg bg-accent px-3 text-base font-bold text-white disabled:opacity-40"
           >
             +{formatDisplayNumber(10, numeralPref)}
+            <span className="sr-only"> ខ្ទង់ដប់</span>
           </button>
         </div>
 
-        <div className="flex items-center justify-between gap-1.5 rounded-xl border border-border bg-surface p-2">
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface p-2">
           <button
             type="button"
             data-testid="pv-remove-one"
             disabled={disabled || ones <= 0}
             onClick={() => setOnes((o) => Math.max(0, o - 1))}
-            className="manipulative-target rounded-lg border border-border bg-surface-subtle px-3 text-base font-bold text-ink disabled:opacity-40"
-            aria-label="ដកខ្ទង់រាយ ១"
+            className="manipulative-target flex-1 rounded-lg border border-border bg-surface-subtle px-3 text-base font-bold text-ink disabled:opacity-40"
           >
             −{formatDisplayNumber(1, numeralPref)}
+            <span className="sr-only"> ខ្ទង់រាយ</span>
           </button>
           <button
             type="button"
             data-testid="pv-add-one"
             disabled={disabled || ones >= 20}
             onClick={() => setOnes((o) => Math.min(20, o + 1))}
-            className="manipulative-target rounded-lg bg-amber-700 px-3 text-base font-bold text-white disabled:opacity-40"
-            aria-label="បន្ថែមខ្ទង់រាយ ១"
+            className="manipulative-target flex-1 rounded-lg bg-amber-700 px-3 text-base font-bold text-white disabled:opacity-40"
           >
             +{formatDisplayNumber(1, numeralPref)}
+            <span className="sr-only"> ខ្ទង់រាយ</span>
           </button>
         </div>
       </div>

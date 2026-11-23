@@ -29,6 +29,11 @@ html[lang="km"] * {
   letter-spacing: 0 !important;
 }
 
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   background-color: var(--color-canvas);
   color: var(--color-ink);
@@ -44,7 +49,22 @@ button,
   min-height: 44px;
   padding-block: 0.45rem;
   overflow-wrap: break-word;
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 6rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button,
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:active:not(:disabled),
+a.khmer-chip:active {
+  transform: scale(0.98);
 }
 
 a,
@@ -52,14 +72,28 @@ input,
 select,
 textarea,
 [tabindex] {
-  scroll-margin-top: 5rem;
+  scroll-margin-top: 6rem;
 }
 
 .manipulative-target {
   min-width: 56px;
   min-height: 56px;
+  touch-action: manipulation;
+  scroll-margin-top: 6rem;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+svg .manipulative-target:active {
+  opacity: 0.85;
+}
+
+.touch-drag-surface {
   touch-action: none;
-  scroll-margin-top: 5rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 *:focus-visible {

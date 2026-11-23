@@ -26,6 +26,31 @@ function getAudioContext(): AudioContext | null {
   return sharedAudioCtx;
 }
 
+function withActiveAudioContext(run: (ctx: AudioContext) => void): void {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  if (ctx.state === "suspended") {
+    void ctx
+      .resume()
+      .then(() => {
+        try {
+          run(ctx);
+        } catch {
+          // Non-blocking
+        }
+      })
+      .catch(() => {
+        // Ignore autoplay blocks
+      });
+    return;
+  }
+  try {
+    run(ctx);
+  } catch {
+    // Non-blocking
+  }
+}
+
 function playTone(
   ctx: AudioContext,
   freq: number,
@@ -71,17 +96,13 @@ const PENTATONIC_FREQS = [
  */
 export function playScaleNote(stepIndex: number, enabled: boolean): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  try {
+  withActiveAudioContext((ctx) => {
     const idx = Math.max(
       0,
       Math.min(PENTATONIC_FREQS.length - 1, Math.round(stepIndex))
     );
     playTone(ctx, PENTATONIC_FREQS[idx], 0, 0.16, 0.11, "triangle");
-  } catch {
-    // Non-blocking
-  }
+  });
 }
 
 /**
@@ -89,9 +110,7 @@ export function playScaleNote(stepIndex: number, enabled: boolean): void {
  */
 export function playWaterPlop(enabled: boolean): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  try {
+  withActiveAudioContext((ctx) => {
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -105,9 +124,7 @@ export function playWaterPlop(enabled: boolean): void {
     gain.connect(ctx.destination);
     osc.start(now);
     osc.stop(now + 0.16);
-  } catch {
-    // Non-blocking
-  }
+  });
 }
 
 /**
@@ -118,17 +135,14 @@ export function playPatternMelody(
   enabled: boolean
 ): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
   const notes = [392.0, 440.0, 523.25, 659.25]; // G4, A4, C5, E5
-  try {
+  withActiveAudioContext((ctx) => {
     colorIndices.forEach((colorIdx, pos) => {
-      const freq = notes[((colorIdx % notes.length) + notes.length) % notes.length];
+      const freq =
+        notes[((colorIdx % notes.length) + notes.length) % notes.length];
       playTone(ctx, freq, pos * 0.16, 0.14, 0.11, "triangle");
     });
-  } catch {
-    // Non-blocking
-  }
+  });
 }
 
 /**
@@ -136,15 +150,11 @@ export function playPatternMelody(
  */
 export function playSuccessChime(enabled: boolean): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  try {
+  withActiveAudioContext((ctx) => {
     playTone(ctx, 523.25, 0, 0.18, 0.12, "triangle"); // C5
     playTone(ctx, 659.25, 0.09, 0.2, 0.12, "triangle"); // E5
     playTone(ctx, 783.99, 0.18, 0.32, 0.14, "sine"); // G5
-  } catch {
-    // Non-blocking audio
-  }
+  });
 }
 
 /**
@@ -152,13 +162,9 @@ export function playSuccessChime(enabled: boolean): void {
  */
 export function playHintChime(enabled: boolean): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  try {
+  withActiveAudioContext((ctx) => {
     playTone(ctx, 587.33, 0, 0.22, 0.09, "sine"); // D5
-  } catch {
-    // Non-blocking audio
-  }
+  });
 }
 
 /**
@@ -166,11 +172,7 @@ export function playHintChime(enabled: boolean): void {
  */
 export function playGentleNudgeChime(enabled: boolean): void {
   if (!enabled) return;
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  try {
+  withActiveAudioContext((ctx) => {
     playTone(ctx, 329.63, 0, 0.14, 0.07, "sine"); // E4 soft
-  } catch {
-    // Non-blocking audio
-  }
+  });
 }

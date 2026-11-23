@@ -185,10 +185,12 @@ export function FractionBarShape({
   }
 
   // Shade-fraction mode (bar with >=56x56px clickable segments + optional synced 0-1 number line)
-  const barWidth = 312;
+  const isWideDenominator = denominator >= 6;
+  const barWidth = isWideDenominator ? denominator * 62 : 302;
+  const svgWidth = barWidth + 8;
   const partWidth = barWidth / denominator;
   const ratio = shadedCount / denominator;
-  const markerX = 24 + ratio * 272;
+  const markerX = 24 + ratio * 262;
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -235,11 +237,22 @@ export function FractionBarShape({
         ប៉ះផ្នែកនីមួយៗនៃនំ ដើម្បីលាបពណ៌ ឬលុបពណ៌
       </p>
 
-      {/* Safari-safe inline SVG fraction bar (each part >= 78x72 CSS px for den<=4) */}
-      <div className="w-full max-w-[380px] flex justify-center">
+      {/* Safari-safe inline SVG fraction bar (each part >= 56x68 CSS px without overlap) */}
+      <div className="w-full max-w-[380px] overflow-x-auto flex justify-center">
         <svg
-          viewBox="0 0 320 92"
-          className="w-full min-w-[320px] h-auto select-none"
+          viewBox={`0 0 ${svgWidth} 92`}
+          style={
+            isWideDenominator
+              ? {
+                  width: `${svgWidth}px`,
+                  minWidth: `${svgWidth}px`,
+                  height: "92px",
+                }
+              : undefined
+          }
+          className={`${
+            isWideDenominator ? "block" : "w-full h-auto"
+          } select-none`}
           role="group"
           aria-label="របារប្រភាគអន្តរកម្ម"
         >
@@ -303,7 +316,7 @@ export function FractionBarShape({
       {showNumberLine && (
         <div className="w-full max-w-[380px] rounded-2xl border border-border bg-canvas px-2 py-1.5">
           <svg
-            viewBox="0 0 320 66"
+            viewBox="0 0 310 66"
             className="w-full h-auto select-none"
             role="img"
             aria-label={`បន្ទាត់ចំនួន ០ ដល់ ១ បង្ហាញ ${formatDisplayNumber(shadedCount, numeralPref)} លើ ${formatDisplayNumber(denominator, numeralPref)}`}
@@ -311,7 +324,7 @@ export function FractionBarShape({
             <line
               x1={24}
               y1={30}
-              x2={296}
+              x2={286}
               y2={30}
               stroke="#9ca3af"
               strokeWidth={3.5}
@@ -327,7 +340,7 @@ export function FractionBarShape({
               strokeLinecap="round"
             />
             {Array.from({ length: denominator + 1 }).map((_, i) => {
-              const tx = 24 + (i / denominator) * 272;
+              const tx = 24 + (i / denominator) * 262;
               const isEndpoint = i === 0 || i === denominator;
               return (
                 <g key={`nl-${i}`}>

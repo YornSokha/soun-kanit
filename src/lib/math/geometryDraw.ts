@@ -210,3 +210,76 @@ export function checkSymmetryMirror(
     extraCount,
   };
 }
+
+export interface GridHitTestInput {
+  clientX: number;
+  clientY: number;
+  rect: { left: number; top: number; width: number; height: number };
+  svgWidth: number;
+  svgHeight: number;
+  gridRows: number;
+  gridCols: number;
+  pad?: number;
+  lockLeftHalf?: boolean;
+}
+
+/**
+ * Maps a pointer's client coordinates (touch/mouse/pen) to a grid cell { row, col, key }.
+ * Enables continuous single-finger drag painting across SVG grid cells on mobile browsers
+ * where implicit touch pointer capture prevents `onPointerEnter` on sibling `<g>` elements.
+ */
+export function clientPointToGridCell(
+  input: GridHitTestInput
+): { row: number; col: number; key: string } | null {
+  const {
+    clientX,
+    clientY,
+    rect,
+    svgWidth,
+    svgHeight,
+    gridRows,
+    gridCols,
+    pad = 8,
+    lockLeftHalf = false,
+  } = input;
+
+  if (
+    rect.width <= 0 ||
+    rect.height <= 0 ||
+    gridRows <= 0 ||
+    gridCols <= 0
+  ) {
+    return null;
+  }
+
+  const svgX = ((clientX - rect.left) / rect.width) * svgWidth;
+  const svgY = ((clientY - rect.top) / rect.height) * svgHeight;
+  if (
+    svgX < pad ||
+    svgX > svgWidth - pad ||
+    svgY < pad ||
+    svgY > svgHeight - pad
+  ) {
+    return null;
+  }
+
+  const innerW = svgWidth - pad * 2;
+  const innerH = svgHeight - pad * 2;
+  const cellW = innerW / gridCols;
+  const cellH = innerH / gridRows;
+
+  const col = Math.min(
+    gridCols - 1,
+    Math.max(0, Math.floor((svgX - pad) / cellW))
+  );
+  const row = Math.min(
+    gridRows - 1,
+    Math.max(0, Math.floor((svgY - pad) / cellH))
+  );
+
+  if (lockLeftHalf && col < Math.floor(gridCols / 2)) {
+    return null;
+  }
+
+  return { row, col, key: pointKey(row, col) };
+}
