@@ -267,6 +267,54 @@ export const GeometryDrawStepSchema = z.object({
   explanationKm: z.string().min(4).max(240),
 });
 
+export const ClockTimeStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("clock-time"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    initialHour: z.number().int().min(1).max(12).default(12),
+    initialMinute: z.number().int().min(0).max(59).default(0),
+    minuteStep: z.union([z.literal(5), z.literal(15), z.literal(30)]).default(15),
+    showDigitalReadout: z.boolean().default(true),
+    periodLabelKm: z.string().max(40).optional(),
+  }),
+  solution: z.object({
+    expectedHour: z.number().int().min(1).max(12),
+    expectedMinute: z.number().int().min(0).max(59),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
+export const DataChartBarSchema = z.object({
+  id: z.string().min(1),
+  labelKm: z.string().min(1).max(40),
+  color: z.string().default("#2563eb"),
+  initialValue: z.number().int().min(0).max(12).default(0),
+});
+
+export const DataChartStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("data-chart"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    mode: z.enum(["build-bars", "read-bar"]),
+    maxValue: z.number().int().min(4).max(12).default(8),
+    unitLabelKm: z.string().min(1).max(30).default("ផ្លែ"),
+    bars: z.array(DataChartBarSchema).min(2).max(4),
+  }),
+  solution: z.object({
+    expectedBarValues: z.record(z.string(), z.number().int().min(0)).optional(),
+    expectedBarId: z.string().min(1).optional(),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
 export const ActivityStepSchema = z.discriminatedUnion("type", [
   CountingStageStepSchema,
   NumberLineStepSchema,
@@ -277,6 +325,8 @@ export const ActivityStepSchema = z.discriminatedUnion("type", [
   FractionBarShapeStepSchema,
   PatternSequenceStepSchema,
   GeometryDrawStepSchema,
+  ClockTimeStepSchema,
+  DataChartStepSchema,
 ]);
 
 export const LessonDocumentV1Schema = z.object({
@@ -304,5 +354,7 @@ export type ArrayGroupsStep = z.infer<typeof ArrayGroupsStepSchema>;
 export type FractionBarShapeStep = z.infer<typeof FractionBarShapeStepSchema>;
 export type PatternSequenceStep = z.infer<typeof PatternSequenceStepSchema>;
 export type GeometryDrawStep = z.infer<typeof GeometryDrawStepSchema>;
+export type ClockTimeStep = z.infer<typeof ClockTimeStepSchema>;
+export type DataChartStep = z.infer<typeof DataChartStepSchema>;
 export type ActivityStep = z.infer<typeof ActivityStepSchema>;
 export type LessonDocumentV1 = z.infer<typeof LessonDocumentV1Schema>;

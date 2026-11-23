@@ -13,6 +13,8 @@ import { ArrayGroups } from "./ArrayGroups";
 import { FractionBarShape } from "./FractionBarShape";
 import { PatternSequence } from "./PatternSequence";
 import { GeometryDraw } from "./GeometryDraw";
+import { ClockTime } from "./ClockTime";
+import { DataChart } from "./DataChart";
 
 interface ActivityRendererProps {
   step: ActivityStep;
@@ -24,7 +26,7 @@ interface ActivityRendererProps {
 
 /**
  * Single decoupled renderer mapping any Zod-validated ActivityStep JSON
- * across all 9 reusable Safari-safe SVG manipulative primitives.
+ * across all 11 reusable Safari-safe SVG manipulative primitives.
  */
 export function ActivityRenderer({
   step,
@@ -121,6 +123,26 @@ export function ActivityRenderer({
     case "geometry-draw":
       return (
         <GeometryDraw
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "clock-time":
+      return (
+        <ClockTime
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "data-chart":
+      return (
+        <DataChart
           key={step.id}
           step={step}
           numeralPref={numeralPref}

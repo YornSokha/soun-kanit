@@ -7,12 +7,16 @@ import { useLearner } from "@/components/providers/LearnerProvider";
 interface AudioReadButtonProps {
   textKm: string;
   audioUrl?: string;
+  labelKm?: string;
+  testId?: string;
   className?: string;
 }
 
 export function AudioReadButton({
   textKm,
   audioUrl,
+  labelKm = "ស្តាប់សំណួរ",
+  testId = "audio-read-btn",
   className = "",
 }: AudioReadButtonProps) {
   const { audioEnabled } = useLearner();
@@ -42,7 +46,7 @@ export function AudioReadButton({
   return (
     <button
       type="button"
-      data-testid="audio-read-btn"
+      data-testid={testId}
       aria-pressed={isSpeaking}
       disabled={!audioEnabled}
       onClick={handleClick}
@@ -66,7 +70,7 @@ export function AudioReadButton({
         <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
         <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
       </svg>
-      <span>{isSpeaking ? "កំពុងអាន..." : "ស្តាប់សំណួរ"}</span>
+      <span>{isSpeaking ? "កំពុងអាន..." : labelKm}</span>
     </button>
   );
 }

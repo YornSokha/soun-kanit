@@ -723,4 +723,82 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await expectAllManipulativeTargetsAtLeast56px(page);
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 9: ClockTime (t01), DataChart (t03), /play Frog Clock, Lesson Scratchpad, Spoken Hints, and Printable Certificate at 360x800 (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Open 5th path (Time, Measurement & Data) on /learn and launch t01
+    await page.goto("/learn");
+    await page.getByTestId("path-tab-time-measurement-data").click();
+    await expect(
+      page.getByTestId("lesson-card-t01-telling-time-khmer-clock")
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("lesson-card-t03-market-bar-charts")
+    ).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 2. Lesson t01: Test Scratchpad + Spoken Hints + ClockTime (5:00 -> 7:00)
+    await page.getByTestId("lesson-card-t01-telling-time-khmer-clock").click();
+    await expect(page).toHaveURL(/\/learn\/t01-telling-time-khmer-clock$/);
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    // Toggle on-screen scratchpad and add tally dots without resetting clock state
+    await page.getByTestId("scratchpad-toggle-btn").click();
+    await expect(page.getByTestId("lesson-scratchpad-panel")).toBeVisible();
+    await page.getByTestId("scratchpad-tally-btn").click();
+    await expectNoWcag22Violations(page);
+
+    // Reveal hint tier 1 and verify spoken Khmer hint button
+    await page.getByTestId("hint-btn").click();
+    await expect(page.getByTestId("hint-audio-btn-1")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // Set 5:00 -> 7:00 (+1 hour twice) and check explanation audio button
+    await page.getByTestId("clock-hour-inc").click();
+    await page.getByTestId("clock-hour-inc").click();
+    await expect(page.getByTestId("clock-digital-readout")).toContainText("០៧:០០");
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("explanation-audio-btn")).toBeVisible();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+
+    // 3. Lesson t03: DataChart (build mango=6, orange=4 -> read tallest lotus)
+    await page.goto("/learn/t03-market-bar-charts");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    for (let i = 0; i < 5; i++) {
+      await page.getByTestId("chart-inc-mango").click();
+    }
+    for (let i = 0; i < 3; i++) {
+      await page.getByTestId("chart-inc-orange").click();
+    }
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("chart-select-lotus").click();
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 4. Play Studio -> 6th tab Frog's Daily Clock (5:00 -> 7:00)
+    await page.goto("/play");
+    await page.getByTestId("play-tab-clock").click();
+    await expect(page.getByTestId("clock-game-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("clock-hour-inc").click();
+    await page.getByTestId("clock-hour-inc").click();
+    await page.getByTestId("play-clock-check-btn").click();
+    await expect(page.getByTestId("play-clock-next-btn")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 5. Printable Offline Khmer Achievement Certificate in /garden
+    await page.goto("/garden");
+    await page.getByTestId("open-certificate-btn").click();
+    await expect(page.getByTestId("certificate-preview")).toBeVisible();
+    await expect(page.getByTestId("print-certificate-btn")).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { LearningPathMeta } from "@/lib/curriculum/loader";
 import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
+import { AchievementCertificate } from "@/components/ui/AchievementCertificate";
 import {
   formatDisplayNumber,
   formatTextNumerals,
@@ -326,8 +327,11 @@ export function ParentDashboardClient({ paths }: ParentDashboardClientProps) {
               </section>
             )}
 
+            {/* Printable Offline Khmer Achievement Certificate */}
+            <AchievementCertificate />
+
             {/* Optional custom 4-digit caregiver PIN */}
-            <section className="rounded-3xl border border-border bg-surface p-5 shadow-xs space-y-3">
+            <section className="no-print rounded-3xl border border-border bg-surface p-5 shadow-xs space-y-3">
               <h2 className="text-base font-bold text-ink">
                 កំណត់លេខកូដ PIN ផ្ទាល់ខ្លួន (ជម្រើសបន្ថែម)
               </h2>

@@ -176,6 +176,29 @@ function buildValidAnswer(step: ActivityStep, useKhmer = false): StepAnswer {
       }
       return { type: "geometry-draw", paintedCells: cells };
     }
+    case "clock-time": {
+      return {
+        type: "clock-time",
+        hour: fmt(step.solution.expectedHour),
+        minute: fmt(step.solution.expectedMinute),
+      };
+    }
+    case "data-chart": {
+      if (step.config.mode === "read-bar") {
+        const id = step.solution.expectedBarId ?? step.config.bars[0].id;
+        return {
+          type: "data-chart",
+          selectedBarId: useKhmer ? `\u200B${id}\u200B` : id,
+        };
+      }
+      const vals: Record<string, number | string> = {};
+      for (const [k, v] of Object.entries(
+        step.solution.expectedBarValues ?? {}
+      )) {
+        vals[k] = fmt(v);
+      }
+      return { type: "data-chart", barValues: vals };
+    }
   }
 }
 
@@ -284,6 +307,37 @@ function buildInvalidAnswers(step: ActivityStep): StepAnswer[] {
         return [{ type: "geometry-draw", edges: [{ from: "0,0", to: "0,1" }] }];
       }
       return [{ type: "geometry-draw", paintedCells: [] }];
+    }
+    case "clock-time": {
+      const wrongHour =
+        step.solution.expectedHour === 12 ? 1 : step.solution.expectedHour + 1;
+      return [
+        {
+          type: "clock-time",
+          hour: wrongHour,
+          minute: step.solution.expectedMinute,
+        },
+      ];
+    }
+    case "data-chart": {
+      if (step.config.mode === "read-bar") {
+        const wrong = step.config.bars.find(
+          (b) => b.id !== step.solution.expectedBarId
+        );
+        return [
+          {
+            type: "data-chart",
+            selectedBarId: wrong ? wrong.id : "__wrong__",
+          },
+        ];
+      }
+      const wrongVals: Record<string, number> = {};
+      for (const [k, v] of Object.entries(
+        step.solution.expectedBarValues ?? {}
+      )) {
+        wrongVals[k] = v === 0 ? 1 : 0;
+      }
+      return [{ type: "data-chart", barValues: wrongVals }];
     }
   }
 }

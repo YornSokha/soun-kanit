@@ -108,5 +108,14 @@ export function getAllLearningPaths(): LearningPathMeta[] {
       gradeRangeKm: "ថ្នាក់ ២–៦",
       lessons: loadLessonsForPath("multiplication-and-algebra"),
     },
+    {
+      id: "time-measurement-data",
+      titleKm: "ពេលវេលា រង្វាស់ និងដ្យាក្រាមទិន្នន័យ",
+      shortTitleKm: "ពេលវេលា និងទិន្នន័យ",
+      subtitleKm:
+        "មើលនាឡិកាខ្មែរ គណនារយៈពេល វាស់ប្រវែង និងសង់ដ្យាក្រាមសសរអន្តរកម្ម",
+      gradeRangeKm: "ថ្នាក់ ២–៥",
+      lessons: loadLessonsForPath("time-measurement-data"),
+    },
   ];
 }

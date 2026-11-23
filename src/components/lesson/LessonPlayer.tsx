@@ -16,6 +16,7 @@ import { AudioReadButton, AudioToggle } from "@/components/ui/AudioReadButton";
 import { MascotFrog } from "@/components/ui/MascotFrog";
 import { CelebrationBurst } from "@/components/ui/CelebrationBurst";
 import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
+import { LessonScratchpad } from "@/components/lesson/LessonScratchpad";
 import {
   playGentleNudgeChime,
   playHintChime,
@@ -52,6 +53,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null);
   const [stepAttempts, setStepAttempts] = useState<number>(0);
   const [revealedHintCount, setRevealedHintCount] = useState<number>(0);
+  const [scratchpadOpen, setScratchpadOpen] = useState<boolean>(false);
 
   // Lesson-wide metrics
   const [firstTryCorrectCount, setFirstTryCorrectCount] = useState<number>(0);
@@ -127,6 +129,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
       setGradeResult(null);
       setStepAttempts(0);
       setRevealedHintCount(0);
+      setScratchpadOpen(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -319,15 +322,35 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
       </header>
 
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-3 py-4 pb-10">
-        {/* Lesson title + Concreteness Fading stage chip */}
+        {/* Lesson title + Concreteness Fading stage chip + Scratchpad toggle */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-semibold text-ink-muted">
             {formatTextNumerals(lesson.titleKm, numeralPref)}
           </p>
-          <span className="rounded-full border border-border bg-surface px-3 py-0.5 text-xs font-semibold text-ink-muted">
-            {STAGE_LABELS_KM[activeStep.stage] ?? activeStep.stage}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              data-testid="scratchpad-toggle-btn"
+              aria-pressed={scratchpadOpen}
+              onClick={() => setScratchpadOpen((v) => !v)}
+              className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                scratchpadOpen
+                  ? "border-accent bg-accent text-white"
+                  : "border-border bg-surface text-ink hover:bg-surface-subtle"
+              }`}
+            >
+              {scratchpadOpen ? "បិទក្រដាសព្រាង" : "ក្រដាសព្រាង"}
+            </button>
+            <span className="rounded-full border border-border bg-surface px-3 py-0.5 text-xs font-semibold text-ink-muted">
+              {STAGE_LABELS_KM[activeStep.stage] ?? activeStep.stage}
+            </span>
+          </div>
         </div>
+
+        {/* Toggleable On-Screen Doodle Scratchpad (preserves step answer) */}
+        {scratchpadOpen && (
+          <LessonScratchpad key={activeStep.id} numeralPref={numeralPref} />
+        )}
 
         {/* Active Step Card */}
         <section className="rounded-3xl border border-border bg-surface p-3.5 sm:p-5 shadow-xs space-y-4">
@@ -376,12 +399,19 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
                 {formatTextNumerals(gradeResult.feedbackKm, numeralPref)}
               </p>
               {gradeResult.isCorrect && (
-                <p
-                  data-testid="step-explanation"
-                  className="text-sm text-ink"
-                >
-                  {formatTextNumerals(activeStep.explanationKm, numeralPref)}
-                </p>
+                <div className="space-y-2">
+                  <p
+                    data-testid="step-explanation"
+                    className="text-sm text-ink"
+                  >
+                    {formatTextNumerals(activeStep.explanationKm, numeralPref)}
+                  </p>
+                  <AudioReadButton
+                    textKm={activeStep.explanationKm}
+                    labelKm="ស្តាប់ការពន្យល់"
+                    testId="explanation-audio-btn"
+                  />
+                </div>
               )}
             </div>
           </section>
@@ -398,14 +428,21 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
               <div
                 key={hint.tier}
                 data-testid={`hint-tier-${hint.tier}`}
-                className="rounded-xl bg-surface p-3 border border-border space-y-0.5"
+                className="rounded-xl bg-surface p-3 border border-border space-y-1.5"
               >
-                <p className="text-xs font-bold text-hint-ink">
-                  {formatTextNumerals(
-                    HINT_KIND_LABELS_KM[hint.kind] ?? `ជំនួយទី ${hint.tier}`,
-                    numeralPref
-                  )}
-                </p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-hint-ink">
+                    {formatTextNumerals(
+                      HINT_KIND_LABELS_KM[hint.kind] ?? `ជំនួយទី ${hint.tier}`,
+                      numeralPref
+                    )}
+                  </p>
+                  <AudioReadButton
+                    textKm={hint.textKm}
+                    labelKm="ស្តាប់ជំនួយ"
+                    testId={`hint-audio-btn-${hint.tier}`}
+                  />
+                </div>
                 <p className="text-sm text-ink">
                   {formatTextNumerals(hint.textKm, numeralPref)}
                 </p>

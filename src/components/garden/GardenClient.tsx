@@ -6,6 +6,7 @@ import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
 import { AudioToggle } from "@/components/ui/AudioReadButton";
 import { CelebrationBurst } from "@/components/ui/CelebrationBurst";
+import { AchievementCertificate } from "@/components/ui/AchievementCertificate";
 import { computeGardenState } from "@/lib/math/garden";
 import {
   playScaleNote,
@@ -349,6 +350,9 @@ export function GardenClient() {
             • ទទួលបាន <strong className="text-ink">សញ្ញាសម្គាល់ការយល់ដឹង</strong> → មេអំបៅថ្មីហោះមកលេងក្នុងសួន!
           </p>
         </section>
+
+        {/* Printable Offline Khmer Achievement Certificate */}
+        <AchievementCertificate />
       </main>
     </div>
   );

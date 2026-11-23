@@ -9,8 +9,9 @@ import { MascotFrog } from "@/components/ui/MascotFrog";
 import { CelebrationBurst } from "@/components/ui/CelebrationBurst";
 import { detectKramaPattern } from "@/lib/math/kramaPattern";
 import { GeometryDraw } from "@/components/activities/GeometryDraw";
+import { ClockTime } from "@/components/activities/ClockTime";
 import { gradeStep, type StepAnswer } from "@/lib/math/grader";
-import type { GeometryDrawStep } from "@/lib/curriculum/schema";
+import type { ClockTimeStep, GeometryDrawStep } from "@/lib/curriculum/schema";
 import {
   playGentleNudgeChime,
   playPatternMelody,
@@ -293,10 +294,115 @@ const DRAW_STUDIO_CHALLENGES: DrawStudioChallenge[] = [
   },
 ];
 
+interface ClockPlayPuzzle {
+  id: string;
+  routineKm: string;
+  step: ClockTimeStep;
+}
+
+const CLOCK_PLAY_PUZZLES: ClockPlayPuzzle[] = [
+  {
+    id: "play-clock-school",
+    routineKm: "ទៅសាលារៀនពេលព្រឹក",
+    step: {
+      id: "play-clock-school",
+      type: "clock-time",
+      stage: "concrete",
+      promptKm: "កង្កែបតូចត្រូវចូលរៀននៅម៉ោង ៧:០០ ព្រឹក — កំណត់នាឡិកាជូនវាណា៎!",
+      config: {
+        initialHour: 5,
+        initialMinute: 0,
+        minuteStep: 15,
+        showDigitalReadout: true,
+        periodLabelKm: "ពេលព្រឹក",
+      },
+      solution: { expectedHour: 7, expectedMinute: 0 },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "ទ្រនិចខ្លីនៅ ៧ និងវែងនៅ ១២។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "បន្ថែម ២ ម៉ោងពី ៥:០០។" },
+        { tier: 3, kind: "worked-step", textKm: "ចុច +១ ម៉ោង ២ ដង!" },
+      ],
+      explanationKm: "កង្កែបតូចទៅដល់សាលាម៉ោង ៧:០០ ទាន់ពេលបេះបិទ!",
+    },
+  },
+  {
+    id: "play-clock-recess",
+    routineKm: "សម្រាកលេងនៅសាលា",
+    step: {
+      id: "play-clock-recess",
+      type: "clock-time",
+      stage: "iconic",
+      promptKm: "ម៉ោង ៩:៣០ ដល់ពេលសម្រាកលេងជាមួយមិត្តភក្ដិ — កំណត់ម៉ោង ៩:៣០!",
+      config: {
+        initialHour: 9,
+        initialMinute: 0,
+        minuteStep: 15,
+        showDigitalReadout: true,
+        periodLabelKm: "ពេលព្រឹក",
+      },
+      solution: { expectedHour: 9, expectedMinute: 30 },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "៣០ នាទីជាកន្លះម៉ោង។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ជ្រើស :៣០ នាទី។" },
+        { tier: 3, kind: "worked-step", textKm: "ប៉ះប៊ូតុង :៣០!" },
+      ],
+      explanationKm: "ម៉ោង ៩:៣០ ហើយ — តោះទៅលេងលោតអន្ទាក់!",
+    },
+  },
+  {
+    id: "play-clock-lunch",
+    routineKm: "ញ៉ាំបាយថ្ងៃត្រង់",
+    step: {
+      id: "play-clock-lunch",
+      type: "clock-time",
+      stage: "iconic",
+      promptKm: "ម៉ោង ១២:១៥ ដល់ពេលញ៉ាំសម្លកកូរ — កំណត់ម៉ោង ១២:១៥!",
+      config: {
+        initialHour: 11,
+        initialMinute: 0,
+        minuteStep: 15,
+        showDigitalReadout: true,
+        periodLabelKm: "ថ្ងៃត្រង់",
+      },
+      solution: { expectedHour: 12, expectedMinute: 15 },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "១៥ នាទីទ្រនិចវែងនៅលេខ ៣។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ឡើងម៉ោងដល់ ១២ និងនាទី :១៥។" },
+        { tier: 3, kind: "worked-step", textKm: "ចុច +១ ម៉ោង និងប៉ះ :១៥!" },
+      ],
+      explanationKm: "ឆ្ងាញ់ណាស់! ម៉ោង ១២:១៥ ដល់ពេលបាយថ្ងៃត្រង់ហើយ!",
+    },
+  },
+  {
+    id: "play-clock-garden",
+    routineKm: "ស្រោចសួនផ្កាឈូក",
+    step: {
+      id: "play-clock-garden",
+      type: "clock-time",
+      stage: "symbolic",
+      promptKm: "ម៉ោង ៤:៤៥ រសៀលដល់ពេលស្រោចសួនស្វាយ — កំណត់ម៉ោង ៤:៤៥!",
+      config: {
+        initialHour: 3,
+        initialMinute: 30,
+        minuteStep: 15,
+        showDigitalReadout: true,
+        periodLabelKm: "ពេលរសៀល",
+      },
+      solution: { expectedHour: 4, expectedMinute: 45 },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "៤៥ នាទីទ្រនិចវែងនៅលេខ ៩។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "បង្កើនម៉ោងដល់ ៤ និងប៉ះ :៤៥។" },
+        { tier: 3, kind: "worked-step", textKm: "ចុច +១ ម៉ោង និង :៤៥!" },
+      ],
+      explanationKm: "ម៉ោង ៤:៤៥ ល្ងាច ផ្កាឈូករីកស្រស់ស្អាតណាស់!",
+    },
+  },
+];
+
 export function PlayStudioClient() {
   const { numeralPref, audioEnabled } = useLearner();
   const [activeMode, setActiveMode] = useState<
-    "market" | "krama" | "frog" | "scale" | "draw"
+    "market" | "krama" | "frog" | "scale" | "draw" | "clock"
   >("market");
 
   // 1. Market Stall state
@@ -348,6 +454,23 @@ export function PlayStudioClient() {
   const currentDrawChallenge =
     filteredDrawChallenges[drawChallengeIdx % filteredDrawChallenges.length] ??
     DRAW_STUDIO_CHALLENGES[0];
+
+  // 6. Frog's Daily Clock state
+  const [clockPuzzleIdx, setClockPuzzleIdx] = useState<number>(0);
+  const [clockAnswer, setClockAnswer] = useState<
+    Extract<StepAnswer, { type: "clock-time" }>
+  >({
+    type: "clock-time",
+    hour: CLOCK_PLAY_PUZZLES[0].step.config.initialHour,
+    minute: CLOCK_PLAY_PUZZLES[0].step.config.initialMinute,
+  });
+  const [clockStatus, setClockStatus] = useState<{
+    ok: boolean;
+    messageKm: string;
+  } | null>(null);
+  const [clockSolvedCount, setClockSolvedCount] = useState<number>(0);
+  const currentClockPuzzle =
+    CLOCK_PLAY_PUZZLES[clockPuzzleIdx % CLOCK_PLAY_PUZZLES.length];
 
   const currentOrder = MARKET_ORDERS[orderIdx % MARKET_ORDERS.length];
   const traySumKhr = notesOnTray.reduce((s, n) => s + n, 0);
@@ -548,6 +671,37 @@ export function PlayStudioClient() {
     setDrawStatus(null);
   };
 
+  // Frog's Daily Clock handlers
+  const handleCheckClock = () => {
+    const res = gradeStep(currentClockPuzzle.step, clockAnswer);
+    if (res.isCorrect) {
+      playSuccessChime(audioEnabled);
+      setClockSolvedCount((c) => c + 1);
+      setClockStatus({
+        ok: true,
+        messageKm: `អស្ចារ្យ! ${currentClockPuzzle.step.explanationKm}`,
+      });
+    } else {
+      playGentleNudgeChime(audioEnabled);
+      setClockStatus({
+        ok: false,
+        messageKm: res.feedbackKm || "សាកពិនិត្យទ្រនិចនាឡិកាម្ដងទៀតណា៎!",
+      });
+    }
+  };
+
+  const handleNextClockPuzzle = () => {
+    const nextIdx = (clockPuzzleIdx + 1) % CLOCK_PLAY_PUZZLES.length;
+    setClockPuzzleIdx(nextIdx);
+    const nextCfg = CLOCK_PLAY_PUZZLES[nextIdx].step.config;
+    setClockAnswer({
+      type: "clock-time",
+      hour: nextCfg.initialHour,
+      minute: nextCfg.initialMinute,
+    });
+    setClockStatus(null);
+  };
+
   const scaleDiff = scaleLeftTotal - currentScalePuzzle.rightTotal;
   const scaleTilt = scaleDiff === 0 ? 0 : scaleDiff > 0 ? -8 : 8;
 
@@ -648,13 +802,26 @@ export function PlayStudioClient() {
             data-testid="play-tab-draw"
             aria-pressed={activeMode === "draw"}
             onClick={() => setActiveMode("draw")}
-            className={`khmer-chip col-span-2 rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
               activeMode === "draw"
                 ? "border-accent bg-accent text-white shadow-xs"
                 : "border-border bg-surface text-ink hover:bg-surface-subtle"
             }`}
           >
-            គូររូបគណិត និងស៊ីមេទ្រី
+            គូររូបគណិត
+          </button>
+          <button
+            type="button"
+            data-testid="play-tab-clock"
+            aria-pressed={activeMode === "clock"}
+            onClick={() => setActiveMode("clock")}
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+              activeMode === "clock"
+                ? "border-accent bg-accent text-white shadow-xs"
+                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+            }`}
+          >
+            នាឡិកាកង្កែបតូច
           </button>
         </nav>
 
@@ -1432,6 +1599,94 @@ export function PlayStudioClient() {
                 className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
               >
                 មេរៀនគូររូប →
+              </Link>
+            </div>
+          </section>
+        )}
+
+        {/* MODE 6: Frog's Daily Clock */}
+        {activeMode === "clock" && (
+          <section
+            data-testid="clock-game-panel"
+            className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
+          >
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-canvas p-3.5">
+              <MascotFrog
+                mood={clockStatus?.ok ? "happy" : "curious"}
+                size={46}
+              />
+              <div className="flex-1 space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-accent">
+                    កាលវិភាគ៖ {currentClockPuzzle.routineKm}
+                  </p>
+                  <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success">
+                    កំណត់ត្រូវ៖{" "}
+                    {formatDisplayNumber(clockSolvedCount, numeralPref)} ដង
+                  </span>
+                </div>
+                <p className="text-base font-bold text-ink">
+                  {formatTextNumerals(
+                    currentClockPuzzle.step.promptKm,
+                    numeralPref
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <CelebrationBurst active={Boolean(clockStatus?.ok)} />
+
+            <ClockTime
+              key={`${currentClockPuzzle.id}-${clockPuzzleIdx}`}
+              step={currentClockPuzzle.step}
+              numeralPref={numeralPref}
+              disabled={Boolean(clockStatus?.ok)}
+              onAnswerChange={(ans) => {
+                setClockAnswer(ans);
+                setClockStatus(null);
+              }}
+            />
+
+            {clockStatus && (
+              <div
+                data-testid="play-clock-feedback"
+                role="status"
+                aria-live="polite"
+                className={`rounded-2xl border-2 p-3.5 text-sm font-bold ${
+                  clockStatus.ok
+                    ? "border-success bg-success-soft text-ink"
+                    : "border-hint bg-hint-soft text-ink"
+                }`}
+              >
+                {formatTextNumerals(clockStatus.messageKm, numeralPref)}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2.5">
+              {!clockStatus?.ok ? (
+                <button
+                  type="button"
+                  data-testid="play-clock-check-btn"
+                  onClick={handleCheckClock}
+                  className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                >
+                  ពិនិត្យម៉ោង
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="play-clock-next-btn"
+                  onClick={handleNextClockPuzzle}
+                  className="khmer-chip flex-1 rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                >
+                  ម៉ោងបន្ទាប់ →
+                </button>
+              )}
+              <Link
+                href="/learn/t01-telling-time-khmer-clock"
+                className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
+              >
+                មេរៀននាឡិកា →
               </Link>
             </div>
           </section>

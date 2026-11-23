@@ -5,6 +5,7 @@ import {
   checkSymmetryMirror,
   type DrawnEdge,
 } from "@/lib/math/geometryDraw";
+import { checkClockMatch, checkDataChartBars } from "@/lib/math/clockAndChart";
 
 export type StepAnswer =
   | {
@@ -55,6 +56,16 @@ export type StepAnswer =
       type: "geometry-draw";
       edges?: DrawnEdge[];
       paintedCells?: string[];
+    }
+  | {
+      type: "clock-time";
+      hour: number | string;
+      minute: number | string;
+    }
+  | {
+      type: "data-chart";
+      barValues?: Record<string, number | string>;
+      selectedBarId?: string;
     };
 
 export interface GradeDiscrepancy {
@@ -73,6 +84,8 @@ export interface GradeDiscrepancy {
     | "shape-mismatch"
     | "pattern-mismatch"
     | "drawing-mismatch"
+    | "time-mismatch"
+    | "chart-mismatch"
     | "invalid-input";
   expected?: number;
   actual?: number;
@@ -733,6 +746,72 @@ export function gradeStep(step: ActivityStep, answer: StepAnswer): GradeResult {
           expected: expectedArea,
           actual: cleanPainted.length,
         },
+      };
+    }
+
+    case "clock-time": {
+      const ans = answer as Extract<StepAnswer, { type: "clock-time" }>;
+      const check = checkClockMatch(
+        step.solution.expectedHour,
+        step.solution.expectedMinute,
+        ans.hour,
+        ans.minute
+      );
+      if (check.isMatch) {
+        return {
+          isCorrect: true,
+          feedbackKm: "ពូកែណាស់! អ្នកកំណត់ម៉ោងលើនាឡិកាបានត្រឹមត្រូវបេះបិទ!",
+        };
+      }
+      return {
+        isCorrect: false,
+        feedbackKm: !check.hourMatch
+          ? "សាកពិនិត្យទ្រនិចខ្លី (ម៉ោង) ម្ដងទៀតណា៎!"
+          : "ទ្រនិចម៉ោងត្រូវហើយ! សាកបង្វិលទ្រនិចវែង (នាទី) ឱ្យចំម៉ោងគោលដៅណា៎!",
+        discrepancy: {
+          kind: "time-mismatch",
+          expected: step.solution.expectedHour * 60 + step.solution.expectedMinute,
+          actual:
+            check.actualHour !== null && check.actualMinute !== null
+              ? check.actualHour * 60 + check.actualMinute
+              : undefined,
+        },
+      };
+    }
+
+    case "data-chart": {
+      const ans = answer as Extract<StepAnswer, { type: "data-chart" }>;
+      if (step.config.mode === "read-bar") {
+        const chosen = stripZwsp(ans.selectedBarId ?? "").trim();
+        const expected = stripZwsp(step.solution.expectedBarId ?? "").trim();
+        if (chosen && chosen === expected) {
+          return {
+            isCorrect: true,
+            feedbackKm: "ត្រឹមត្រូវណាស់! អ្នកអានដ្យាក្រាមសសរបានយ៉ាងច្បាស់!",
+          };
+        }
+        return {
+          isCorrect: false,
+          feedbackKm:
+            "សាកប្រៀបធៀបកម្ពស់សសរនីមួយៗលើដ្យាក្រាម ហើយជ្រើសរើសម្ដងទៀតណា៎!",
+          discrepancy: { kind: "chart-mismatch" },
+        };
+      }
+
+      const expectedMap = step.solution.expectedBarValues ?? {};
+      const actualMap = ans.barValues ?? {};
+      const check = checkDataChartBars(expectedMap, actualMap);
+      if (check.isMatch) {
+        return {
+          isCorrect: true,
+          feedbackKm: "អស្ចារ្យ! ដ្យាក្រាមសសរដែលអ្នកសង់ត្រូវតាមទិន្នន័យគ្រប់ជួរឈរ!",
+        };
+      }
+      return {
+        isCorrect: false,
+        feedbackKm:
+          "ជិតត្រូវហើយ! សាកពិនិត្យកម្ពស់សសរនីមួយៗឱ្យស្មើនឹងចំនួនក្នុងសំណួរម្ដងទៀតណា៎!",
+        discrepancy: { kind: "chart-mismatch" },
       };
     }
   }
