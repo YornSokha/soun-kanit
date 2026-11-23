@@ -4,10 +4,12 @@ import {
   LessonDocumentV1Schema,
   type ActivityStep,
 } from "../src/lib/curriculum/schema";
+import { DailyPuzzlePackV1Schema } from "../src/lib/curriculum/daily";
 import { gradeStep, type StepAnswer } from "../src/lib/math/grader";
 import { toKhmerDigits } from "../src/lib/khmer/numerals";
 
-const CONTENT_DIR = path.join(process.cwd(), "content");
+const PATHS_DIR = path.join(process.cwd(), "content", "paths");
+const DAILY_FILE = path.join(process.cwd(), "content", "daily", "puzzles.json");
 
 function collectJsonFiles(dir: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -237,16 +239,48 @@ function buildInvalidAnswers(step: ActivityStep): StepAnswer[] {
 }
 
 function main() {
-  const files = collectJsonFiles(CONTENT_DIR);
+  const files = collectJsonFiles(PATHS_DIR);
   if (files.length === 0) {
-    console.error("ERROR: No lesson JSON files found under content/.");
+    console.error("ERROR: No lesson JSON files found under content/paths/.");
     process.exit(1);
   }
 
   let errorCount = 0;
   let totalStepsChecked = 0;
+  let dailyChecked = 0;
   const seenIds = new Set<string>();
   const seenPrimitives = new Set<string>();
+
+  const validateSingleStep = (label: string, step: ActivityStep) => {
+    totalStepsChecked++;
+    seenPrimitives.add(step.type);
+
+    const validArabic = gradeStep(step, buildValidAnswer(step, false));
+    if (!validArabic.isCorrect) {
+      console.error(
+        `FAIL [${label} -> ${step.id}]: Declared solution failed grader: ${validArabic.feedbackKm}`
+      );
+      errorCount++;
+    }
+
+    const validKhmer = gradeStep(step, buildValidAnswer(step, true));
+    if (!validKhmer.isCorrect) {
+      console.error(
+        `FAIL [${label} -> ${step.id}]: Khmer/ZWSP normalized solution failed grader: ${validKhmer.feedbackKm}`
+      );
+      errorCount++;
+    }
+
+    for (const badAnswer of buildInvalidAnswers(step)) {
+      const res = gradeStep(step, badAnswer);
+      if (res.isCorrect || !res.feedbackKm.trim()) {
+        console.error(
+          `FAIL [${label} -> ${step.id}]: Distractor/invalid answer did not fail cleanly with feedback`
+        );
+        errorCount++;
+      }
+    }
+  };
 
   for (const filePath of files) {
     const rel = path.relative(process.cwd(), filePath);
@@ -277,34 +311,7 @@ function main() {
     seenIds.add(lesson.id);
 
     for (const step of lesson.steps) {
-      totalStepsChecked++;
-      seenPrimitives.add(step.type);
-
-      const validArabic = gradeStep(step, buildValidAnswer(step, false));
-      if (!validArabic.isCorrect) {
-        console.error(
-          `FAIL [${rel} -> ${step.id}]: Declared solution failed grader: ${validArabic.feedbackKm}`
-        );
-        errorCount++;
-      }
-
-      const validKhmer = gradeStep(step, buildValidAnswer(step, true));
-      if (!validKhmer.isCorrect) {
-        console.error(
-          `FAIL [${rel} -> ${step.id}]: Khmer/ZWSP normalized solution failed grader: ${validKhmer.feedbackKm}`
-        );
-        errorCount++;
-      }
-
-      for (const badAnswer of buildInvalidAnswers(step)) {
-        const res = gradeStep(step, badAnswer);
-        if (res.isCorrect || !res.feedbackKm.trim()) {
-          console.error(
-            `FAIL [${rel} -> ${step.id}]: Distractor/invalid answer did not fail cleanly with feedback`
-          );
-          errorCount++;
-        }
-      }
+      validateSingleStep(rel, step);
     }
 
     console.log(
@@ -312,8 +319,35 @@ function main() {
     );
   }
 
+  // Validate daily visual puzzle pack if present
+  if (fs.existsSync(DAILY_FILE)) {
+    const relDaily = path.relative(process.cwd(), DAILY_FILE);
+    try {
+      const rawDaily: unknown = JSON.parse(fs.readFileSync(DAILY_FILE, "utf-8"));
+      const parsedDaily = DailyPuzzlePackV1Schema.safeParse(rawDaily);
+      if (!parsedDaily.success) {
+        console.error(`FAIL [${relDaily}]: Schema validation errors:`);
+        for (const issue of parsedDaily.error.issues) {
+          console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
+        }
+        errorCount++;
+      } else {
+        for (const puzzle of parsedDaily.data.puzzles) {
+          dailyChecked++;
+          validateSingleStep(`${relDaily}:${puzzle.id}`, puzzle.step);
+        }
+        console.log(
+          `PASS [${relDaily}] — ${dailyChecked} daily visual puzzles verified`
+        );
+      }
+    } catch (err) {
+      console.error(`FAIL [${relDaily}]: Invalid JSON syntax`, err);
+      errorCount++;
+    }
+  }
+
   console.log(
-    `\nValidated ${files.length} lessons (${totalStepsChecked} steps, ${seenPrimitives.size} distinct primitives). Errors: ${errorCount}`
+    `\nValidated ${files.length} lessons + ${dailyChecked} daily puzzles (${totalStepsChecked} total steps, ${seenPrimitives.size} distinct primitives). Errors: ${errorCount}`
   );
 
   if (errorCount > 0) {

@@ -26,3 +26,13 @@ The system SHALL reveal up to three escalating Khmer hints per problem step—vi
 - **THEN** Tier 1 (visual cue) displays without revealing the final answer
 - **WHEN** the learner activates "សុំជំនួយ" a second and third time
 - **THEN** Tier 2 (strategy nudge) and Tier 3 (worked step) display sequentially
+
+### Requirement: Khmer Audio Prompt Read-Aloud
+The system SHALL provide an accessible one-tap Khmer read-aloud control for lesson prompts and a persistent audio preference toggle so emergent readers can listen to prompts without reading fatigue.
+
+#### Scenario: Learner activates prompt read-aloud and toggles audio preference
+- **GIVEN** an active lesson step on a mobile viewport
+- **WHEN** the learner taps the Khmer read-aloud button on the step prompt
+- **THEN** the system plays recorded step audio if present or uses Khmer speech synthesis fallback without runtime error
+- **WHEN** the learner toggles the persistent audio preference control
+- **THEN** the updated `audioEnabled` preference persists locally across reloads

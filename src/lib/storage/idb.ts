@@ -110,6 +110,26 @@ export function getLocalDb(): Promise<IDBPDatabase<KonleuhKanitDB>> | null {
 
 const ACTIVE_PROFILE_KEY = "konleuh-kanit:active-profile-id";
 const NUMERAL_PREF_KEY = "konleuh-kanit:numeral-preference";
+const AUDIO_PREF_KEY = "konleuh-kanit:audio-enabled";
+
+export function getSavedAudioEnabled(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const val = window.localStorage.getItem(AUDIO_PREF_KEY);
+    return val === "0" ? false : true;
+  } catch {
+    return true;
+  }
+}
+
+export function saveAudioEnabledLocal(enabled: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(AUDIO_PREF_KEY, enabled ? "1" : "0");
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export function getSavedNumeralPref(): NumeralPreference {
   if (typeof window === "undefined") return "km";

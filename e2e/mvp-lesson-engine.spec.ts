@@ -341,4 +341,97 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     );
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 3: Khmer audio read-aloud toggle, /daily visual puzzle, and /review Leitner due queue (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Audio read-aloud button & persistent toggle in LessonPlayer
+    await page.goto("/learn/l01-counting-1-5");
+    const readBtn = page.getByTestId("audio-read-btn");
+    const audioToggle = page.locator('[data-testid="audio-toggle"]:visible');
+    await expect(readBtn).toBeVisible();
+    await expect(audioToggle).toHaveAttribute("aria-pressed", "true");
+    await readBtn.click();
+    await expectNoWcag22Violations(page);
+
+    // Toggle audio off and verify read button disables & persists across reload
+    await audioToggle.click();
+    await expect(audioToggle).toHaveAttribute("aria-pressed", "false");
+    await expect(readBtn).toBeDisabled();
+    await page.reload();
+    await expect(
+      page.locator('[data-testid="audio-toggle"]:visible')
+    ).toHaveAttribute("aria-pressed", "false");
+    // Re-enable audio
+    await page.locator('[data-testid="audio-toggle"]:visible').click();
+    await expect(
+      page.locator('[data-testid="audio-toggle"]:visible')
+    ).toHaveAttribute("aria-pressed", "true");
+
+    // 2. Daily Visual Puzzle (/daily) renders decoupled puzzle with WCAG 2.2 AA & >=56px targets
+    await page.goto("/daily");
+    await expect(page.getByTestId("daily-prompt")).toBeVisible();
+    await expect(page.getByTestId("audio-read-btn")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    // Reveal a hint calmly on /daily
+    await page.getByTestId("daily-hint-btn").click();
+    await expect(page.getByTestId("daily-hint-drawer")).toBeVisible();
+
+    // 3. Automated Leitner due-review queue (/review) surfaces overdue lessons from IndexedDB
+    await page.goto("/learn");
+    await expect(page.getByTestId("daily-puzzle-card")).toBeVisible();
+    await expect(page.getByTestId("review-queue-card")).toBeVisible();
+
+    // Seed a guest profile + overdue lesson in IndexedDB
+    await page.evaluate(async () => {
+      const profileId = "review-test-student";
+      window.localStorage.setItem("konleuh-kanit:active-profile-id", profileId);
+      await new Promise<void>((resolve, reject) => {
+        const req = window.indexedDB.open("konleuh-kanit-db", 1);
+        req.onerror = () => reject(req.error);
+        req.onsuccess = () => {
+          const db = req.result;
+          const tx = db.transaction(["profiles", "progress"], "readwrite");
+          tx.objectStore("profiles").put({
+            id: profileId,
+            displayName: "សុខា",
+            avatarId: "lotus",
+            ageYears: 7,
+            gradeLevel: 1,
+            numeralPreference: "km",
+            audioEnabled: true,
+            weeklyGoalDays: 3,
+            activeDates: ["2026-11-23"],
+            totalXp: 40,
+            createdAt: "2026-11-20T00:00:00.000Z",
+            updatedAt: "2026-11-23T00:00:00.000Z",
+          });
+          tx.objectStore("progress").put({
+            id: `${profileId}:l07-making-ten`,
+            studentId: profileId,
+            lessonId: "l07-making-ten",
+            masteryTier: "familiar",
+            leitnerBox: 2,
+            nextReviewAt: "2020-01-01T00:00:00.000Z",
+            accuracyPct: 85,
+            hintsUsed: 1,
+            attemptsCount: 1,
+            completedStepIds: ["l07-s1-concrete", "l07-s2-iconic-line", "l07-s3-symbolic-explain"],
+            completedAt: "2019-12-30T00:00:00.000Z",
+            updatedAt: "2019-12-30T00:00:00.000Z",
+          });
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+    });
+
+    await page.goto("/review");
+    await expect(
+      page.getByTestId("due-review-item-l07-making-ten")
+    ).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });

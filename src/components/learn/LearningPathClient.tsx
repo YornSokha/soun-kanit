@@ -11,6 +11,8 @@ import {
 } from "@/lib/khmer/numerals";
 import { MASTERY_LABELS_KM, type MasteryTier } from "@/lib/math/mastery";
 import { computeMasteryBadges } from "@/lib/math/badges";
+import { buildReviewQueue } from "@/lib/math/reviewQueue";
+import { getDailyProgressKey } from "@/lib/curriculum/daily";
 import { cacheLessons } from "@/lib/storage/idb";
 
 interface LearningPathClientProps {
@@ -46,6 +48,9 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
 
   const [offlineCached, setOfflineCached] = useState<boolean>(false);
   const [weekCutoffIso, setWeekCutoffIso] = useState<string | null>(null);
+  const [todayDate, setTodayDate] = useState<{ iso: string; now: Date } | null>(
+    null
+  );
 
   // Cache all lessons locally in IndexedDB and compute current week cutoff on client
   useEffect(() => {
@@ -55,7 +60,11 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
       const now = new Date();
       const cutoff = new Date(now);
       cutoff.setDate(now.getDate() - 6);
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
       setWeekCutoffIso(cutoff.toISOString().slice(0, 10));
+      setTodayDate({ iso: `${y}-${m}-${d}`, now });
       setOfflineCached(true);
     });
     return () => {
@@ -74,6 +83,12 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
   }).length;
   const badges = computeMasteryBadges(progressByLesson);
   const earnedBadgesCount = badges.filter((b) => b.earned).length;
+  const dueReviewCount = todayDate
+    ? buildReviewQueue(path.lessons, progressByLesson, todayDate.now).due.length
+    : 0;
+  const dailyDoneToday = todayDate
+    ? Boolean(progressByLesson[getDailyProgressKey(todayDate.iso)]?.completedAt)
+    : false;
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
@@ -233,6 +248,63 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
               {profile ? "+ បន្ថែមឈ្មោះកុមារ" : "បង្កើតឈ្មោះរៀន"}
             </Link>
           </div>
+        </section>
+
+        {/* Quick calm actions: 2-min Daily Puzzle & Leitner Review Queue */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/daily"
+            data-testid="daily-puzzle-card"
+            className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <p className="text-base font-bold text-ink">
+                លំហាត់ប្រចាំថ្ងៃ
+              </p>
+              <p className="text-xs text-ink-muted">
+                {dailyDoneToday
+                  ? "បានបញ្ចប់លំហាត់ថ្ងៃនេះហើយ!"
+                  : `ល្បងគំនិតរូបភាព ${formatDisplayNumber(2, numeralPref)} នាទី`}
+              </p>
+            </div>
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-bold shrink-0 ${
+                dailyDoneToday
+                  ? "border-success bg-success-soft text-success"
+                  : "border-accent bg-accent-soft text-accent"
+              }`}
+            >
+              {dailyDoneToday ? "រួចរាល់" : "សាកល្បង"}
+            </span>
+          </Link>
+
+          <Link
+            href="/review"
+            data-testid="review-queue-card"
+            className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <p className="text-base font-bold text-ink">
+                រំលឹកឡើងវិញ
+              </p>
+              <p className="text-xs text-ink-muted">
+                {dueReviewCount > 0
+                  ? `ដល់ពេលរំលឹក ${formatDisplayNumber(dueReviewCount, numeralPref)} មេរៀន`
+                  : "តារាងរំលឹកតាមប្រអប់ Leitner"}
+              </p>
+            </div>
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-bold shrink-0 ${
+                dueReviewCount > 0
+                  ? "border-hint bg-hint-soft text-hint-ink"
+                  : "border-border bg-surface-subtle text-ink-muted"
+              }`}
+            >
+              {dueReviewCount > 0
+                ? `${formatDisplayNumber(dueReviewCount, numeralPref)} មេរៀន`
+                : "មើលតារាង"}
+            </span>
+          </Link>
         </section>
 
         {/* Early Foundations Path Header */}

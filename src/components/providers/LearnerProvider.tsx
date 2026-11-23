@@ -15,9 +15,11 @@ import {
   getActiveProfileId,
   getProfile,
   getProgressForStudent,
+  getSavedAudioEnabled,
   getSavedNumeralPref,
   listOutboxItems,
   listProfiles,
+  saveAudioEnabledLocal,
   saveLessonProgress,
   saveNumeralPrefLocal,
   saveProfile,
@@ -32,11 +34,17 @@ export interface LearnerContextValue {
   profiles: LocalStudentProfile[];
   progressByLesson: Record<string, LocalLessonProgress>;
   numeralPref: NumeralPreference;
+  audioEnabled: boolean;
   isOnline: boolean;
   isHydrated: boolean;
   pendingSyncCount: number;
   setNumeralPref: (pref: NumeralPreference) => Promise<void>;
   toggleNumeralPref: () => Promise<void>;
+  toggleAudioEnabled: () => Promise<void>;
+  recordDailyPuzzleCompleted: (input: {
+    dateIso: string;
+    puzzleId: string;
+  }) => Promise<{ xpEarned: number }>;
   createGuestProfile: (input: {
     displayName: string;
     avatarId: string;
@@ -84,6 +92,7 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
     Record<string, LocalLessonProgress>
   >({});
   const [numeralPref, setNumeralPrefState] = useState<NumeralPreference>("km");
+  const [audioEnabled, setAudioEnabledState] = useState<boolean>(true);
   const [isOnline, setIsOnline] = useState<boolean>(true);
   const [isHydrated, setIsHydrated] = useState<boolean>(false);
   const [pendingSyncCount, setPendingSyncCount] = useState<number>(0);
@@ -117,6 +126,8 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
       }
       setNumeralPrefState(active.numeralPreference);
       saveNumeralPrefLocal(active.numeralPreference);
+      setAudioEnabledState(active.audioEnabled);
+      saveAudioEnabledLocal(active.audioEnabled);
       const list = await getProgressForStudent(active.id);
       const map: Record<string, LocalLessonProgress> = {};
       for (const item of list) {
@@ -132,8 +143,10 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
 
     async function init() {
       const savedPref = getSavedNumeralPref();
+      const savedAudio = getSavedAudioEnabled();
       if (active) {
         setNumeralPrefState(savedPref);
+        setAudioEnabledState(savedAudio);
         setIsOnline(typeof navigator !== "undefined" ? navigator.onLine : true);
       }
 
@@ -222,6 +235,26 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
     const next: NumeralPreference = numeralPref === "km" ? "latn" : "km";
     await setNumeralPref(next);
   }, [numeralPref, setNumeralPref]);
+
+  const toggleAudioEnabled = useCallback(async () => {
+    const next = !audioEnabled;
+    setAudioEnabledState(next);
+    saveAudioEnabledLocal(next);
+
+    if (profile) {
+      const updated: LocalStudentProfile = {
+        ...profile,
+        audioEnabled: next,
+        updatedAt: new Date().toISOString(),
+      };
+      setProfile(updated);
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === updated.id ? updated : p))
+      );
+      await saveProfile(updated, true);
+      void flushSyncOutbox();
+    }
+  }, [audioEnabled, profile, flushSyncOutbox]);
 
   const createGuestProfile = useCallback(
     async (input: {
@@ -395,21 +428,76 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
     [ensureActiveProfile, progressByLesson, flushSyncOutbox]
   );
 
+  const recordDailyPuzzleCompleted = useCallback(
+    async (input: { dateIso: string; puzzleId: string }) => {
+      const active = await ensureActiveProfile();
+      const dailyKey = `daily:${input.dateIso}`;
+      const existing = progressByLesson[dailyKey];
+      const nowIso = new Date().toISOString();
+      const xpEarned = existing?.completedAt ? 0 : 15;
+
+      const updatedProgress: LocalLessonProgress = {
+        id: `${active.id}:${dailyKey}`,
+        studentId: active.id,
+        lessonId: dailyKey,
+        masteryTier: "mastered",
+        leitnerBox: 5,
+        nextReviewAt: null,
+        accuracyPct: 100,
+        hintsUsed: 0,
+        attemptsCount: (existing?.attemptsCount ?? 0) + 1,
+        completedStepIds: [input.puzzleId],
+        completedAt: nowIso,
+        updatedAt: nowIso,
+      };
+
+      await saveLessonProgress(updatedProgress, true);
+      setProgressByLesson((prev) => ({
+        ...prev,
+        [dailyKey]: updatedProgress,
+      }));
+
+      const today = getTodayIsoDate();
+      const nextActiveDates = Array.from(
+        new Set([...(active.activeDates ?? []), today])
+      );
+      const updatedProfile: LocalStudentProfile = {
+        ...active,
+        totalXp: active.totalXp + xpEarned,
+        activeDates: nextActiveDates,
+        updatedAt: nowIso,
+      };
+
+      await saveProfile(updatedProfile, true);
+      setProfile(updatedProfile);
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === updatedProfile.id ? updatedProfile : p))
+      );
+      void flushSyncOutbox();
+
+      return { xpEarned };
+    },
+    [ensureActiveProfile, progressByLesson, flushSyncOutbox]
+  );
+
   const value = useMemo<LearnerContextValue>(
     () => ({
       profile,
       profiles,
       progressByLesson,
       numeralPref,
+      audioEnabled,
       isOnline,
       isHydrated,
       pendingSyncCount,
       setNumeralPref,
       toggleNumeralPref,
+      toggleAudioEnabled,
       createGuestProfile,
       switchProfile,
       recordStepCompleted,
       recordLessonFinished,
+      recordDailyPuzzleCompleted,
       flushSyncOutbox,
     }),
     [
@@ -417,15 +505,18 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
       profiles,
       progressByLesson,
       numeralPref,
+      audioEnabled,
       isOnline,
       isHydrated,
       pendingSyncCount,
       setNumeralPref,
       toggleNumeralPref,
+      toggleAudioEnabled,
       createGuestProfile,
       switchProfile,
       recordStepCompleted,
       recordLessonFinished,
+      recordDailyPuzzleCompleted,
       flushSyncOutbox,
     ]
   );

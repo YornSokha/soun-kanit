@@ -12,6 +12,7 @@ import {
 import { cacheLessons } from "@/lib/storage/idb";
 import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
+import { AudioReadButton, AudioToggle } from "@/components/ui/AudioReadButton";
 import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
 
 interface LessonPlayerProps {
@@ -298,7 +299,10 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
             </div>
           </div>
 
-          <NumeralToggle />
+          <div className="flex items-center gap-1.5">
+            <AudioToggle />
+            <NumeralToggle />
+          </div>
         </div>
       </header>
 
@@ -315,12 +319,18 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
 
         {/* Active Step Card */}
         <section className="rounded-3xl border border-border bg-surface p-3.5 sm:p-5 shadow-xs space-y-4">
-          <h1
-            data-testid="step-prompt"
-            className="text-lg sm:text-xl font-bold text-ink"
-          >
-            {formatTextNumerals(activeStep.promptKm, numeralPref)}
-          </h1>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <h1
+              data-testid="step-prompt"
+              className="flex-1 min-w-[200px] text-lg sm:text-xl font-bold text-ink"
+            >
+              {formatTextNumerals(activeStep.promptKm, numeralPref)}
+            </h1>
+            <AudioReadButton
+              textKm={activeStep.promptKm}
+              audioUrl={activeStep.audioUrl}
+            />
+          </div>
 
           {/* Single decoupled SVG manipulative renderer */}
           <ActivityRenderer
