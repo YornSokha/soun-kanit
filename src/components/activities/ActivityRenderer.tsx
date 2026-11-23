@@ -8,6 +8,10 @@ import { CountingStage } from "./CountingStage";
 import { NumberLine } from "./NumberLine";
 import { PlaceValueBlocks } from "./PlaceValueBlocks";
 import { ScenarioChoice } from "./ScenarioChoice";
+import { ComparisonBalance } from "./ComparisonBalance";
+import { ArrayGroups } from "./ArrayGroups";
+import { FractionBarShape } from "./FractionBarShape";
+import { PatternSequence } from "./PatternSequence";
 
 interface ActivityRendererProps {
   step: ActivityStep;
@@ -19,7 +23,7 @@ interface ActivityRendererProps {
 
 /**
  * Single decoupled renderer mapping any Zod-validated ActivityStep JSON
- * to its corresponding reusable Safari-safe SVG manipulative primitive.
+ * across all 8 reusable Safari-safe SVG manipulative primitives.
  */
 export function ActivityRenderer({
   step,
@@ -68,6 +72,47 @@ export function ActivityRenderer({
           step={step}
           numeralPref={numeralPref}
           highlightTargetId={highlightTargetId}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "comparison-balance":
+      return (
+        <ComparisonBalance
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          highlightTargetId={highlightTargetId}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "array-groups":
+      return (
+        <ArrayGroups
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "fraction-bar-shape":
+      return (
+        <FractionBarShape
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "pattern-sequence":
+      return (
+        <PatternSequence
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
           disabled={disabled}
           onAnswerChange={onAnswerChange}
         />

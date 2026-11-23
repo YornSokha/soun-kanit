@@ -78,6 +78,58 @@ function buildValidAnswer(step: ActivityStep, useKhmer = false): StepAnswer {
           : step.solution.correctOptionId,
       };
     }
+    case "comparison-balance": {
+      if (step.config.mode === "compare-operator") {
+        return {
+          type: "comparison-balance",
+          operator: useKhmer
+            ? `${step.solution.expectedOperator ?? ""}\u200B`
+            : step.solution.expectedOperator,
+        };
+      }
+      return {
+        type: "comparison-balance",
+        rightTotal: fmt(
+          step.solution.expectedRightTotal ?? step.config.leftValue
+        ),
+      };
+    }
+    case "array-groups": {
+      const rows = step.solution.expectedRows ?? 1;
+      const cols =
+        step.solution.expectedCols ??
+        Math.max(1, Math.round(step.solution.expectedProduct / rows));
+      return {
+        type: "array-groups",
+        rows: fmt(rows),
+        cols: fmt(cols),
+      };
+    }
+    case "fraction-bar-shape": {
+      if (step.config.mode === "shape-identify") {
+        return {
+          type: "fraction-bar-shape",
+          selectedShapeId: useKhmer
+            ? `${step.solution.expectedShapeId ?? ""}\u200B`
+            : step.solution.expectedShapeId,
+        };
+      }
+      return {
+        type: "fraction-bar-shape",
+        numerator: fmt(step.solution.expectedNumerator ?? 1),
+        denominator: fmt(
+          step.solution.expectedDenominator ?? step.config.denominator
+        ),
+      };
+    }
+    case "pattern-sequence": {
+      return {
+        type: "pattern-sequence",
+        slotValues: step.solution.expectedSlotValues.map((v) =>
+          useKhmer ? `${toKhmerDigits(v)}\u200B` : v
+        ),
+      };
+    }
   }
 }
 
@@ -132,6 +184,55 @@ function buildInvalidAnswers(step: ActivityStep): StepAnswer[] {
           selectedOptionId: o.id,
         }));
     }
+    case "comparison-balance": {
+      if (step.config.mode === "compare-operator") {
+        return (["<", "=", ">"] as const)
+          .filter((op) => op !== step.solution.expectedOperator)
+          .map((op) => ({
+            type: "comparison-balance" as const,
+            operator: op,
+          }));
+      }
+      const target = step.solution.expectedRightTotal ?? step.config.leftValue;
+      return [{ type: "comparison-balance", rightTotal: target + 1 }];
+    }
+    case "array-groups": {
+      return [
+        {
+          type: "array-groups",
+          rows: 1,
+          cols: step.solution.expectedProduct + 1,
+        },
+      ];
+    }
+    case "fraction-bar-shape": {
+      if (step.config.mode === "shape-identify") {
+        return (step.config.shapeOptions ?? [])
+          .filter((o) => o.id !== step.solution.expectedShapeId)
+          .map((o) => ({
+            type: "fraction-bar-shape" as const,
+            selectedShapeId: o.id,
+          }));
+      }
+      const den = step.solution.expectedDenominator ?? step.config.denominator;
+      const wrongNum =
+        (step.solution.expectedNumerator ?? 1) === 0 ? 1 : 0;
+      return [
+        {
+          type: "fraction-bar-shape",
+          numerator: wrongNum,
+          denominator: den,
+        },
+      ];
+    }
+    case "pattern-sequence": {
+      return [
+        {
+          type: "pattern-sequence",
+          slotValues: step.solution.expectedSlotValues.map(() => "__wrong__"),
+        },
+      ];
+    }
   }
 }
 
@@ -145,6 +246,7 @@ function main() {
   let errorCount = 0;
   let totalStepsChecked = 0;
   const seenIds = new Set<string>();
+  const seenPrimitives = new Set<string>();
 
   for (const filePath of files) {
     const rel = path.relative(process.cwd(), filePath);
@@ -176,8 +278,8 @@ function main() {
 
     for (const step of lesson.steps) {
       totalStepsChecked++;
+      seenPrimitives.add(step.type);
 
-      // 1. Arabic/canonical solution must pass
       const validArabic = gradeStep(step, buildValidAnswer(step, false));
       if (!validArabic.isCorrect) {
         console.error(
@@ -186,7 +288,6 @@ function main() {
         errorCount++;
       }
 
-      // 2. Khmer + ZWSP solution must pass identically
       const validKhmer = gradeStep(step, buildValidAnswer(step, true));
       if (!validKhmer.isCorrect) {
         console.error(
@@ -195,7 +296,6 @@ function main() {
         errorCount++;
       }
 
-      // 3. Invalid answers / distractors must fail with non-empty Khmer feedback
       for (const badAnswer of buildInvalidAnswers(step)) {
         const res = gradeStep(step, badAnswer);
         if (res.isCorrect || !res.feedbackKm.trim()) {
@@ -213,7 +313,7 @@ function main() {
   }
 
   console.log(
-    `\nValidated ${files.length} lessons (${totalStepsChecked} steps). Errors: ${errorCount}`
+    `\nValidated ${files.length} lessons (${totalStepsChecked} steps, ${seenPrimitives.size} distinct primitives). Errors: ${errorCount}`
   );
 
   if (errorCount > 0) {

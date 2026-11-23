@@ -10,6 +10,7 @@ import {
   formatTextNumerals,
 } from "@/lib/khmer/numerals";
 import { MASTERY_LABELS_KM, type MasteryTier } from "@/lib/math/mastery";
+import { computeMasteryBadges } from "@/lib/math/badges";
 import { cacheLessons } from "@/lib/storage/idb";
 
 interface LearningPathClientProps {
@@ -71,6 +72,8 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
     const tier = progressByLesson[l.id]?.masteryTier;
     return tier && tier !== "not_started";
   }).length;
+  const badges = computeMasteryBadges(progressByLesson);
+  const earnedBadgesCount = badges.filter((b) => b.earned).length;
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
@@ -167,6 +170,40 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
                   </span>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Calm informational mastery badges (zero loot boxes / guilt streaks) */}
+          <div
+            data-testid="mastery-badges-section"
+            className="rounded-2xl border border-border bg-canvas p-3.5 space-y-2.5"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-bold text-ink">
+                សញ្ញាសម្គាល់ការយល់ដឹង
+              </p>
+              <span className="text-xs font-semibold text-ink-muted">
+                {formatDisplayNumber(earnedBadgesCount, numeralPref)} /{" "}
+                {formatDisplayNumber(badges.length, numeralPref)}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {badges.map((badge) => (
+                <div
+                  key={badge.id}
+                  data-testid={`badge-${badge.id}`}
+                  data-earned={badge.earned ? "true" : "false"}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
+                    badge.earned
+                      ? "border-success bg-success-soft text-success"
+                      : "border-border bg-surface text-ink-muted"
+                  }`}
+                  title={formatTextNumerals(badge.descriptionKm, numeralPref)}
+                >
+                  <span aria-hidden="true">{badge.earned ? "★" : "○"}</span>
+                  <span>{formatTextNumerals(badge.titleKm, numeralPref)}</span>
+                </div>
+              ))}
             </div>
           </div>
 

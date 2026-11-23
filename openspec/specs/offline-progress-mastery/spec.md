@@ -24,3 +24,12 @@ The system SHALL compute skill mastery across Attempted, Familiar, Proficient, a
 - **THEN** mastery transitions to `familiar`, Leitner box sets to 2, and `nextReviewAt` schedules 2 days ahead
 - **WHEN** the learner finishes with 100% accuracy without Tier 3 hints
 - **THEN** mastery transitions to `proficient` and advances one Leitner box
+
+### Requirement: Calm Informational Mastery Badges
+The system SHALL derive informational mastery badges from completed lessons and mastery states without countdown timers, virtual currencies, or loot boxes.
+
+#### Scenario: Completing key milestones unlocks informational badges
+- **GIVEN** a learner with locally persisted completed lessons in IndexedDB
+- **WHEN** the learner views the Learning Path dashboard
+- **THEN** earned mastery badges display calmly alongside the weekly learning rhythm summary
+- **AND** unearned badges remain visible as gentle goals without punitive streaks

@@ -25,6 +25,26 @@ export type StepAnswer =
       selectedOptionId?: string;
       selectedNotesKhr?: Array<number | string>;
       sumKhr?: number | string;
+    }
+  | {
+      type: "comparison-balance";
+      operator?: string;
+      rightTotal?: number | string;
+    }
+  | {
+      type: "array-groups";
+      rows: number | string;
+      cols: number | string;
+    }
+  | {
+      type: "fraction-bar-shape";
+      numerator?: number | string;
+      denominator?: number | string;
+      selectedShapeId?: string;
+    }
+  | {
+      type: "pattern-sequence";
+      slotValues: Array<string | null>;
     };
 
 export interface GradeDiscrepancy {
@@ -36,6 +56,12 @@ export interface GradeDiscrepancy {
     | "needs-regrouping"
     | "wrong-option"
     | "banknote-mismatch"
+    | "operator-mismatch"
+    | "balance-mismatch"
+    | "array-mismatch"
+    | "fraction-mismatch"
+    | "shape-mismatch"
+    | "pattern-mismatch"
     | "invalid-input";
   expected?: number;
   actual?: number;
@@ -316,7 +342,6 @@ export function gradeStep(step: ActivityStep, answer: StepAnswer): GradeResult {
         };
       }
 
-      // single-choice or worked-error-check
       const cleanSelected = ans.selectedOptionId
         ? stripZwsp(ans.selectedOptionId).trim()
         : "";
@@ -351,6 +376,250 @@ export function gradeStep(step: ActivityStep, answer: StepAnswer): GradeResult {
           chosenOption?.diagnosticFeedbackKm ??
           "ជិតត្រូវហើយ! សាកពិនិត្យមើលជម្រើសផ្សេងទៀត ឬសុំជំនួយណា៎។",
         discrepancy: { kind: "wrong-option" },
+      };
+    }
+
+    case "comparison-balance": {
+      const ans = answer as Extract<StepAnswer, { type: "comparison-balance" }>;
+
+      if (step.config.mode === "compare-operator") {
+        const chosenOp = ans.operator ? stripZwsp(ans.operator).trim() : "";
+        const expectedOp = step.solution.expectedOperator;
+
+        if (!chosenOp || !["<", ">", "="].includes(chosenOp)) {
+          return {
+            isCorrect: false,
+            feedbackKm: "សូមជ្រើសរើសសញ្ញា <, > ឬ = ជាមុនសិនណា៎!",
+            discrepancy: { kind: "invalid-input" },
+          };
+        }
+
+        if (chosenOp === expectedOp) {
+          return {
+            isCorrect: true,
+            feedbackKm: "ពូកែណាស់! ការប្រៀបធៀបរបស់អ្នកត្រឹមត្រូវហើយ!",
+          };
+        }
+
+        return {
+          isCorrect: false,
+          feedbackKm:
+            "ជិតត្រូវហើយ! សាកប្រៀបធៀបខាងឆ្វេង និងខាងស្ដាំម្ដងទៀត — មាត់សញ្ញាតែងតែបើកទៅរកចំនួនធំជាង!",
+          discrepancy: { kind: "operator-mismatch" },
+        };
+      }
+
+      // balance-equation mode
+      const rightTotal =
+        ans.rightTotal !== undefined
+          ? normalizeNumericInput(ans.rightTotal)
+          : null;
+      const expectedRight =
+        step.solution.expectedRightTotal ?? step.config.leftValue;
+
+      if (rightTotal === null) {
+        return {
+          isCorrect: false,
+          feedbackKm: "សូមបន្ថែមទម្ងន់លើជញ្ជីងខាងស្ដាំឱ្យស្មើគ្នាសិនណា៎!",
+          discrepancy: { kind: "invalid-input" },
+        };
+      }
+
+      if (rightTotal === expectedRight) {
+        return {
+          isCorrect: true,
+          feedbackKm: "ល្អណាស់! ជញ្ជីងទាំងពីរខាងមានតុល្យភាពស្មើគ្នាហើយ!",
+        };
+      }
+
+      return {
+        isCorrect: false,
+        feedbackKm:
+          rightTotal < expectedRight
+            ? "ខាងស្ដាំនៅស្រាលជាងខាងឆ្វេង សាកបន្ថែមទម្ងន់ទៀតណា៎!"
+            : "ខាងស្ដាំធ្ងន់ជាងខាងឆ្វេងបន្តិចហើយ សាកដកចេញខ្លះវិញណា៎!",
+        discrepancy: {
+          kind: "balance-mismatch",
+          expected: expectedRight,
+          actual: rightTotal,
+        },
+      };
+    }
+
+    case "array-groups": {
+      const ans = answer as Extract<StepAnswer, { type: "array-groups" }>;
+      const rows = normalizeNumericInput(ans.rows);
+      const cols = normalizeNumericInput(ans.cols);
+
+      if (rows === null || cols === null || rows <= 0 || cols <= 0) {
+        return {
+          isCorrect: false,
+          feedbackKm: "សូមរៀបចំចំនួនជួរ និងចំនួនវត្ថុក្នុងជួរនីមួយៗសិនណា៎!",
+          discrepancy: { kind: "invalid-input" },
+        };
+      }
+
+      const product = rows * cols;
+      const productMatches = product === step.solution.expectedProduct;
+
+      let dimsMatch = true;
+      if (
+        step.solution.expectedRows !== undefined &&
+        step.solution.expectedCols !== undefined
+      ) {
+        const exact =
+          rows === step.solution.expectedRows &&
+          cols === step.solution.expectedCols;
+        const swapped =
+          step.solution.allowCommutative &&
+          rows === step.solution.expectedCols &&
+          cols === step.solution.expectedRows;
+        dimsMatch = exact || swapped;
+      }
+
+      if (productMatches && dimsMatch) {
+        return {
+          isCorrect: true,
+          feedbackKm: "អស្ចារ្យ! ការរៀបចំក្រុមស្មើៗគ្នារបស់អ្នកត្រឹមត្រូវហើយ!",
+        };
+      }
+
+      return {
+        isCorrect: false,
+        feedbackKm:
+          product < step.solution.expectedProduct
+            ? "ចំនួនសរុបនៅតិចជាងគោលដៅបន្តិច សាកបន្ថែមជួរ ឬវត្ថុក្នុងជួរទៀតណា៎!"
+            : product > step.solution.expectedProduct
+              ? "ចំនួនសរុបលើសគោលដៅបន្តិចហើយ សាកបន្ថយជួរ ឬជួរឈរខ្លះវិញណា៎!"
+              : "ចំនួនសរុបត្រូវហើយ ប៉ុន្តែសាកពិនិត្យចំនួនជួរ និងវត្ថុក្នុងជួរនីមួយៗម្ដងទៀតណា៎!",
+        discrepancy: {
+          kind: "array-mismatch",
+          expected: step.solution.expectedProduct,
+          actual: product,
+        },
+      };
+    }
+
+    case "fraction-bar-shape": {
+      const ans = answer as Extract<StepAnswer, { type: "fraction-bar-shape" }>;
+
+      if (step.config.mode === "shape-identify") {
+        const selected = ans.selectedShapeId
+          ? stripZwsp(ans.selectedShapeId).trim()
+          : "";
+        const expected = step.solution.expectedShapeId
+          ? stripZwsp(step.solution.expectedShapeId).trim()
+          : "";
+
+        if (!selected) {
+          return {
+            isCorrect: false,
+            feedbackKm: "សូមប៉ះជ្រើសរើសរូបធរណីមាត្រមួយសិនណា៎!",
+            discrepancy: { kind: "invalid-input" },
+          };
+        }
+
+        if (selected === expected) {
+          return {
+            isCorrect: true,
+            feedbackKm: "ពូកែណាស់! អ្នកស្គាល់រូបធរណីមាត្រនេះច្បាស់ណាស់!",
+          };
+        }
+
+        return {
+          isCorrect: false,
+          feedbackKm:
+            "ជិតត្រូវហើយ! សាករាប់ចំនួនជ្រុងនៃរូបនីមួយៗម្ដងទៀតណា៎។",
+          discrepancy: { kind: "shape-mismatch" },
+        };
+      }
+
+      // shade-fraction mode
+      const num =
+        ans.numerator !== undefined
+          ? normalizeNumericInput(ans.numerator)
+          : null;
+      const den =
+        ans.denominator !== undefined
+          ? normalizeNumericInput(ans.denominator)
+          : step.config.denominator;
+
+      const expNum = step.solution.expectedNumerator;
+      const expDen = step.solution.expectedDenominator ?? step.config.denominator;
+
+      if (num === null || den === null || den <= 0 || expNum === undefined) {
+        return {
+          isCorrect: false,
+          feedbackKm: "សូមប៉ះផ្នែកនៃរបារ ដើម្បីលាបពណ៌ចំណែកប្រភាគសិនណា៎!",
+          discrepancy: { kind: "invalid-input" },
+        };
+      }
+
+      const exactMatch = num === expNum && den === expDen;
+      const equivalentMatch =
+        step.solution.acceptEquivalent && num * expDen === expNum * den;
+
+      if (exactMatch || equivalentMatch) {
+        return {
+          isCorrect: true,
+          feedbackKm: "ល្អណាស់! ចំណែកប្រភាគដែលអ្នកលាបពណ៌ត្រឹមត្រូវហើយ!",
+        };
+      }
+
+      const actualRatio = num / den;
+      const expectedRatio = expNum / expDen;
+
+      return {
+        isCorrect: false,
+        feedbackKm:
+          actualRatio < expectedRatio
+            ? "ចំណែកដែលលាបពណ៌នៅតិចបន្តិច សាកលាបពណ៌បន្ថែមទៀតណា៎!"
+            : "ចំណែកដែលលាបពណ៌ច្រើនជាងគោលដៅបន្តិចហើយ សាកប៉ះលុបពណ៌ខ្លះវិញណា៎!",
+        discrepancy: {
+          kind: "fraction-mismatch",
+          expected: expNum,
+          actual: num,
+        },
+      };
+    }
+
+    case "pattern-sequence": {
+      const ans = answer as Extract<StepAnswer, { type: "pattern-sequence" }>;
+      const expected = step.solution.expectedSlotValues.map((v) =>
+        stripZwsp(v).trim()
+      );
+      const actual = (ans.slotValues ?? []).map((v) =>
+        v === null ? "" : stripZwsp(v).trim()
+      );
+
+      if (actual.length !== expected.length || actual.some((v) => !v)) {
+        return {
+          isCorrect: false,
+          feedbackKm: "សូមបំពេញប្រឡោះទំនេរទាំងអស់ក្នុងលំនាំសិនណា៎!",
+          discrepancy: { kind: "invalid-input" },
+        };
+      }
+
+      const allMatch = expected.every((expVal, idx) => {
+        if (actual[idx] === expVal) return true;
+        // Also accept Khmer/Arabic numeric equivalence for number-skip patterns
+        const expNum = normalizeNumericInput(expVal);
+        const actNum = normalizeNumericInput(actual[idx]);
+        return expNum !== null && actNum !== null && expNum === actNum;
+      });
+
+      if (allMatch) {
+        return {
+          isCorrect: true,
+          feedbackKm: "អស្ចារ្យ! អ្នករកឃើញក្បួនលំនាំបានយ៉ាងត្រឹមត្រូវ!",
+        };
+      }
+
+      return {
+        isCorrect: false,
+        feedbackKm:
+          "ជិតត្រូវហើយ! សាកមើលលំនាំដែលកើតឡើងដដែលៗពីឆ្វេងទៅស្ដាំម្ដងទៀតណា៎។",
+        discrepancy: { kind: "pattern-mismatch" },
       };
     }
   }

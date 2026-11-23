@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type {
+  ArrayGroupsStep,
+  ComparisonBalanceStep,
   CountingStageStep,
+  FractionBarShapeStep,
   NumberLineStep,
+  PatternSequenceStep,
   PlaceValueBlocksStep,
   ScenarioChoiceStep,
 } from "@/lib/curriculum/schema";
@@ -215,5 +219,228 @@ describe("gradeStep() deterministic grader", () => {
         selectedNotesKhr: [1000, 100],
       }).isCorrect
     ).toBe(false);
+  });
+
+  it("grades comparison-balance operator and balance-equation modes", () => {
+    const opStep: ComparisonBalanceStep = {
+      id: "cb-1",
+      type: "comparison-balance",
+      stage: "concrete",
+      promptKm: "ប្រៀបធៀប ៧ និង ៤",
+      config: {
+        mode: "compare-operator",
+        visualStyle: "scale-oranges",
+        leftValue: 7,
+        rightValue: 4,
+      },
+      solution: { expectedOperator: ">" },
+      hints: sampleHints,
+      explanationKm: "៧ > ៤",
+    };
+
+    expect(
+      gradeStep(opStep, { type: "comparison-balance", operator: ">\u200B" })
+        .isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(opStep, { type: "comparison-balance", operator: "<" })
+        .discrepancy?.kind
+    ).toBe("operator-mismatch");
+
+    const balStep: ComparisonBalanceStep = {
+      id: "cb-2",
+      type: "comparison-balance",
+      stage: "symbolic",
+      promptKm: "ធ្វើឱ្យជញ្ជីងស្មើ ៦",
+      config: {
+        mode: "balance-equation",
+        visualStyle: "scale-oranges",
+        leftValue: 6,
+        rightValue: 4,
+        availableTiles: [1, 2, 3],
+      },
+      solution: { expectedRightTotal: 6 },
+      hints: sampleHints,
+      explanationKm: "៦ = ៦",
+    };
+
+    expect(
+      gradeStep(balStep, { type: "comparison-balance", rightTotal: "៦\u200B" })
+        .isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(balStep, { type: "comparison-balance", rightTotal: 5 })
+        .isCorrect
+    ).toBe(false);
+  });
+
+  it("grades array-groups with commutative dimension support", () => {
+    const step: ArrayGroupsStep = {
+      id: "ag-1",
+      type: "array-groups",
+      stage: "iconic",
+      promptKm: "រៀបចំ ២ × ៣ = ៦",
+      config: {
+        mode: "equal-groups",
+        itemTheme: "orange",
+        maxRows: 4,
+        maxCols: 5,
+        initialRows: 1,
+        initialCols: 1,
+        showProduct: true,
+      },
+      solution: {
+        expectedRows: 2,
+        expectedCols: 3,
+        expectedProduct: 6,
+        allowCommutative: true,
+      },
+      hints: sampleHints,
+      explanationKm: "២ × ៣ = ៦",
+    };
+
+    expect(
+      gradeStep(step, { type: "array-groups", rows: "២", cols: "៣\u200B" })
+        .isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(step, { type: "array-groups", rows: 3, cols: 2 }).isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(step, { type: "array-groups", rows: 1, cols: 6 }).isCorrect
+    ).toBe(false);
+  });
+
+  it("grades fraction-bar-shape with reduced rational equivalence and 2D shape identification", () => {
+    const fracStep: FractionBarShapeStep = {
+      id: "fb-1",
+      type: "fraction-bar-shape",
+      stage: "symbolic",
+      promptKm: "លាបពណ៌ ១/២ ឬ ២/៤",
+      config: {
+        mode: "shade-fraction",
+        visualShape: "bar",
+        denominator: 4,
+        initialShaded: 0,
+        allowPartitionChange: true,
+        availableDenominators: [2, 4],
+        showNumberLine: true,
+      },
+      solution: {
+        expectedNumerator: 1,
+        expectedDenominator: 2,
+        acceptEquivalent: true,
+      },
+      hints: sampleHints,
+      explanationKm: "២/៤ = ១/២",
+    };
+
+    expect(
+      gradeStep(fracStep, {
+        type: "fraction-bar-shape",
+        numerator: "២",
+        denominator: "៤\u200B",
+      }).isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(fracStep, {
+        type: "fraction-bar-shape",
+        numerator: 1,
+        denominator: 4,
+      }).isCorrect
+    ).toBe(false);
+
+    const shapeStep: FractionBarShapeStep = {
+      id: "fb-2",
+      type: "fraction-bar-shape",
+      stage: "iconic",
+      promptKm: "រកត្រីកោណ",
+      config: {
+        mode: "shape-identify",
+        visualShape: "polygon-sides",
+        denominator: 1,
+        initialShaded: 0,
+        allowPartitionChange: false,
+        showNumberLine: false,
+        shapeOptions: [
+          { id: "shape-tri", shape: "triangle", labelKm: "ត្រីកោណ", sides: 3 },
+          { id: "shape-sq", shape: "square", labelKm: "ការ៉េ", sides: 4 },
+        ],
+      },
+      solution: { expectedShapeId: "shape-tri", acceptEquivalent: true },
+      hints: sampleHints,
+      explanationKm: "ត្រីកោណមាន ៣ ជ្រុង",
+    };
+
+    expect(
+      gradeStep(shapeStep, {
+        type: "fraction-bar-shape",
+        selectedShapeId: "shape-tri\u200B",
+      }).isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(shapeStep, {
+        type: "fraction-bar-shape",
+        selectedShapeId: "shape-sq",
+      }).isCorrect
+    ).toBe(false);
+  });
+
+  it("grades pattern-sequence for krama patterns and Khmer/Arabic skip-counting", () => {
+    const kramaStep: PatternSequenceStep = {
+      id: "ps-1",
+      type: "pattern-sequence",
+      stage: "concrete",
+      promptKm: "លំនាំក្រមា",
+      config: {
+        variant: "krama-tiles",
+        sequence: ["red", "blue", "red", "blue", null, null],
+        palette: [
+          { id: "red", labelKm: "ក្រហម", glyph: "stripe-red" },
+          { id: "blue", labelKm: "ខៀវ", glyph: "stripe-blue" },
+        ],
+      },
+      solution: { expectedSlotValues: ["red", "blue"] },
+      hints: sampleHints,
+      explanationKm: "ក្រហម-ខៀវ",
+    };
+
+    expect(
+      gradeStep(kramaStep, {
+        type: "pattern-sequence",
+        slotValues: ["red\u200B", "blue"],
+      }).isCorrect
+    ).toBe(true);
+    expect(
+      gradeStep(kramaStep, {
+        type: "pattern-sequence",
+        slotValues: ["blue", "red"],
+      }).isCorrect
+    ).toBe(false);
+
+    const skipStep: PatternSequenceStep = {
+      id: "ps-2",
+      type: "pattern-sequence",
+      stage: "symbolic",
+      promptKm: "២, ៤, ៦, ?",
+      config: {
+        variant: "number-skip",
+        sequence: ["2", "4", "6", null],
+        palette: [
+          { id: "7", labelKm: "៧", glyph: "number" },
+          { id: "8", labelKm: "៨", glyph: "number" },
+        ],
+      },
+      solution: { expectedSlotValues: ["8"] },
+      hints: sampleHints,
+      explanationKm: "៦ + ២ = ៨",
+    };
+
+    expect(
+      gradeStep(skipStep, {
+        type: "pattern-sequence",
+        slotValues: ["៨\u200B"],
+      }).isCorrect
+    ).toBe(true);
   });
 });

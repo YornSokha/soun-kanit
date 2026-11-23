@@ -216,4 +216,129 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     // Restore online status cleanly
     await context.setOffline(false);
   });
+
+  test("Milestone 2: 10-lesson path, 4 new SVG primitives (L3, L9, L10), >=56px targets, mastery badges, and WCAG 2.2 AA", async ({
+    page,
+  }) => {
+    // 1. Verify all 10 lessons & mastery badges on /learn
+    await page.goto("/learn");
+    await expect(page.getByTestId("mastery-badges-section")).toBeVisible();
+    const lessonIds = [
+      "l01-counting-1-5",
+      "l02-zero-and-ten-frame",
+      "l03-comparing-numbers",
+      "l04-number-line-0-10",
+      "l05-addition-to-10",
+      "l06-subtraction-within-10",
+      "l07-making-ten",
+      "l08-tens-and-ones-99",
+      "l09-patterns-and-shapes",
+      "l10-riel-money-and-halves",
+    ];
+    for (const id of lessonIds) {
+      await expect(page.getByTestId(`lesson-card-${id}`)).toBeVisible();
+    }
+    await expectNoWcag22Violations(page);
+
+    // 2. Lesson 3 (comparison-balance: >, <, balance 6=6)
+    await page.goto("/learn/l03-comparing-numbers");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("compare-op-gt").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("compare-op-lt").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("balance-add-2").click();
+    await expect(page.getByTestId("balance-right-total")).toContainText("៦");
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+    await expect(page.getByTestId("lesson-summary")).toBeVisible();
+
+    // 3. Lesson 9 (pattern-sequence krama + fraction-bar-shape 2D + array-groups + skip counting)
+    await page.goto("/learn/l09-patterns-and-shapes");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    // Tap-to-place krama pattern: red -> slot 0, blue -> slot 1
+    await page.getByTestId("pattern-tile-red").click();
+    await page.getByTestId("pattern-slot-0").click();
+    await page.getByTestId("pattern-tile-blue").click();
+    await page.getByTestId("pattern-slot-1").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 2: 2D shape identify (triangle)
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("shape-option-shape-tri").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 3: array-groups (2 x 3 = 6, starts at 1 x 2)
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("array-rows-inc").click();
+    await page.getByTestId("array-cols-inc").click();
+    await expect(page.getByTestId("array-product-badge")).toContainText("៦");
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 4: skip counting 2, 4, 6, 8
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("pattern-tile-8").click();
+    await page.getByTestId("pattern-slot-0").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+    await expect(page.getByTestId("lesson-summary")).toBeVisible();
+
+    // 4. Lesson 10 (banknote-builder + fraction-bar-shape 1/2 and 2/4 = 1/2)
+    await page.goto("/learn/l10-riel-money-and-halves");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("banknote-500").click();
+    await page.getByTestId("banknote-500").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    await page.getByTestId("choice-option-opt-500").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 3: Shade 1/2
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("fraction-part-0").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 4: Shade 2/4 (= 1/2)
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("fraction-part-0").click();
+    await page.getByTestId("fraction-part-1").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+    await expect(page.getByTestId("lesson-summary")).toBeVisible();
+
+    // 5. Return to /learn and verify earned mastery badges unlocked!
+    await page.goto("/learn");
+    await expect(page.getByTestId("badge-first-step")).toHaveAttribute(
+      "data-earned",
+      "true"
+    );
+    await expect(page.getByTestId("badge-pattern-explorer")).toHaveAttribute(
+      "data-earned",
+      "true"
+    );
+    await expect(page.getByTestId("badge-riel-fraction-pro")).toHaveAttribute(
+      "data-earned",
+      "true"
+    );
+    await expectNoWcag22Violations(page);
+  });
 });

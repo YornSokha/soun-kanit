@@ -131,11 +131,129 @@ export const ScenarioChoiceStepSchema = z.object({
   explanationKm: z.string().min(4).max(240),
 });
 
+export const ComparisonBalanceStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("comparison-balance"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    mode: z.enum(["compare-operator", "balance-equation"]),
+    visualStyle: z.enum(["scale-oranges", "bars", "symbolic"]).default("scale-oranges"),
+    leftValue: z.number().int().min(0),
+    rightValue: z.number().int().min(0),
+    leftLabelKm: z.string().max(60).optional(),
+    rightLabelKm: z.string().max(60).optional(),
+    availableTiles: z.array(z.number().int().positive()).optional(),
+  }),
+  solution: z.object({
+    expectedOperator: z.enum(["<", ">", "="]).optional(),
+    expectedRightTotal: z.number().int().min(0).optional(),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
+export const ArrayGroupsStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("array-groups"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    mode: z.enum(["equal-groups", "rectangular-grid"]),
+    itemTheme: z.enum(["mango", "orange", "dot", "tile"]).default("orange"),
+    maxRows: z.number().int().min(1).max(6).default(5),
+    maxCols: z.number().int().min(1).max(6).default(6),
+    initialRows: z.number().int().min(1).max(6).default(1),
+    initialCols: z.number().int().min(1).max(6).default(1),
+    showProduct: z.boolean().default(true),
+  }),
+  solution: z.object({
+    expectedRows: z.number().int().positive().optional(),
+    expectedCols: z.number().int().positive().optional(),
+    expectedProduct: z.number().int().positive(),
+    allowCommutative: z.boolean().default(true),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
+export const FractionShapeOptionSchema = z.object({
+  id: z.string().min(1),
+  shape: z.enum(["triangle", "square", "rectangle", "circle"]),
+  labelKm: z.string().min(1).max(80),
+  sides: z.number().int().min(0),
+});
+
+export const FractionBarShapeStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("fraction-bar-shape"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    mode: z.enum(["shade-fraction", "shape-identify"]),
+    visualShape: z.enum(["bar", "circle", "polygon-sides"]).default("bar"),
+    denominator: z.number().int().min(1).max(12).default(2),
+    initialShaded: z.number().int().min(0).default(0),
+    allowPartitionChange: z.boolean().default(false),
+    availableDenominators: z.array(z.number().int().min(2).max(8)).optional(),
+    showNumberLine: z.boolean().default(false),
+    shapeOptions: z.array(FractionShapeOptionSchema).min(2).max(4).optional(),
+  }),
+  solution: z.object({
+    expectedNumerator: z.number().int().min(0).optional(),
+    expectedDenominator: z.number().int().positive().optional(),
+    acceptEquivalent: z.boolean().default(true),
+    expectedShapeId: z.string().optional(),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
+export const PatternPaletteItemSchema = z.object({
+  id: z.string().min(1),
+  labelKm: z.string().min(1).max(40),
+  color: z.string().optional(),
+  glyph: z.enum([
+    "stripe-red",
+    "stripe-blue",
+    "stripe-gold",
+    "circle",
+    "square",
+    "triangle",
+    "number",
+  ]),
+});
+
+export const PatternSequenceStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("pattern-sequence"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    variant: z.enum(["krama-tiles", "shape-pattern", "number-skip"]),
+    sequence: z.array(z.string().nullable()).min(4).max(8),
+    palette: z.array(PatternPaletteItemSchema).min(2).max(5),
+  }),
+  solution: z.object({
+    expectedSlotValues: z.array(z.string().min(1)).min(1),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
 export const ActivityStepSchema = z.discriminatedUnion("type", [
   CountingStageStepSchema,
   NumberLineStepSchema,
   PlaceValueBlocksStepSchema,
   ScenarioChoiceStepSchema,
+  ComparisonBalanceStepSchema,
+  ArrayGroupsStepSchema,
+  FractionBarShapeStepSchema,
+  PatternSequenceStepSchema,
 ]);
 
 export const LessonDocumentV1Schema = z.object({
@@ -158,5 +276,9 @@ export type CountingStageStep = z.infer<typeof CountingStageStepSchema>;
 export type NumberLineStep = z.infer<typeof NumberLineStepSchema>;
 export type PlaceValueBlocksStep = z.infer<typeof PlaceValueBlocksStepSchema>;
 export type ScenarioChoiceStep = z.infer<typeof ScenarioChoiceStepSchema>;
+export type ComparisonBalanceStep = z.infer<typeof ComparisonBalanceStepSchema>;
+export type ArrayGroupsStep = z.infer<typeof ArrayGroupsStepSchema>;
+export type FractionBarShapeStep = z.infer<typeof FractionBarShapeStepSchema>;
+export type PatternSequenceStep = z.infer<typeof PatternSequenceStepSchema>;
 export type ActivityStep = z.infer<typeof ActivityStepSchema>;
 export type LessonDocumentV1 = z.infer<typeof LessonDocumentV1Schema>;
