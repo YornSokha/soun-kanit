@@ -49,6 +49,9 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
   const [selectedPathId, setSelectedPathId] = useState<string>(
     paths[0]?.id ?? "early-foundations"
   );
+  const [activityFilter, setActivityFilter] = useState<
+    "path" | "drawing" | "all"
+  >("path");
   const [offlineCached, setOfflineCached] = useState<boolean>(false);
   const [weekCutoffIso, setWeekCutoffIso] = useState<string | null>(null);
   const [todayDate, setTodayDate] = useState<{ iso: string; now: Date } | null>(
@@ -82,6 +85,25 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
 
   const activePath =
     paths.find((p) => p.id === selectedPathId) ?? paths[0];
+
+  const visibleLessons = useMemo(() => {
+    if (activityFilter === "drawing") {
+      return allLessons.filter((l) =>
+        l.steps.some((s) => s.type === "geometry-draw")
+      );
+    }
+    if (activityFilter === "all") {
+      return allLessons;
+    }
+    return activePath?.lessons ?? [];
+  }, [activityFilter, allLessons, activePath]);
+
+  const drawingLessonsCount = useMemo(
+    () =>
+      allLessons.filter((l) => l.steps.some((s) => s.type === "geometry-draw"))
+        .length,
+    [allLessons]
+  );
 
   const weeklyGoal = profile?.weeklyGoalDays ?? 3;
   const activeDaysThisWeek = Math.min(
@@ -353,31 +375,90 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           </Link>
         </section>
 
-        {/* Unrestricted Multi-Path Selector (never grade-locked) */}
-        <nav aria-label="ជ្រើសរើសផ្លូវរៀន" className="flex flex-wrap gap-2">
-          {paths.map((p) => {
-            const isActive = p.id === activePath?.id;
-            return (
+        {/* Unrestricted Multi-Path Selector + Interactive Activity Filter Menu */}
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-bold text-ink-muted">
+              ជ្រើសរើសផ្លូវរៀន ឬតម្រងមេរៀនអន្តរកម្ម
+            </p>
+            <div
+              role="group"
+              aria-label="តម្រងប្រភេទមេរៀន"
+              className="flex flex-wrap gap-1.5"
+            >
               <button
-                key={p.id}
                 type="button"
-                data-testid={`path-tab-${p.id}`}
-                aria-pressed={isActive}
-                onClick={() => setSelectedPathId(p.id)}
-                className={`khmer-chip rounded-2xl border-2 px-4 text-sm font-bold transition-colors ${
-                  isActive
-                    ? "border-accent bg-accent text-white shadow-xs"
-                    : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                data-testid="filter-mode-path"
+                aria-pressed={activityFilter === "path"}
+                onClick={() => setActivityFilter("path")}
+                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                  activityFilter === "path"
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border bg-surface text-ink-muted hover:text-ink"
                 }`}
               >
-                {formatTextNumerals(p.shortTitleKm, numeralPref)}{" "}
-                <span className={isActive ? "text-white/90" : "text-ink-muted"}>
-                  ({formatTextNumerals(p.gradeRangeKm, numeralPref)})
-                </span>
+                តាមផ្លូវរៀន
               </button>
-            );
-          })}
-        </nav>
+              <button
+                type="button"
+                data-testid="filter-mode-drawing"
+                aria-pressed={activityFilter === "drawing"}
+                onClick={() => setActivityFilter("drawing")}
+                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                  activityFilter === "drawing"
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                }`}
+              >
+                គូររូប ({formatDisplayNumber(drawingLessonsCount, numeralPref)})
+              </button>
+              <button
+                type="button"
+                data-testid="filter-mode-all"
+                aria-pressed={activityFilter === "all"}
+                onClick={() => setActivityFilter("all")}
+                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                  activityFilter === "all"
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                }`}
+              >
+                ទាំងអស់ ({formatDisplayNumber(allLessons.length, numeralPref)})
+              </button>
+            </div>
+          </div>
+
+          <nav aria-label="ជ្រើសរើសផ្លូវរៀន" className="flex flex-wrap gap-2">
+            {paths.map((p) => {
+              const isActive =
+                activityFilter === "path" && p.id === activePath?.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  data-testid={`path-tab-${p.id}`}
+                  aria-pressed={isActive}
+                  onClick={() => {
+                    setSelectedPathId(p.id);
+                    setActivityFilter("path");
+                  }}
+                  className={`khmer-chip rounded-2xl border-2 px-4 text-sm font-bold transition-colors ${
+                    isActive
+                      ? "border-accent bg-accent text-white shadow-xs"
+                      : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                  }`}
+                >
+                  {formatTextNumerals(p.shortTitleKm, numeralPref)}{" "}
+                  <span
+                    className={isActive ? "text-white/90" : "text-ink-muted"}
+                  >
+                    ({formatDisplayNumber(p.lessons.length, numeralPref)})
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </section>
 
         {/* Active Learning Path Header & Unrestricted Lesson List */}
         {activePath && (
@@ -385,25 +466,49 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>
                 <h2 className="text-xl font-bold text-ink">
-                  {formatTextNumerals(activePath.titleKm, numeralPref)}
+                  {activityFilter === "drawing"
+                    ? "មេរៀនគូររូបធរណីមាត្រ ស៊ីមេទ្រី និងផ្ទៃក្រឡា"
+                    : activityFilter === "all"
+                      ? "មេរៀនអន្តរកម្មទាំងអស់"
+                      : formatTextNumerals(activePath.titleKm, numeralPref)}
                 </h2>
                 <p className="text-sm text-ink-muted">
-                  {formatTextNumerals(activePath.subtitleKm, numeralPref)}
+                  {activityFilter === "drawing"
+                    ? "ប៉ះចំណុចគូររូប គូរស៊ីមេទ្រីប្រាសាទខ្មែរ និងលាបពណ៌ផ្ទៃក្រឡាប្រភាគ"
+                    : activityFilter === "all"
+                      ? "រៀនមេរៀនណាក៏បានដោយសេរី — មិនចាក់សោតាមថ្នាក់រៀនទេ"
+                      : formatTextNumerals(activePath.subtitleKm, numeralPref)}
                 </p>
               </div>
               <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink-muted">
-                បានរៀន {formatDisplayNumber(completedInActivePath, numeralPref)}{" "}
-                /{" "}
-                {formatDisplayNumber(activePath.lessons.length, numeralPref)}{" "}
-                មេរៀន
+                {activityFilter === "path" ? (
+                  <>
+                    បានរៀន{" "}
+                    {formatDisplayNumber(completedInActivePath, numeralPref)} /{" "}
+                    {formatDisplayNumber(
+                      activePath.lessons.length,
+                      numeralPref
+                    )}{" "}
+                    មេរៀន
+                  </>
+                ) : (
+                  <>
+                    បង្ហាញ{" "}
+                    {formatDisplayNumber(visibleLessons.length, numeralPref)}{" "}
+                    មេរៀន
+                  </>
+                )}
               </span>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {activePath.lessons.map((lesson) => {
+              {visibleLessons.map((lesson) => {
                 const prog = progressByLesson[lesson.id];
                 const tier: MasteryTier = prog?.masteryTier ?? "not_started";
                 const gradeNum = lesson.moeysGradeRef.replace("G", "");
+                const hasDrawing = lesson.steps.some(
+                  (s) => s.type === "geometry-draw"
+                );
 
                 return (
                   <Link
@@ -454,6 +559,14 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                           )}{" "}
                           ជំហាន
                         </span>
+                        {hasDrawing && (
+                          <>
+                            <span aria-hidden="true">•</span>
+                            <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent">
+                              គូររូបអន្តរកម្ម
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </Link>

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Kantumruy_Pro, Noto_Sans_Khmer } from "next/font/google";
 import { LearnerProvider } from "@/components/providers/LearnerProvider";
+import { AppNavigation } from "@/components/ui/AppNavigation";
 import "./globals.css";
 
 const kantumruyPro = Kantumruy_Pro({
@@ -45,7 +47,12 @@ export default function RootLayout({
       className={`${kantumruyPro.variable} ${notoSansKhmer.variable} h-full`}
     >
       <body className="min-h-full bg-canvas text-ink antialiased flex flex-col">
-        <LearnerProvider>{children}</LearnerProvider>
+        <LearnerProvider>
+          {children}
+          <Suspense fallback={null}>
+            <AppNavigation />
+          </Suspense>
+        </LearnerProvider>
       </body>
     </html>
   );

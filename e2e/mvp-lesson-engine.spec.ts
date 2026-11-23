@@ -653,4 +653,74 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("play-draw-next-btn")).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 8: Persistent Khmer Navigation Menus, Interactive Filter, and 5 New Lessons (g06, g07, l11, f05, m05) at 360x800 (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Verify persistent bottom navigation menu across hubs
+    await page.goto("/learn");
+    await expect(page.getByTestId("app-bottom-nav")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    await page.getByTestId("nav-tab-play").click();
+    await expect(page).toHaveURL(/\/play$/);
+    await expect(page.getByTestId("app-bottom-nav")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    await page.getByTestId("nav-tab-garden").click();
+    await expect(page).toHaveURL(/\/garden$/);
+    await expectNoWcag22Violations(page);
+
+    // 2. Open expandable More Menu and jump to /review
+    await page.getByTestId("nav-more-btn").click();
+    await expect(page.getByTestId("nav-more-menu")).toBeVisible();
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("nav-more-link-review").click();
+    await expect(page).toHaveURL(/\/review$/);
+    await expectNoWcag22Violations(page);
+
+    // 3. Return to /learn via bottom nav and filter for interactive drawing lessons
+    await page.getByTestId("nav-tab-learn").click();
+    await expect(page).toHaveURL(/\/learn$/);
+    await page.getByTestId("filter-mode-drawing").click();
+    await expect(
+      page.getByTestId("lesson-card-g06-rectangles-and-area-design")
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("lesson-card-g07-angkor-symmetry-and-shapes")
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("lesson-card-f05-halves-quarters-and-draw-fractions")
+    ).toBeVisible();
+    await expect(
+      page.getByTestId("lesson-card-m05-skip-counting-and-mystery-puzzles")
+    ).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 4. Launch Lesson g06 -> verify global bottom nav auto-hides in focus mode and complete Step 1 (rectangle)
+    await page
+      .getByTestId("lesson-card-g06-rectangles-and-area-design")
+      .click();
+    await expect(page).toHaveURL(/\/learn\/g06-rectangles-and-area-design$/);
+    await expect(page.getByTestId("app-bottom-nav")).toHaveCount(0);
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("draw-peg-0-3").click();
+    await page.getByTestId("draw-peg-2-3").click();
+    await page.getByTestId("draw-peg-2-0").click();
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+
+    // 5. Verify l11 and m05 render cleanly at 360x800 with >= 56px targets
+    await page.goto("/learn/l11-khmer-market-change-and-place-value");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    await page.goto("/learn/m05-skip-counting-and-mystery-puzzles");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+  });
 });
