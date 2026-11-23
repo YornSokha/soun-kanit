@@ -252,7 +252,7 @@ export function ScenarioChoice({
               data-testid={`banknote-${note}`}
               disabled={disabled}
               onClick={() => setTrayNotes((prev) => [...prev, note])}
-              className="manipulative-target flex items-center justify-center rounded-xl border-2 border-border bg-surface px-4 text-base font-bold text-ink shadow-xs hover:border-accent hover:bg-accent-soft"
+              className="manipulative-target btn-3d [--btn-edge:#c9c2b2] flex items-center justify-center rounded-2xl border-2 border-[#c9c2b2] bg-surface px-4 text-base font-extrabold text-ink hover:border-[#13429E] hover:bg-[#E5F0FF]"
             >
               +{formatDisplayNumber(note.toLocaleString("en-US"), numeralPref)}៛
             </button>
@@ -300,10 +300,10 @@ export function ScenarioChoice({
               data-testid={`choice-option-${opt.id}`}
               disabled={disabled}
               onClick={() => setSelectedOptionId(opt.id)}
-              className={`manipulative-target w-full rounded-2xl border-2 px-4 py-3 text-left text-base font-semibold transition-colors flex items-center gap-3 ${
+              className={`manipulative-target btn-3d w-full rounded-2xl border-2 px-4 py-3 text-left text-base font-bold transition-colors flex items-center gap-3 ${
                 isSelected
-                  ? "border-accent bg-accent-soft text-ink shadow-xs"
-                  : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                  ? "border-[#13429E] [--btn-edge:#13429E] bg-[#E5F0FF] text-ink"
+                  : "border-[#c9c2b2] [--btn-edge:#c9c2b2] bg-surface text-ink hover:bg-surface-subtle"
               }`}
             >
               <span

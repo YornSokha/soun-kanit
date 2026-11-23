@@ -17,15 +17,15 @@ export function NumeralToggle({ className = "" }: NumeralToggleProps) {
       data-testid="numeral-toggle"
       onClick={() => void toggleNumeralPref()}
       aria-pressed={!isKhmer}
-      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border bg-surface px-2.5 sm:px-3 text-xs sm:text-sm font-semibold text-ink shadow-xs transition-colors hover:bg-surface-subtle ${className}`}
+      className={`khmer-chip pill-3d [--pill-edge:#c9c2b2] shrink-0 whitespace-nowrap inline-flex items-center gap-1 sm:gap-1.5 rounded-full border-2 border-[#c9c2b2] bg-surface px-2 sm:px-3 text-xs sm:text-sm font-bold text-ink transition-colors hover:bg-surface-subtle ${className}`}
     >
       <span className="sr-only">
         {isKhmer ? "ប្ដូរទៅលេខអារ៉ាប់ " : "ប្ដូរទៅលេខខ្មែរ "}
       </span>
       <span
-        className={`rounded-full px-2 py-0.5 transition-colors ${
+        className={`rounded-full px-1.5 sm:px-2.5 py-0.5 transition-all ${
           isKhmer
-            ? "bg-accent text-white"
+            ? "bg-[#FFD23F] text-[#1E2A4A] shadow-[0_2px_0_#C89600] font-extrabold"
             : "text-ink-muted"
         }`}
       >
@@ -33,9 +33,9 @@ export function NumeralToggle({ className = "" }: NumeralToggleProps) {
       </span>
       {" "}
       <span
-        className={`rounded-full px-2 py-0.5 transition-colors ${
+        className={`rounded-full px-1.5 sm:px-2.5 py-0.5 transition-all ${
           !isKhmer
-            ? "bg-accent text-white"
+            ? "bg-[#FFD23F] text-[#1E2A4A] shadow-[0_2px_0_#C89600] font-extrabold"
             : "text-ink-muted"
         }`}
       >

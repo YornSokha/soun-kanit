@@ -11,8 +11,8 @@ export default function HomePage() {
   const { profile, numeralPref } = useLearner();
 
   return (
-    <div className="min-h-dvh bg-canvas flex flex-col">
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-4 py-3">
+    <div className="app-page-with-rail min-h-dvh bg-canvas flex flex-col">
+      <header className="sticky top-0 z-20 border-b-2 border-[#c9c2b2] bg-surface/95 backdrop-blur px-4 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <BrandLogo size={40} />
@@ -29,8 +29,8 @@ export default function HomePage() {
       </header>
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-8 px-4 py-8">
-        <section className="rounded-3xl border border-border bg-surface p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="inline-flex items-center rounded-full border border-border bg-surface-subtle px-3.5 py-1 text-xs font-semibold text-ink-muted">
+        <section className="rounded-3xl border-2 border-[#c9c2b2] bg-surface p-6 sm:p-8 shadow-[0_6px_0_#c9c2b2,0_12px_28px_rgba(30,42,74,0.08)] space-y-6">
+          <div className="inline-flex items-center rounded-full border-2 border-[#C89600] bg-[#FFF3BF] px-3.5 py-1 text-xs font-bold text-[#1E2A4A]">
             {formatTextNumerals(
               "សម្រាប់កុមារអាយុ ៦ ដល់ ១២ ឆ្នាំ • ប្រើបានទោះគ្មានអ៊ីនធឺណិត",
               numeralPref
@@ -126,14 +126,14 @@ export default function HomePage() {
                 <Link
                   href="/learn"
                   data-testid="cta-continue-learning"
-                  className="khmer-chip flex-1 inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3.5 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                  className="khmer-chip btn-3d candy-ocean flex-1 inline-flex items-center justify-center rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-6 py-3.5 text-base font-extrabold text-white hover:bg-[#1751BA]"
                 >
                   បន្តរៀន ({profile.displayName})
                 </Link>
                 <Link
                   href="/onboarding"
                   data-testid="cta-new-profile"
-                  className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-5 py-3.5 text-base font-semibold text-ink hover:bg-surface-subtle"
+                  className="khmer-chip btn-3d [--btn-edge:#c9c2b2] inline-flex items-center justify-center rounded-2xl border-2 border-[#c9c2b2] bg-surface px-5 py-3.5 text-base font-bold text-ink hover:bg-surface-subtle"
                 >
                   បង្កើតគណនីកុមារថ្មី
                 </Link>
@@ -143,14 +143,14 @@ export default function HomePage() {
                 <Link
                   href="/onboarding"
                   data-testid="cta-start-onboarding"
-                  className="khmer-chip flex-1 inline-flex items-center justify-center rounded-2xl bg-accent px-6 py-3.5 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                  className="khmer-chip btn-3d candy-ocean flex-1 inline-flex items-center justify-center rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-6 py-3.5 text-base font-extrabold text-white hover:bg-[#1751BA]"
                 >
                   ចាប់ផ្ដើមរៀនឥឡូវនេះ
                 </Link>
                 <Link
                   href="/learn"
                   data-testid="cta-browse-path"
-                  className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-5 py-3.5 text-base font-semibold text-ink hover:bg-surface-subtle"
+                  className="khmer-chip btn-3d [--btn-edge:#c9c2b2] inline-flex items-center justify-center rounded-2xl border-2 border-[#c9c2b2] bg-surface px-5 py-3.5 text-base font-bold text-ink hover:bg-surface-subtle"
                 >
                   មើលមេរៀនទាំងអស់
                 </Link>
@@ -160,19 +160,19 @@ export default function HomePage() {
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="rounded-2xl border border-border bg-surface p-4 space-y-1">
+          <div className="rounded-2xl border-2 border-[#C89600] bg-surface p-4 shadow-[0_4px_0_#C89600] space-y-1">
             <h2 className="text-base font-bold text-ink">ប៉ះ ឬអូសងាយស្រួល</h2>
             <p className="text-sm text-ink-muted">
               ប្រើបានទាំងការប៉ះមួយម្រាមដៃ និងការអូសលើទូរស័ព្ទគ្រប់ប្រភេទ។
             </p>
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-4 space-y-1">
+          <div className="rounded-2xl border-2 border-[#148F56] bg-surface p-4 shadow-[0_4px_0_#148F56] space-y-1">
             <h2 className="text-base font-bold text-ink">ជំនួយ ៣ ដំណាក់កាល</h2>
             <p className="text-sm text-ink-muted">
               ណែនាំឱ្យកុមារគិតរកចម្លើយដោយខ្លួនឯង មិនប្រញាប់ មិនដាក់ពិន័យ។
             </p>
           </div>
-          <div className="rounded-2xl border border-border bg-surface p-4 space-y-1">
+          <div className="rounded-2xl border-2 border-[#C85A14] bg-surface p-4 shadow-[0_4px_0_#C85A14] space-y-1">
             <h2 className="text-base font-bold text-ink">រៀនបានគ្មានអ៊ីនធឺណិត</h2>
             <p className="text-sm text-ink-muted">
               រក្សាទុកវឌ្ឍនភាពក្នុងឧបករណ៍ភ្លាមៗ សាកសមសម្រាប់គ្រួសារនៅគ្រប់ខេត្ត។

@@ -167,10 +167,10 @@ export function AppNavigation() {
 
   return (
     <>
-      {/* Bottom clearance spacer so fixed nav never obscures focused controls */}
+      {/* Bottom clearance spacer so fixed nav never obscures focused controls on mobile/portrait */}
       <div
         aria-hidden="true"
-        className="h-[calc(5.5rem+env(safe-area-inset-bottom))] shrink-0"
+        className="app-nav-spacer h-[calc(5.5rem+env(safe-area-inset-bottom))] shrink-0"
       />
 
       {/* Backdrop when More Menu sheet is open */}
@@ -188,7 +188,7 @@ export function AppNavigation() {
           id="nav-more-menu-panel"
           aria-label="ម៉ឺនុយបន្ថែម"
           data-testid="nav-more-menu"
-          className="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 max-h-[70dvh] overflow-y-auto overscroll-contain rounded-3xl border-2 border-border bg-surface p-3 shadow-lg space-y-1.5"
+          className="app-nav-more-sheet fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] left-3 right-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 max-h-[70dvh] overflow-y-auto overscroll-contain rounded-3xl border-2 border-[#c9c2b2] bg-surface p-3 shadow-[0_6px_0_#c9c2b2,0_14px_28px_rgba(30,42,74,0.14)] space-y-1.5"
         >
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-xs font-bold text-ink-muted">
@@ -198,7 +198,7 @@ export function AppNavigation() {
               type="button"
               data-testid="nav-more-close-btn"
               onClick={() => setMoreOpen(false)}
-              className="khmer-chip rounded-xl border border-border bg-surface-subtle px-3 text-xs font-bold text-ink"
+              className="khmer-chip pill-3d [--pill-edge:#c9c2b2] rounded-xl border-2 border-[#c9c2b2] bg-surface-subtle px-3 text-xs font-bold text-ink"
             >
               បិទ ✕
             </button>
@@ -216,10 +216,10 @@ export function AppNavigation() {
                   data-testid={`nav-more-link-${item.id}`}
                   aria-current={active ? "page" : undefined}
                   onClick={() => setMoreOpen(false)}
-                  className={`flex min-h-[48px] flex-col justify-center rounded-2xl border px-3.5 py-2 transition-colors ${
+                  className={`flex min-h-[48px] flex-col justify-center rounded-2xl border-2 px-3.5 py-2 transition-all ${
                     active
-                      ? "border-accent bg-accent-soft text-accent"
-                      : "border-border bg-canvas text-ink hover:border-accent hover:bg-surface-subtle"
+                      ? "border-[#C89600] bg-[#FFF1B8] text-[#1E2A4A] shadow-[0_3px_0_#C89600]"
+                      : "border-border bg-canvas text-ink hover:border-[#C89600] hover:bg-surface-subtle"
                   }`}
                 >
                   <span className="text-sm font-bold">{item.titleKm}</span>
@@ -233,13 +233,13 @@ export function AppNavigation() {
         </nav>
       )}
 
-      {/* Persistent Bottom / Floating Dock Navigation */}
+      {/* Persistent Mobile Bottom Dock (<900px) / Vertical Left Side Rail (>=900px) */}
       <nav
         aria-label="ម៉ឺនុយមេ"
         data-testid="app-bottom-nav"
-        className="fixed bottom-0 left-0 right-0 sm:bottom-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[calc(100%-2rem)] sm:max-w-xl z-40 border-t sm:border-2 border-border bg-surface/95 backdrop-blur sm:rounded-3xl shadow-md px-1.5 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:py-1.5"
+        className="app-nav-shell fixed bottom-0 left-0 right-0 sm:bottom-3 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[calc(100%-2rem)] sm:max-w-xl z-40 border-t-2 sm:border-2 border-[#c9c2b2] bg-surface/95 backdrop-blur sm:rounded-3xl shadow-[0_-4px_16px_rgba(30,42,74,0.06)] px-1.5 pt-1.5 pb-[calc(0.375rem+env(safe-area-inset-bottom))] sm:py-2"
       >
-        <div className="grid grid-cols-5 gap-1">
+        <div className="app-nav-items grid grid-cols-5 gap-1">
           {PRIMARY_ITEMS.map((item) => {
             const active = item.match(pathname);
             return (
@@ -249,10 +249,10 @@ export function AppNavigation() {
                 data-testid={`nav-tab-${item.id}`}
                 aria-current={active ? "page" : undefined}
                 onClick={() => setMoreOpen(false)}
-                className={`flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-[11px] font-bold transition-colors ${
+                className={`flex min-h-[48px] min-[900px]:min-h-[60px] flex-col items-center justify-center gap-0.5 rounded-2xl border-2 px-1 py-1 text-[11px] min-[900px]:text-xs font-extrabold transition-all active:translate-y-0.5 ${
                   active
-                    ? "bg-accent text-white shadow-xs"
-                    : "text-ink hover:bg-surface-subtle"
+                    ? "border-[#C89600] bg-[#FFF1B8] text-[#1E2A4A] shadow-[0_3px_0_#C89600]"
+                    : "border-transparent text-ink hover:bg-surface-subtle hover:border-[#d6d0c4]"
                 }`}
               >
                 {item.icon}
@@ -267,10 +267,10 @@ export function AppNavigation() {
             aria-expanded={moreOpen}
             aria-controls={moreOpen ? "nav-more-menu-panel" : undefined}
             onClick={() => setMoreOpen((v) => !v)}
-            className={`flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-1 text-[11px] font-bold transition-colors ${
+            className={`flex min-h-[48px] min-[900px]:min-h-[60px] flex-col items-center justify-center gap-0.5 rounded-2xl border-2 px-1 py-1 text-[11px] min-[900px]:text-xs font-extrabold transition-all active:translate-y-0.5 ${
               moreOpen || isMoreActive
-                ? "bg-accent text-white shadow-xs"
-                : "text-ink hover:bg-surface-subtle"
+                ? "border-[#C89600] bg-[#FFF1B8] text-[#1E2A4A] shadow-[0_3px_0_#C89600]"
+                : "border-transparent text-ink hover:bg-surface-subtle hover:border-[#d6d0c4]"
             }`}
           >
             <svg

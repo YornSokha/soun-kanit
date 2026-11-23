@@ -956,4 +956,138 @@ test.describe("Soun Kanit (សួនគណិត) E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("draw-area-badge")).toContainText("២");
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 11: Playful Tactile 3D Kid UI, Mascot Prompt Bubble, Sprouting Bud, Treat Time, Direct-Touch Garden, Crayon Swatches & 1024x768 Landscape Workspace (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Candy-colored 3D lesson tiles & 1-3 star mastery indicators on 360x800 mobile
+    await page.goto("/learn");
+    const firstCard = page.getByTestId("lesson-card-l01-counting-1-5");
+    await expect(firstCard).toHaveAttribute("data-candy", "sun");
+    await expect(page.getByTestId("mastery-stars-l01-counting-1-5")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 2. Direct-Touch Living Garden Habitat (/garden) & All Garden Friends Collection Grid
+    await page.goto("/garden");
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expect(page.getByTestId("garden-collection-grid")).toBeVisible();
+    await expect(page.getByTestId("garden-friend-pond-frog")).toHaveAttribute(
+      "data-unlocked",
+      "true"
+    );
+    await expect(page.getByTestId("garden-friend-emerald-turtle")).toHaveAttribute(
+      "data-unlocked",
+      "false"
+    );
+
+    // Tap directly on the SVG pond frog, mangoes, lotus flowers, and butterflies
+    await page.getByTestId("garden-canvas-frog").click();
+    await expect(page.getByTestId("garden-speech-bubble")).toContainText("ប្ល៊ុប");
+    await expect(page.getByTestId("garden-floating-heart")).toBeVisible();
+
+    await page.getByTestId("garden-canvas-mango").click();
+    await expect(page.getByTestId("garden-speech-bubble")).toContainText("ស្វាយទុំ");
+    await expect(page.getByTestId("garden-status-message")).toContainText("១");
+
+    await page.getByTestId("garden-canvas-lotus").click();
+    await expect(page.getByTestId("garden-speech-bubble")).toContainText("ផ្កាឈូករីក");
+
+    await page.getByTestId("garden-canvas-butterfly").click();
+    await expect(page.getByTestId("garden-speech-bubble")).toContainText("មេអំបៅ");
+    await expectNoWcag22Violations(page);
+
+    // 3. Play Studio (/play) circular lifted crayon swatches
+    await page.goto("/play");
+    await page.getByTestId("play-tab-draw").click();
+    const pinkCrayon = page.getByTestId("draw-crayon-pink");
+    await expect(pinkCrayon).toBeVisible();
+    await pinkCrayon.click();
+    await expect(pinkCrayon).toHaveAttribute("aria-pressed", "true");
+    await expectNoWcag22Violations(page);
+
+    // 4. Switch to 1024x768 landscape tablet/desktop viewport: verify left side rail nav & 2-column lesson workspace
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await page.goto("/learn");
+    const navRailBox = await page.getByTestId("app-bottom-nav").boundingBox();
+    expect(navRailBox).not.toBeNull();
+    expect(navRailBox!.x).toBeLessThanOrEqual(4);
+    expect(navRailBox!.width).toBeLessThanOrEqual(120);
+    expect(navRailBox!.height).toBeGreaterThanOrEqual(700);
+    await expectNoWcag22Violations(page);
+
+    // Open Lesson 7 on 1024x768 landscape and verify side-by-side 2-column workspace + sprouting bud meter
+    await page.goto("/learn/l07-making-ten");
+    await expect(page.getByTestId("mascot-prompt-bubble")).toBeVisible();
+    await expect(page.getByTestId("step-dot-indicator")).toBeVisible();
+    await expect(page.getByTestId("sprouting-bud-meter")).toHaveAttribute(
+      "data-stage",
+      "1"
+    );
+    await expect(page.getByTestId("step-dot-1")).toHaveAttribute(
+      "data-status",
+      "active"
+    );
+
+    const boardBox = await page.getByTestId("lesson-math-board").boundingBox();
+    const bubbleBox = await page.getByTestId("mascot-prompt-bubble").boundingBox();
+    expect(boardBox).not.toBeNull();
+    expect(bubbleBox).not.toBeNull();
+    // Math board sits in left column; mascot prompt bubble & controls sit in right column
+    expect(boardBox!.x + boardBox!.width).toBeLessThanOrEqual(bubbleBox!.x + 4);
+    await expectNoWcag22Violations(page);
+
+    // Complete Step 1 and verify step dot 1 marks completed & sprouting bud advances stage
+    await page.getByTestId("outside-token-0").click();
+    await page.getByTestId("frame-slot-8").click();
+    await page.getByTestId("outside-token-0").click();
+    await page.getByTestId("frame-slot-9").click();
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("step-dot-1")).toHaveAttribute(
+      "data-status",
+      "completed"
+    );
+    await expect(page.getByTestId("sprouting-bud-meter")).toHaveAttribute(
+      "data-stage",
+      "2"
+    );
+    await expect(page.getByTestId("mascot-celebration-pill")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+
+    // Complete Step 2 & Step 3 to reach "Treat Time" celebration
+    await page.getByTestId("tick-10").click();
+    await page.getByTestId("tick-15").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    await page.getByTestId("choice-option-opt-a").click();
+    await page.getByTestId("check-answer-btn").click();
+    await page.getByTestId("continue-btn").click();
+
+    // 5. Verify interactive "Treat Time" frog-feeding celebration (0 -> 3 hearts + golden crown)
+    await expect(page.getByTestId("lesson-summary")).toBeVisible();
+    await expect(page.getByTestId("treat-time-stage")).toBeVisible();
+    await expect(page.getByTestId("treat-hearts")).toHaveAttribute(
+      "data-filled",
+      "0"
+    );
+
+    const feedBtn = page.getByTestId("feed-mascot-btn");
+    await feedBtn.click();
+    await expect(page.getByTestId("treat-hearts")).toHaveAttribute(
+      "data-filled",
+      "1"
+    );
+    await feedBtn.click();
+    await expect(page.getByTestId("treat-hearts")).toHaveAttribute(
+      "data-filled",
+      "2"
+    );
+    await feedBtn.click();
+    await expect(page.getByTestId("treat-hearts")).toHaveAttribute(
+      "data-filled",
+      "3"
+    );
+    await expect(page.getByTestId("mascot-crown")).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });

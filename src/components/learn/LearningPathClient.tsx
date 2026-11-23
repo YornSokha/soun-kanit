@@ -21,12 +21,83 @@ interface LearningPathClientProps {
 }
 
 const MASTERY_BADGE_STYLE: Record<MasteryTier, string> = {
-  not_started: "border-border bg-surface-subtle text-ink-muted",
-  attempted: "border-hint bg-hint-soft text-hint-ink",
-  familiar: "border-accent/40 bg-accent-soft text-accent",
-  proficient: "border-success bg-success-soft text-success",
-  mastered: "border-success bg-success text-white",
+  not_started: "border-[#c9c2b2] bg-surface-subtle text-ink-muted",
+  attempted: "border-[#C89600] bg-[#FFF3BF] text-[#1E2A4A]",
+  familiar: "border-[#13429E] bg-[#E5F0FF] text-[#13429E]",
+  proficient: "border-[#148F56] bg-[#E3FBEF] text-[#0D2B1D]",
+  mastered: "border-[#148F56] bg-[#15803d] text-white",
 };
+
+const MASTERY_STAR_COUNT: Record<MasteryTier, number> = {
+  not_started: 0,
+  attempted: 1,
+  familiar: 1,
+  proficient: 2,
+  mastered: 3,
+};
+
+const CANDY_THEMES = [
+  {
+    name: "sun",
+    className: "candy-sun",
+    badgeBg: "bg-[#FFD23F]",
+    badgeText: "text-[#1E2A4A]",
+    badgeBorder: "border-[#C89600]",
+    cardBorder: "border-[#C89600]",
+    tileEdge: "[--tile-edge:#C89600]",
+    btnEdge: "[--btn-edge:#C89600]",
+  },
+  {
+    name: "ocean",
+    className: "candy-ocean",
+    badgeBg: "bg-[#1D5FD6]",
+    badgeText: "text-white",
+    badgeBorder: "border-[#13429E]",
+    cardBorder: "border-[#13429E]",
+    tileEdge: "[--tile-edge:#13429E]",
+    btnEdge: "[--btn-edge:#13429E]",
+  },
+  {
+    name: "leaf",
+    className: "candy-leaf",
+    badgeBg: "bg-[#22C57B]",
+    badgeText: "text-[#0D2B1D]",
+    badgeBorder: "border-[#148F56]",
+    cardBorder: "border-[#148F56]",
+    tileEdge: "[--tile-edge:#148F56]",
+    btnEdge: "[--btn-edge:#148F56]",
+  },
+  {
+    name: "berry",
+    className: "candy-berry",
+    badgeBg: "bg-[#D62860]",
+    badgeText: "text-white",
+    badgeBorder: "border-[#9E1943]",
+    cardBorder: "border-[#9E1943]",
+    tileEdge: "[--tile-edge:#9E1943]",
+    btnEdge: "[--btn-edge:#9E1943]",
+  },
+  {
+    name: "tangerine",
+    className: "candy-tangerine",
+    badgeBg: "bg-[#FF8C42]",
+    badgeText: "text-[#1E2A4A]",
+    badgeBorder: "border-[#C85A14]",
+    cardBorder: "border-[#C85A14]",
+    tileEdge: "[--tile-edge:#C85A14]",
+    btnEdge: "[--btn-edge:#C85A14]",
+  },
+  {
+    name: "grape",
+    className: "candy-grape",
+    badgeBg: "bg-[#7C3AED]",
+    badgeText: "text-white",
+    badgeBorder: "border-[#5620B8]",
+    cardBorder: "border-[#5620B8]",
+    tileEdge: "[--tile-edge:#5620B8]",
+    btnEdge: "[--btn-edge:#5620B8]",
+  },
+] as const;
 
 function countActiveDaysThisWeek(
   activeDates: string[],
@@ -125,8 +196,8 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
     : false;
 
   return (
-    <div className="min-h-dvh bg-canvas flex flex-col">
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-4 py-3">
+    <div className="app-page-with-rail min-h-dvh bg-canvas flex flex-col">
+      <header className="sticky top-0 z-20 border-b-2 border-[#c9c2b2] bg-surface/95 backdrop-blur px-4 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-2">
           <Link
             href="/"
@@ -140,7 +211,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
             <Link
               href="/parent"
               data-testid="parent-dashboard-link"
-              className="khmer-chip inline-flex items-center rounded-full border border-border bg-surface px-3 text-xs font-semibold text-ink hover:bg-surface-subtle"
+              className="khmer-chip pill-3d [--pill-edge:#c9c2b2] inline-flex items-center rounded-full border-2 border-[#c9c2b2] bg-surface px-3 text-xs font-bold text-ink hover:bg-surface-subtle"
             >
               ឪពុកម្ដាយ
             </Link>
@@ -151,7 +222,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
 
       <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-5 px-4 py-6 pb-12">
         {/* Learner calm summary & weekly rhythm card */}
-        <section className="rounded-3xl border border-border bg-surface p-5 shadow-xs space-y-4">
+        <section className="rounded-3xl border-2 border-[#c9c2b2] bg-surface p-5 shadow-[0_6px_0_#c9c2b2,0_10px_24px_rgba(30,42,74,0.06)] space-y-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold text-ink-muted">
@@ -287,11 +358,11 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
         </section>
 
         {/* Quick calm actions: Daily Puzzle, Leitner Review, Living Garden & Play Studio */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <Link
             href="/play"
             data-testid="play-studio-card"
-            className="rounded-3xl border-2 border-hint/60 bg-hint-soft/50 p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+            className="tile-3d [--tile-edge:#C85A14] rounded-3xl border-2 border-[#C85A14] bg-surface p-4 flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
               <p className="text-base font-bold text-ink">ក្ដារលេងគណិត</p>
@@ -299,7 +370,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 ហាងផ្លែឈើ ត្បាញក្រមា កង្កែបលោត ជញ្ជីង និងគូររូបគណិត
               </p>
             </div>
-            <span className="rounded-full border border-hint bg-surface px-3 py-1 text-xs font-bold text-hint-ink shrink-0">
+            <span className="rounded-full border-2 border-[#C85A14] bg-[#FF8C42] px-3 py-1 text-xs font-extrabold text-[#1E2A4A] shrink-0">
               លេងសប្បាយ
             </span>
           </Link>
@@ -307,7 +378,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           <Link
             href="/garden"
             data-testid="garden-card"
-            className="rounded-3xl border-2 border-success/50 bg-success-soft/50 p-4 shadow-xs hover:border-success hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+            className="tile-3d [--tile-edge:#148F56] rounded-3xl border-2 border-[#148F56] bg-surface p-4 flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
               <p className="text-base font-bold text-ink">សួនគណិតរបស់ខ្ញុំ</p>
@@ -315,7 +386,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 ដើមស្វាយ កង្កែបតូច និងផ្កាឈូករីកតាមការរៀន
               </p>
             </div>
-            <span className="rounded-full border border-success bg-surface px-3 py-1 text-xs font-bold text-success shrink-0">
+            <span className="rounded-full border-2 border-[#148F56] bg-[#22C57B] px-3 py-1 text-xs font-extrabold text-[#0D2B1D] shrink-0">
               មើលសួន
             </span>
           </Link>
@@ -323,7 +394,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           <Link
             href="/daily"
             data-testid="daily-puzzle-card"
-            className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+            className="tile-3d [--tile-edge:#13429E] rounded-3xl border-2 border-[#13429E] bg-surface p-4 flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
               <p className="text-base font-bold text-ink">លំហាត់ប្រចាំថ្ងៃ</p>
@@ -334,10 +405,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
               </p>
             </div>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold shrink-0 ${
+              className={`rounded-full border-2 px-3 py-1 text-xs font-extrabold shrink-0 ${
                 dailyDoneToday
-                  ? "border-success bg-success-soft text-success"
-                  : "border-accent bg-accent-soft text-accent"
+                  ? "border-[#148F56] bg-[#22C57B] text-[#0D2B1D]"
+                  : "border-[#13429E] bg-[#1D5FD6] text-white"
               }`}
             >
               {dailyDoneToday ? "រួចរាល់" : "សាកល្បង"}
@@ -347,7 +418,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           <Link
             href="/review"
             data-testid="review-queue-card"
-            className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+            className="tile-3d [--tile-edge:#5620B8] rounded-3xl border-2 border-[#5620B8] bg-surface p-4 flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
               <p className="text-base font-bold text-ink">រំលឹកឡើងវិញ</p>
@@ -358,10 +429,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
               </p>
             </div>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-bold shrink-0 ${
+              className={`rounded-full border-2 px-3 py-1 text-xs font-extrabold shrink-0 ${
                 dueReviewCount > 0
-                  ? "border-hint bg-hint-soft text-hint-ink"
-                  : "border-border bg-surface-subtle text-ink-muted"
+                  ? "border-[#C89600] bg-[#FFD23F] text-[#1E2A4A]"
+                  : "border-[#5620B8] bg-[#7C3AED] text-white"
               }`}
             >
               {dueReviewCount > 0
@@ -387,10 +458,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 data-testid="filter-mode-path"
                 aria-pressed={activityFilter === "path"}
                 onClick={() => setActivityFilter("path")}
-                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                className={`khmer-chip pill-3d rounded-full border-2 px-3 text-xs font-extrabold transition-colors ${
                   activityFilter === "path"
-                    ? "border-accent bg-accent-soft text-accent"
-                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                    ? "border-[#C89600] [--pill-edge:#C89600] bg-[#FFD23F] text-[#1E2A4A]"
+                    : "border-[#c9c2b2] [--pill-edge:#c9c2b2] bg-surface text-ink-muted hover:text-ink"
                 }`}
               >
                 តាមផ្លូវរៀន
@@ -400,10 +471,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 data-testid="filter-mode-drawing"
                 aria-pressed={activityFilter === "drawing"}
                 onClick={() => setActivityFilter("drawing")}
-                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                className={`khmer-chip pill-3d rounded-full border-2 px-3 text-xs font-extrabold transition-colors ${
                   activityFilter === "drawing"
-                    ? "border-accent bg-accent-soft text-accent"
-                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                    ? "border-[#9E1943] [--pill-edge:#9E1943] bg-[#D62860] text-white"
+                    : "border-[#c9c2b2] [--pill-edge:#c9c2b2] bg-surface text-ink-muted hover:text-ink"
                 }`}
               >
                 គូររូប ({formatDisplayNumber(drawingLessonsCount, numeralPref)})
@@ -413,10 +484,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 data-testid="filter-mode-all"
                 aria-pressed={activityFilter === "all"}
                 onClick={() => setActivityFilter("all")}
-                className={`khmer-chip rounded-full border px-3 text-xs font-bold transition-colors ${
+                className={`khmer-chip pill-3d rounded-full border-2 px-3 text-xs font-extrabold transition-colors ${
                   activityFilter === "all"
-                    ? "border-accent bg-accent-soft text-accent"
-                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                    ? "border-[#13429E] [--pill-edge:#13429E] bg-[#1D5FD6] text-white"
+                    : "border-[#c9c2b2] [--pill-edge:#c9c2b2] bg-surface text-ink-muted hover:text-ink"
                 }`}
               >
                 ទាំងអស់ ({formatDisplayNumber(allLessons.length, numeralPref)})
@@ -425,9 +496,10 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           </div>
 
           <nav aria-label="ជ្រើសរើសផ្លូវរៀន" className="flex flex-wrap gap-2">
-            {paths.map((p) => {
+            {paths.map((p, pathIdx) => {
               const isActive =
                 activityFilter === "path" && p.id === activePath?.id;
+              const candy = CANDY_THEMES[pathIdx % CANDY_THEMES.length];
               return (
                 <button
                   key={p.id}
@@ -438,15 +510,15 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                     setSelectedPathId(p.id);
                     setActivityFilter("path");
                   }}
-                  className={`khmer-chip rounded-2xl border-2 px-4 text-sm font-bold transition-colors ${
+                  className={`khmer-chip btn-3d rounded-2xl border-2 px-4 text-sm font-extrabold transition-colors ${
                     isActive
-                      ? "border-accent bg-accent text-white shadow-xs"
-                      : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                      ? `${candy.className} ${candy.btnEdge} ${candy.cardBorder} ${candy.badgeBg} ${candy.badgeText}`
+                      : "border-[#c9c2b2] [--btn-edge:#c9c2b2] bg-surface text-ink hover:bg-surface-subtle"
                   }`}
                 >
                   {formatTextNumerals(p.shortTitleKm, numeralPref)}{" "}
                   <span
-                    className={isActive ? "text-white/90" : "text-ink-muted"}
+                    className={isActive ? candy.badgeText : "text-ink-muted"}
                   >
                     ({formatDisplayNumber(p.lessons.length, numeralPref)})
                   </span>
@@ -476,7 +548,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                       : formatTextNumerals(activePath.subtitleKm, numeralPref)}
                 </p>
               </div>
-              <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink-muted">
+              <span className="rounded-full border-2 border-[#c9c2b2] bg-surface px-3 py-1 text-xs font-bold text-ink-muted">
                 {activityFilter === "path" ? (
                   <>
                     បានរៀន{" "}
@@ -497,10 +569,12 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
-              {visibleLessons.map((lesson) => {
+            <div className="grid grid-cols-1 gap-3.5">
+              {visibleLessons.map((lesson, idx) => {
                 const prog = progressByLesson[lesson.id];
                 const tier: MasteryTier = prog?.masteryTier ?? "not_started";
+                const starCount = MASTERY_STAR_COUNT[tier];
+                const candy = CANDY_THEMES[idx % CANDY_THEMES.length];
                 const gradeNum = lesson.moeysGradeRef.replace("G", "");
                 const hasDrawing = lesson.steps.some(
                   (s) => s.type === "geometry-draw"
@@ -511,9 +585,12 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                     key={lesson.id}
                     href={`/learn/${lesson.id}`}
                     data-testid={`lesson-card-${lesson.id}`}
-                    className="group rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs transition-colors hover:border-accent hover:bg-surface-subtle flex items-start gap-4"
+                    data-candy={candy.name}
+                    className={`group tile-3d ${candy.className} ${candy.tileEdge} rounded-3xl border-2 ${candy.cardBorder} bg-surface p-4 sm:p-5 flex items-start gap-3.5 sm:gap-4`}
                   >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-lg font-bold text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                    <div
+                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border-2 ${candy.badgeBorder} ${candy.badgeBg} ${candy.badgeText} shadow-[0_3px_0_var(--candy-edge)] text-lg font-extrabold`}
+                    >
                       {formatDisplayNumber(lesson.order, numeralPref)}
                     </div>
 
@@ -522,19 +599,40 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                         <h3 className="text-base sm:text-lg font-bold text-ink">
                           {formatTextNumerals(lesson.titleKm, numeralPref)}
                         </h3>
-                        <span
-                          data-testid={`mastery-badge-${lesson.id}`}
-                          className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${MASTERY_BADGE_STYLE[tier]}`}
-                        >
-                          {MASTERY_LABELS_KM[tier]}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            data-testid={`mastery-stars-${lesson.id}`}
+                            data-stars={String(starCount)}
+                            aria-hidden="true"
+                            className="inline-flex items-center gap-0.5 text-sm leading-none"
+                          >
+                            {[1, 2, 3].map((starIdx) => (
+                              <span
+                                key={starIdx}
+                                className={
+                                  starIdx <= starCount
+                                    ? "text-[#C89600]"
+                                    : "text-[#d6d0c4]"
+                                }
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </span>
+                          <span
+                            data-testid={`mastery-badge-${lesson.id}`}
+                            className={`rounded-full border-2 px-2.5 py-0.5 text-xs font-extrabold ${MASTERY_BADGE_STYLE[tier]}`}
+                          >
+                            {MASTERY_LABELS_KM[tier]}
+                          </span>
+                        </div>
                       </div>
 
                       <p className="text-sm text-ink-muted">
                         {formatTextNumerals(lesson.subtitleKm, numeralPref)}
                       </p>
 
-                      <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-ink-muted">
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs font-semibold text-ink-muted">
                         <span>
                           ថ្នាក់ទី {formatDisplayNumber(gradeNum, numeralPref)}
                         </span>
@@ -558,7 +656,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                         {hasDrawing && (
                           <>
                             <span aria-hidden="true">•</span>
-                            <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent">
+                            <span className="rounded-full border border-[#9E1943] bg-[#FFE3EC] px-2 py-0.5 text-[11px] font-extrabold text-[#9E1943]">
                               គូររូបអន្តរកម្ម
                             </span>
                           </>

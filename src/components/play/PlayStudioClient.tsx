@@ -706,12 +706,12 @@ export function PlayStudioClient() {
   const scaleTilt = scaleDiff === 0 ? 0 : scaleDiff > 0 ? -8 : 8;
 
   return (
-    <div className="min-h-dvh bg-canvas flex flex-col">
-      <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-3 py-2.5">
+    <div className="app-page-with-rail min-h-dvh bg-canvas flex flex-col">
+      <header className="sticky top-0 z-20 border-b-2 border-[#c9c2b2] bg-surface/95 backdrop-blur px-3 py-2.5">
         <div className="mx-auto flex max-w-2xl items-center justify-between gap-2">
           <Link
             href="/learn"
-            className="khmer-chip inline-flex items-center rounded-xl border border-border bg-surface px-3 text-sm font-semibold text-ink hover:bg-surface-subtle"
+            className="khmer-chip pill-3d [--pill-edge:#c9c2b2] inline-flex items-center rounded-xl border-2 border-[#c9c2b2] bg-surface px-3 text-sm font-bold text-ink hover:bg-surface-subtle"
           >
             ← ផ្លូវរៀន
           </Link>
@@ -725,7 +725,7 @@ export function PlayStudioClient() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-3 py-5 pb-12">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
-            <p className="text-xs font-bold text-accent">
+            <p className="text-xs font-extrabold text-[#13429E]">
               លេង និងស្វែងយល់ • គ្មានម៉ោងរាប់ថយក្រោយ
             </p>
             <h1 className="text-2xl font-bold text-ink">
@@ -734,26 +734,26 @@ export function PlayStudioClient() {
           </div>
           <Link
             href="/garden"
-            className="khmer-chip inline-flex items-center rounded-full border border-success bg-success-soft px-3.5 text-xs font-bold text-success"
+            className="khmer-chip pill-3d candy-leaf inline-flex items-center rounded-full border-2 border-[#148F56] bg-[#22C57B] px-3.5 text-xs font-extrabold text-[#0D2B1D]"
           >
             ទៅសួនគណិត →
           </Link>
         </div>
 
-        {/* 4-Game Mode Switcher */}
+        {/* 6 Tactile 3D Candy Game Mode Cards */}
         <nav
           aria-label="ជ្រើសរើសហ្គេមគណិត"
-          className="grid grid-cols-2 gap-2"
+          className="grid grid-cols-2 sm:grid-cols-3 gap-2.5"
         >
           <button
             type="button"
             data-testid="play-tab-market"
             aria-pressed={activeMode === "market"}
             onClick={() => setActiveMode("market")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "market"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-tangerine border-[#C85A14] bg-[#FF8C42] text-[#1E2A4A]"
+                : "border-[#C85A14] [--btn-edge:#C85A14] bg-surface text-ink hover:bg-[#FFEDE0]"
             }`}
           >
             ហាងផ្លែឈើខ្មែរ
@@ -763,10 +763,10 @@ export function PlayStudioClient() {
             data-testid="play-tab-krama"
             aria-pressed={activeMode === "krama"}
             onClick={() => setActiveMode("krama")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "krama"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-berry border-[#9E1943] bg-[#D62860] text-white"
+                : "border-[#9E1943] [--btn-edge:#9E1943] bg-surface text-ink hover:bg-[#FFE3EC]"
             }`}
           >
             ត្បាញក្រមាគណិត
@@ -776,10 +776,10 @@ export function PlayStudioClient() {
             data-testid="play-tab-frog"
             aria-pressed={activeMode === "frog"}
             onClick={() => setActiveMode("frog")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "frog"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-leaf border-[#148F56] bg-[#22C57B] text-[#0D2B1D]"
+                : "border-[#148F56] [--btn-edge:#148F56] bg-surface text-ink hover:bg-[#E3FBEF]"
             }`}
           >
             កង្កែបលោតដល់ផ្កាឈូក
@@ -789,10 +789,10 @@ export function PlayStudioClient() {
             data-testid="play-tab-scale"
             aria-pressed={activeMode === "scale"}
             onClick={() => setActiveMode("scale")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "scale"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-sun border-[#C89600] bg-[#FFD23F] text-[#1E2A4A]"
+                : "border-[#C89600] [--btn-edge:#C89600] bg-surface text-ink hover:bg-[#FFF3BF]"
             }`}
           >
             ជញ្ជីងអាថ៌កំបាំង
@@ -802,10 +802,10 @@ export function PlayStudioClient() {
             data-testid="play-tab-draw"
             aria-pressed={activeMode === "draw"}
             onClick={() => setActiveMode("draw")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "draw"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-ocean border-[#13429E] bg-[#1D5FD6] text-white"
+                : "border-[#13429E] [--btn-edge:#13429E] bg-surface text-ink hover:bg-[#E5F0FF]"
             }`}
           >
             គូររូបគណិត
@@ -815,10 +815,10 @@ export function PlayStudioClient() {
             data-testid="play-tab-clock"
             aria-pressed={activeMode === "clock"}
             onClick={() => setActiveMode("clock")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+            className={`khmer-chip btn-3d rounded-2xl border-2 px-3 py-2.5 text-sm font-extrabold transition-colors ${
               activeMode === "clock"
-                ? "border-accent bg-accent text-white shadow-xs"
-                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                ? "candy-grape border-[#5620B8] bg-[#7C3AED] text-white"
+                : "border-[#5620B8] [--btn-edge:#5620B8] bg-surface text-ink hover:bg-[#F0E7FF]"
             }`}
           >
             នាឡិកាកង្កែបតូច
@@ -1017,7 +1017,7 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="market-serve-btn"
                   onClick={handleServeOrder}
-                  className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                  className="khmer-chip btn-3d candy-ocean flex-1 rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-5 py-3 text-base font-extrabold text-white hover:bg-[#1751BA]"
                 >
                   ប្រគល់ជូនភ្ញៀវ
                 </button>
@@ -1026,7 +1026,7 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="market-next-btn"
                   onClick={handleNextCustomer}
-                  className="khmer-chip flex-1 rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                  className="khmer-chip btn-3d candy-leaf flex-1 rounded-2xl border-2 border-[#148F56] bg-[#22C57B] px-5 py-3 text-base font-extrabold text-[#0D2B1D]"
                 >
                   ទទួលភ្ញៀវបន្ទាប់ →
                 </button>
@@ -1580,7 +1580,7 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="play-draw-check-btn"
                   onClick={handleCheckDrawing}
-                  className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                  className="khmer-chip btn-3d candy-ocean flex-1 rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-5 py-3 text-base font-extrabold text-white hover:bg-[#1751BA]"
                 >
                   ពិនិត្យរូបគូរ
                 </button>
@@ -1589,14 +1589,14 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="play-draw-next-btn"
                   onClick={handleNextDrawChallenge}
-                  className="khmer-chip flex-1 rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                  className="khmer-chip btn-3d candy-leaf flex-1 rounded-2xl border-2 border-[#148F56] bg-[#22C57B] px-5 py-3 text-base font-extrabold text-[#0D2B1D]"
                 >
                   រូបបន្ទាប់ →
                 </button>
               )}
               <Link
                 href="/learn/g05-drawing-shapes-and-symmetry"
-                className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
+                className="khmer-chip btn-3d [--btn-edge:#c9c2b2] inline-flex items-center justify-center rounded-2xl border-2 border-[#c9c2b2] bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
               >
                 មេរៀនគូររូប →
               </Link>
@@ -1668,7 +1668,7 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="play-clock-check-btn"
                   onClick={handleCheckClock}
-                  className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                  className="khmer-chip btn-3d candy-ocean flex-1 rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-5 py-3 text-base font-extrabold text-white hover:bg-[#1751BA]"
                 >
                   ពិនិត្យម៉ោង
                 </button>
@@ -1677,14 +1677,14 @@ export function PlayStudioClient() {
                   type="button"
                   data-testid="play-clock-next-btn"
                   onClick={handleNextClockPuzzle}
-                  className="khmer-chip flex-1 rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                  className="khmer-chip btn-3d candy-leaf flex-1 rounded-2xl border-2 border-[#148F56] bg-[#22C57B] px-5 py-3 text-base font-extrabold text-[#0D2B1D]"
                 >
                   ម៉ោងបន្ទាប់ →
                 </button>
               )}
               <Link
                 href="/learn/t01-telling-time-khmer-clock"
-                className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
+                className="khmer-chip btn-3d [--btn-edge:#c9c2b2] inline-flex items-center justify-center rounded-2xl border-2 border-[#c9c2b2] bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
               >
                 មេរៀននាឡិកា →
               </Link>

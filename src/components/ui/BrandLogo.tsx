@@ -14,55 +14,55 @@ export function BrandLogo({ size = 38 }: BrandLogoProps) {
       width={size}
       height={size}
       aria-hidden="true"
-      className="shrink-0 rounded-2xl shadow-xs"
+      className="shrink-0 -rotate-3 rounded-2xl ring-2 ring-white shadow-[0_4px_0_#14532d] transition-transform duration-150 hover:rotate-0"
     >
       <rect width={64} height={64} rx={16} fill="#15803d" />
-      <rect x={6} y={6} width={52} height={52} rx={12} fill="#fcfaf5" />
+      <rect x={5} y={5} width={54} height={54} rx={13} fill="#fff9e6" />
       <ellipse
         cx={32}
-        cy={45}
-        rx={19}
+        cy={46}
+        rx={20}
         ry={6.5}
-        fill="#4ade80"
+        fill="#22c55e"
         stroke="#15803d"
         strokeWidth={2}
       />
       <ellipse
         cx={22}
         cy={33}
-        rx={6.5}
-        ry={11}
+        rx={6.8}
+        ry={11.5}
         transform="rotate(-28 22 33)"
         fill="#f472b6"
-        stroke="#be185d"
-        strokeWidth={1.6}
+        stroke="#9d174d"
+        strokeWidth={1.8}
       />
       <ellipse
         cx={42}
         cy={33}
-        rx={6.5}
-        ry={11}
+        rx={6.8}
+        ry={11.5}
         transform="rotate(28 42 33)"
         fill="#f472b6"
-        stroke="#be185d"
-        strokeWidth={1.6}
+        stroke="#9d174d"
+        strokeWidth={1.8}
       />
       <ellipse
         cx={32}
-        cy={30}
-        rx={7}
-        ry={13}
+        cy={29}
+        rx={7.2}
+        ry={13.5}
         fill="#fbcfe8"
-        stroke="#be185d"
-        strokeWidth={1.6}
+        stroke="#9d174d"
+        strokeWidth={1.8}
       />
       <circle
         cx={32}
         cy={36}
-        r={4}
-        fill="#facc15"
+        r={4.2}
+        fill="#ffd23f"
         stroke="#b45309"
-        strokeWidth={1.4}
+        strokeWidth={1.5}
       />
     </svg>
   );

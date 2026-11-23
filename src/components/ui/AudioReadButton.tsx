@@ -50,10 +50,10 @@ export function AudioReadButton({
       aria-pressed={isSpeaking}
       disabled={!audioEnabled}
       onClick={handleClick}
-      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border px-3 sm:px-3.5 text-xs font-bold transition-colors disabled:opacity-45 ${
+      className={`khmer-chip pill-3d shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border-2 px-3 sm:px-3.5 text-xs font-extrabold transition-colors disabled:opacity-45 ${
         isSpeaking
-          ? "border-accent bg-accent text-white"
-          : "border-border bg-surface-subtle text-ink hover:bg-accent-soft hover:border-accent"
+          ? "candy-berry border-[#9E1943] bg-[#D62860] text-white"
+          : "candy-ocean border-[#13429E] bg-[#1D5FD6] text-white hover:bg-[#1751BA]"
       } ${className}`}
     >
       <svg
@@ -61,7 +61,7 @@ export function AudioReadButton({
         className="h-4 w-4 shrink-0"
         fill="none"
         stroke="currentColor"
-        strokeWidth={2}
+        strokeWidth={2.2}
         strokeLinecap="round"
         strokeLinejoin="round"
         aria-hidden="true"
@@ -91,10 +91,10 @@ export function AudioToggle({ className = "" }: { className?: string }) {
       data-testid="audio-toggle"
       aria-pressed={audioEnabled}
       onClick={handleToggle}
-      className={`khmer-chip shrink-0 whitespace-nowrap inline-flex items-center gap-1.5 rounded-full border px-2.5 sm:px-3 text-xs font-semibold shadow-xs transition-colors ${
+      className={`khmer-chip pill-3d shrink-0 whitespace-nowrap inline-flex items-center gap-1 sm:gap-1.5 rounded-full border-2 px-2 sm:px-3 text-xs font-bold transition-colors ${
         audioEnabled
-          ? "border-border bg-surface text-ink hover:bg-surface-subtle"
-          : "border-border bg-surface-subtle text-ink-muted"
+          ? "border-[#c9c2b2] [--pill-edge:#c9c2b2] bg-surface text-ink hover:bg-surface-subtle"
+          : "border-[#c9c2b2] [--pill-edge:#c9c2b2] bg-surface-subtle text-ink-muted"
       } ${className}`}
     >
       <svg

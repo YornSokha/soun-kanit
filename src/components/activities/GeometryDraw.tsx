@@ -275,29 +275,30 @@ export function GeometryDraw({
         )}
       </div>
 
-      {/* Ink color palette */}
-      <div className="flex flex-wrap items-center justify-center gap-2">
+      {/* Tactile circular lifted crayon color swatches */}
+      <div
+        className="flex flex-wrap items-center justify-center gap-2.5 py-1"
+        role="group"
+        aria-label="ជ្រើសរើសពណ៌ខ្មៅដៃគូរ"
+      >
         {INK_SWATCHES.map((sw) => {
           const selected = activeColor === sw.hex;
           return (
             <button
               key={sw.id}
               type="button"
+              data-testid={`draw-crayon-${sw.id}`}
               disabled={disabled}
               aria-pressed={selected}
+              aria-label={`ពណ៌ ${sw.labelKm}`}
+              title={`ពណ៌ ${sw.labelKm}`}
               onClick={() => setActiveColor(sw.hex)}
-              className={`khmer-chip inline-flex items-center gap-1.5 rounded-full border-2 px-3 text-xs font-bold ${
-                selected
-                  ? "border-ink bg-surface shadow-xs text-ink"
-                  : "border-border bg-surface-subtle text-ink-muted"
+              className={`crayon-swatch flex items-center justify-center disabled:opacity-50 ${
+                selected ? "active" : ""
               }`}
+              style={{ backgroundColor: sw.hex }}
             >
-              <span
-                aria-hidden="true"
-                className="h-4 w-4 rounded-full"
-                style={{ backgroundColor: sw.hex }}
-              />
-              <span>{sw.labelKm}</span>
+              <span className="sr-only">{sw.labelKm}</span>
             </button>
           );
         })}

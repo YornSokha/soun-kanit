@@ -85,27 +85,31 @@ export function LessonScratchpad({ numeralPref }: LessonScratchpadProps) {
         <p className="text-xs font-bold text-ink">
           ក្រដាសព្រាងគិតលេខ (គូស ឬប៉ះបន្ថែមចំណុចរាប់)
         </p>
-        <div className="flex items-center gap-1.5">
-          {PAD_COLORS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              aria-pressed={inkColor === c.hex}
-              onClick={() => setInkColor(c.hex)}
-              className={`khmer-chip inline-flex items-center gap-1 rounded-full border px-2.5 text-xs font-bold ${
-                inkColor === c.hex
-                  ? "border-ink bg-surface text-ink"
-                  : "border-border bg-surface-subtle text-ink-muted"
-              }`}
-            >
-              <span
-                aria-hidden="true"
-                className="h-3 w-3 rounded-full"
+        <div
+          className="flex items-center gap-2"
+          role="group"
+          aria-label="ជ្រើសរើសពណ៌ខ្មៅដៃពណ៌"
+        >
+          {PAD_COLORS.map((c) => {
+            const active = inkColor === c.hex;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                data-testid={`scratchpad-crayon-${c.id}`}
+                aria-pressed={active}
+                aria-label={`ពណ៌ ${c.labelKm}`}
+                title={`ពណ៌ ${c.labelKm}`}
+                onClick={() => setInkColor(c.hex)}
+                className={`crayon-swatch flex items-center justify-center ${
+                  active ? "active" : ""
+                }`}
                 style={{ backgroundColor: c.hex }}
-              />
-              <span>{c.labelKm}</span>
-            </button>
-          ))}
+              >
+                <span className="sr-only">{c.labelKm}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
