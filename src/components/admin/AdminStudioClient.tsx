@@ -94,7 +94,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
       if (res.ok) {
         setAuthenticated(true);
       } else {
-        setAuthError("លេខកូដសម្ងាត់មិនត្រឹមត្រូវទេ (លំនាំដើម៖ konleuh-admin)។");
+        setAuthError("លេខកូដសម្ងាត់មិនត្រឹមត្រូវទេ (លំនាំដើម៖ soun-admin)។");
       }
     } finally {
       setAuthLoading(false);
@@ -195,7 +195,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
                   className="w-full min-h-[48px] rounded-2xl border-2 border-border bg-canvas px-4 py-2.5 text-base text-ink focus:border-accent focus:outline-none"
                 />
                 <p className="text-xs text-ink-muted">
-                  សម្រាប់ការសាកល្បងមូលដ្ឋាន៖ <code>konleuh-admin</code>
+                  សម្រាប់ការសាកល្បងមូលដ្ឋាន៖ <code>soun-admin</code>
                 </p>
               </div>
 
@@ -226,7 +226,7 @@ export function AdminStudioClient({ initialLessons }: AdminStudioClientProps) {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h1 className="text-2xl font-bold text-ink">
-                    ស្ទូឌីយោនិពន្ធមេរៀនគន្លឹះគណិត
+                    ស្ទូឌីយោនិពន្ធមេរៀនសួនគណិត
                   </h1>
                   <p className="text-xs text-ink-muted">
                     មេរៀនសរុប{" "}

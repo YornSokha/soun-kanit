@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { formatTextNumerals } from "@/lib/khmer/numerals";
 
 export default function HomePage() {
@@ -14,17 +15,12 @@ export default function HomePage() {
       <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-4 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <span
-              aria-hidden="true"
-              className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent text-white font-bold text-lg shadow-xs"
-            >
-              គ
-            </span>
+            <BrandLogo size={40} />
             <div>
               <p className="text-base font-bold text-ink leading-tight">
-                គន្លឹះគណិត
+                សួនគណិត
               </p>
-              <p className="text-xs text-ink-muted">Konleuh Kanit</p>
+              <p className="text-xs text-ink-muted">Soun Kanit</p>
             </div>
           </div>
 
@@ -47,7 +43,7 @@ export default function HomePage() {
             </h1>
             <p className="text-base sm:text-lg text-ink-muted">
               {formatTextNumerals(
-                "គន្លឹះគណិតជួយកុមារកម្ពុជាយល់គោលគំនិតលេខ វិធីបូក វិធីដក និងការបង្គ្រប់ ១០ តាមរយៈរូបភាពស្វាយ ថាសប្រអប់ ១០ និងបន្ទាត់ចំនួន — គ្មានម៉ោងរាប់ថយក្រោយ គ្មានសម្ពាធ។",
+                "សួនគណិតជួយកុមារកម្ពុជាយល់គណិតវិទ្យាតាមរយៈរូបភាពស្វាយ ផ្កាឈូក ការគូររូបធរណីមាត្រ នាឡិកា និងល្បែងលេងសប្បាយៗ — គ្មានម៉ោងរាប់ថយក្រោយ គ្មានសម្ពាធ។",
                 numeralPref
               )}
             </p>

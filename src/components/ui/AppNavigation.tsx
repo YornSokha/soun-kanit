@@ -133,7 +133,7 @@ const MORE_MENU_ITEMS = [
     id: "home",
     href: "/",
     titleKm: "ទំព័រដើម",
-    subtitleKm: "ត្រឡប់ទៅផ្ទាំងស្វាគមន៍គន្លឹះគណិត",
+    subtitleKm: "ត្រឡប់ទៅផ្ទាំងស្វាគមន៍សួនគណិត",
   },
 ];
 
@@ -189,7 +189,7 @@ export function AppNavigation() {
         >
           <div className="flex items-center justify-between px-2 py-1">
             <p className="text-xs font-bold text-ink-muted">
-              ម៉ឺនុយទាំងអស់ • គន្លឹះគណិត
+              ម៉ឺនុយទាំងអស់ • សួនគណិត
             </p>
             <button
               type="button"

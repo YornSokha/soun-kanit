@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { LearningPathMeta } from "@/lib/curriculum/loader";
 import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import {
   formatDisplayNumber,
   formatTextNumerals,
@@ -131,13 +132,8 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
             href="/"
             className="khmer-chip inline-flex items-center gap-2 rounded-xl px-2 text-base font-bold text-ink"
           >
-            <span
-              aria-hidden="true"
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-white text-base font-bold"
-            >
-              គ
-            </span>
-            <span>គន្លឹះគណិត</span>
+            <BrandLogo size={36} />
+            <span>សួនគណិត</span>
           </Link>
 
           <div className="flex items-center gap-2">
@@ -162,7 +158,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
                 សូមស្វាគមន៍មករៀន
               </p>
               <h1 className="text-2xl font-bold text-ink">
-                {profile ? profile.displayName : "អ្នករៀនគន្លឹះគណិត"}
+                {profile ? profile.displayName : "អ្នករៀនសួនគណិត"}
               </h1>
               {profile && (
                 <p className="text-xs text-ink-muted">

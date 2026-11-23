@@ -36,8 +36,8 @@ describe("Khmer numeral conversion and ZWSP normalization", () => {
   });
 
   it("strips U+200B ZWSP characters without touching visible Khmer text", () => {
-    const withZwsp = "គន្លឹះ\u200Bគណិត\u200B១៣";
-    expect(stripZwsp(withZwsp)).toBe("គន្លឹះគណិត១៣");
+    const withZwsp = "សួន\u200Bគណិត\u200B១៣";
+    expect(stripZwsp(withZwsp)).toBe("សួនគណិត១៣");
     expect(stripZwsp("១\u200B៣")).toBe("១៣");
   });
 

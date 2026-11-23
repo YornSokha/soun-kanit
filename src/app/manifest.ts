@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "គន្លឹះគណិត — Konleuh Kanit",
-    short_name: "គន្លឹះគណិត",
+    name: "សួនគណិត — Soun Kanit",
+    short_name: "សួនគណិត",
     description:
-      "កម្មវិធីរៀនគណិតវិទ្យាអន្តរកម្មជាភាសាខ្មែរសម្រាប់កុមារអាយុ ៦ ដល់ ១២ ឆ្នាំ",
+      "កម្មវិធីរៀនគណិតវិទ្យាដោយរូបភាពអន្តរកម្មជាភាសាខ្មែរសម្រាប់កុមារអាយុ ៦ ដល់ ១២ ឆ្នាំ",
     start_url: "/learn",
     display: "standalone",
     background_color: "#fcfaf5",

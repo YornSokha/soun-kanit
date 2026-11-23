@@ -7,15 +7,19 @@ import { getDb } from "@/db";
 import { lessons } from "@/db/schema";
 import { sql } from "drizzle-orm";
 
-function getConfiguredPasscode(): string {
-  return (process.env.ADMIN_STUDIO_PASSCODE ?? "konleuh-admin").trim();
+function getAllowedPasscodes(): string[] {
+  const configured = process.env.ADMIN_STUDIO_PASSCODE?.trim();
+  if (configured) {
+    return [configured];
+  }
+  return ["soun-admin", "konleuh-admin"];
 }
 
 export async function verifyAdminPasscode(
   passcode: string
 ): Promise<{ ok: boolean }> {
   const clean = stripZwsp(passcode).trim();
-  return { ok: clean.length > 0 && clean === getConfiguredPasscode() };
+  return { ok: clean.length > 0 && getAllowedPasscodes().includes(clean) };
 }
 
 export interface PublishLessonResult {

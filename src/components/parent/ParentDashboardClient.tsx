@@ -179,7 +179,7 @@ export function ParentDashboardClient({ paths }: ParentDashboardClientProps) {
                     របាយការណ៍អាណាព្យាបាល
                   </p>
                   <h1 className="text-2xl font-bold text-ink">
-                    {profile ? profile.displayName : "សិស្សគន្លឹះគណិត"}
+                    {profile ? profile.displayName : "សិស្សសួនគណិត"}
                   </h1>
                   {profile && (
                     <p className="text-xs text-ink-muted">

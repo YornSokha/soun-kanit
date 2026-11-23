@@ -21,7 +21,7 @@ export function AchievementCertificate() {
   ).length;
   const badges = computeMasteryBadges(progressByLesson).filter((b) => b.earned);
 
-  const learnerName = profile?.displayName || "អ្នករៀនគន្លឹះគណិត";
+  const learnerName = profile?.displayName || "អ្នករៀនសួនគណិត";
   const gradeLevel = profile?.gradeLevel ?? 1;
   const totalXp = profile?.totalXp ?? 0;
 
@@ -33,7 +33,7 @@ export function AchievementCertificate() {
             វិញ្ញាបនបត្រលើកទឹកចិត្ត • បោះពុម្ពបានគ្មានអ៊ីនធឺណិត
           </p>
           <h2 className="text-base sm:text-lg font-bold text-ink">
-            វិញ្ញាបនបត្រកោតសរសើរ គន្លឹះគណិត
+            វិញ្ញាបនបត្រកោតសរសើរ សួនគណិត
           </h2>
         </div>
 
@@ -59,7 +59,7 @@ export function AchievementCertificate() {
               <MascotFrog mood="happy" size={52} />
               <div className="text-left">
                 <p className="text-xs font-bold text-amber-800">
-                  កម្មវិធីរៀនគណិតវិទ្យាខ្មែរ • គន្លឹះគណិត
+                  កម្មវិធីរៀនគណិតវិទ្យាខ្មែរ • សួនគណិត
                 </p>
                 <h3 className="text-xl sm:text-2xl font-bold text-ink">
                   វិញ្ញាបនបត្រកោតសរសើរ
@@ -115,7 +115,7 @@ export function AchievementCertificate() {
             )}
 
             <p className="text-xs text-ink-muted pt-2 border-t border-amber-700/20">
-              គន្លឹះគណិត (Konleuh Kanit) • រៀនគណិតដោយមើលឃើញ និងប៉ះផ្ទាល់ដៃ
+              សួនគណិត (Soun Kanit) • រៀនគណិតដោយមើលឃើញ និងប៉ះផ្ទាល់ដៃ
             </p>
           </div>
 

@@ -19,14 +19,14 @@ const notoSansKhmer = Noto_Sans_Khmer({
 });
 
 export const metadata: Metadata = {
-  title: "គន្លឹះគណិត — Konleuh Kanit",
+  title: "សួនគណិត — Soun Kanit",
   description:
-    "កម្មវិធីរៀនគណិតវិទ្យាអន្តរកម្មជាភាសាខ្មែរសម្រាប់កុមារអាយុ ៦ ដល់ ១២ ឆ្នាំ",
-  applicationName: "គន្លឹះគណិត",
+    "កម្មវិធីរៀនគណិតវិទ្យាដោយរូបភាពអន្តរកម្មជាភាសាខ្មែរសម្រាប់កុមារអាយុ ៦ ដល់ ១២ ឆ្នាំ",
+  applicationName: "សួនគណិត",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "គន្លឹះគណិត",
+    title: "សួនគណិត",
   },
 };
 

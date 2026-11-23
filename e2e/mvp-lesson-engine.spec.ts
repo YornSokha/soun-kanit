@@ -29,7 +29,7 @@ async function expectAllManipulativeTargetsAtLeast56px(page: Page) {
   }
 }
 
-test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
+test.describe("Soun Kanit (សួនគណិត) E2E (360x800 Mobile)", () => {
   test("Khmer typography, onboarding -> learning path -> Lesson 7 tap-to-place, numeral toggle, 3-tier hints, touch targets, and WCAG 2.2 AA", async ({
     page,
   }) => {
@@ -472,7 +472,7 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await expectNoWcag22Violations(page);
 
     // 1. Authenticate with default local studio passcode
-    await page.getByTestId("admin-passcode-input").fill("konleuh-admin");
+    await page.getByTestId("admin-passcode-input").fill("soun-admin");
     await page.getByTestId("admin-login-btn").click();
     await expect(page.getByTestId("admin-studio-workspace")).toBeVisible();
     await expect(page.getByTestId("admin-validation-status")).toContainText(
