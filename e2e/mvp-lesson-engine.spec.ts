@@ -464,4 +464,34 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("parent-dashboard-content")).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 5: Authenticated Khmer Admin Content Studio with live validation, ZWSP sanitizer, preview, and publish (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    await page.goto("/admin");
+    await expectNoWcag22Violations(page);
+
+    // 1. Authenticate with default local studio passcode
+    await page.getByTestId("admin-passcode-input").fill("konleuh-admin");
+    await page.getByTestId("admin-login-btn").click();
+    await expect(page.getByTestId("admin-studio-workspace")).toBeVisible();
+    await expect(page.getByTestId("admin-validation-status")).toContainText(
+      "Schema ត្រឹមត្រូវ"
+    );
+    await expect(page.getByTestId("admin-live-preview")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 2. Inject stray U+200B into JSON and verify audit + one-tap sanitizer
+    const editor = page.getByTestId("admin-json-editor");
+    const original = await editor.inputValue();
+    await editor.fill(original.replace('"titleKm": "', '"titleKm": "\u200B'));
+    await expect(page.getByTestId("admin-strip-zwsp-btn")).toBeVisible();
+    await page.getByTestId("admin-strip-zwsp-btn").click();
+    await expect(page.getByTestId("admin-zwsp-status")).toContainText("០");
+
+    // 3. Publish validated lesson via Server Action
+    await page.getByTestId("admin-publish-btn").click();
+    await expect(page.getByTestId("admin-publish-result")).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });
