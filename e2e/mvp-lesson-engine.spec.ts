@@ -434,4 +434,34 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     ).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 4: Unrestricted Grades 3-5 Geometry & Decimals paths and PIN/math-gated /parent dashboard (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Switch paths freely on /learn
+    await page.goto("/learn");
+    await page.getByTestId("path-tab-geometry-foundations").click();
+    await expect(
+      page.getByTestId("lesson-card-g02-grid-area-arrays")
+    ).toBeVisible();
+    await page.getByTestId("path-tab-fractions-and-decimals").click();
+    await expect(
+      page.getByTestId("lesson-card-f03-comparing-decimals")
+    ).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 2. Open Grade 5 Decimals lesson (0.5 > 0.35 worked-error-check)
+    await page.getByTestId("lesson-card-f03-comparing-decimals").click();
+    await expect(page).toHaveURL(/\/learn\/f03-comparing-decimals$/);
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    // 3. Unlock Parent Progress Dashboard with Khmer numerals "៥៦" (7 x 8 = 56)
+    await page.goto("/parent");
+    await expectNoWcag22Violations(page);
+    await page.getByTestId("parent-gate-input").fill("៥៦");
+    await page.getByTestId("parent-unlock-btn").click();
+    await expect(page.getByTestId("parent-dashboard-content")).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { LearningPathMeta } from "@/lib/curriculum/loader";
 import { useLearner } from "@/components/providers/LearnerProvider";
@@ -16,7 +16,7 @@ import { getDailyProgressKey } from "@/lib/curriculum/daily";
 import { cacheLessons } from "@/lib/storage/idb";
 
 interface LearningPathClientProps {
-  path: LearningPathMeta;
+  paths: LearningPathMeta[];
 }
 
 const MASTERY_BADGE_STYLE: Record<MasteryTier, string> = {
@@ -35,7 +35,7 @@ function countActiveDaysThisWeek(
   return activeDates.filter((d) => d >= cutoffIso).length;
 }
 
-export function LearningPathClient({ path }: LearningPathClientProps) {
+export function LearningPathClient({ paths }: LearningPathClientProps) {
   const {
     profile,
     profiles,
@@ -46,16 +46,24 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
     switchProfile,
   } = useLearner();
 
+  const [selectedPathId, setSelectedPathId] = useState<string>(
+    paths[0]?.id ?? "early-foundations"
+  );
   const [offlineCached, setOfflineCached] = useState<boolean>(false);
   const [weekCutoffIso, setWeekCutoffIso] = useState<string | null>(null);
   const [todayDate, setTodayDate] = useState<{ iso: string; now: Date } | null>(
     null
   );
 
+  const allLessons = useMemo(
+    () => paths.flatMap((p) => p.lessons),
+    [paths]
+  );
+
   // Cache all lessons locally in IndexedDB and compute current week cutoff on client
   useEffect(() => {
     let active = true;
-    void cacheLessons(path.lessons).then(() => {
+    void cacheLessons(allLessons).then(() => {
       if (!active) return;
       const now = new Date();
       const cutoff = new Date(now);
@@ -70,21 +78,24 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
     return () => {
       active = false;
     };
-  }, [path.lessons]);
+  }, [allLessons]);
+
+  const activePath =
+    paths.find((p) => p.id === selectedPathId) ?? paths[0];
 
   const weeklyGoal = profile?.weeklyGoalDays ?? 3;
   const activeDaysThisWeek = Math.min(
     7,
     countActiveDaysThisWeek(profile?.activeDates ?? [], weekCutoffIso)
   );
-  const completedCount = path.lessons.filter((l) => {
+  const completedInActivePath = (activePath?.lessons ?? []).filter((l) => {
     const tier = progressByLesson[l.id]?.masteryTier;
     return tier && tier !== "not_started";
   }).length;
   const badges = computeMasteryBadges(progressByLesson);
   const earnedBadgesCount = badges.filter((b) => b.earned).length;
   const dueReviewCount = todayDate
-    ? buildReviewQueue(path.lessons, progressByLesson, todayDate.now).due.length
+    ? buildReviewQueue(allLessons, progressByLesson, todayDate.now).due.length
     : 0;
   const dailyDoneToday = todayDate
     ? Boolean(progressByLesson[getDailyProgressKey(todayDate.iso)]?.completedAt)
@@ -108,6 +119,13 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
           </Link>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/parent"
+              data-testid="parent-dashboard-link"
+              className="khmer-chip inline-flex items-center rounded-full border border-border bg-surface px-3 text-xs font-semibold text-ink hover:bg-surface-subtle"
+            >
+              ឪពុកម្ដាយ
+            </Link>
             <NumeralToggle />
           </div>
         </div>
@@ -258,9 +276,7 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
             className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
-              <p className="text-base font-bold text-ink">
-                លំហាត់ប្រចាំថ្ងៃ
-              </p>
+              <p className="text-base font-bold text-ink">លំហាត់ប្រចាំថ្ងៃ</p>
               <p className="text-xs text-ink-muted">
                 {dailyDoneToday
                   ? "បានបញ្ចប់លំហាត់ថ្ងៃនេះហើយ!"
@@ -284,9 +300,7 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
             className="rounded-3xl border border-border bg-surface p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
           >
             <div className="space-y-0.5">
-              <p className="text-base font-bold text-ink">
-                រំលឹកឡើងវិញ
-              </p>
+              <p className="text-base font-bold text-ink">រំលឹកឡើងវិញ</p>
               <p className="text-xs text-ink-muted">
                 {dueReviewCount > 0
                   ? `ដល់ពេលរំលឹក ${formatDisplayNumber(dueReviewCount, numeralPref)} មេរៀន`
@@ -307,83 +321,115 @@ export function LearningPathClient({ path }: LearningPathClientProps) {
           </Link>
         </section>
 
-        {/* Early Foundations Path Header */}
-        <section className="space-y-3">
-          <div className="flex flex-wrap items-end justify-between gap-2">
-            <div>
-              <h2 className="text-xl font-bold text-ink">
-                {formatTextNumerals(path.titleKm, numeralPref)}
-              </h2>
-              <p className="text-sm text-ink-muted">
-                {formatTextNumerals(path.subtitleKm, numeralPref)}
-              </p>
+        {/* Unrestricted Multi-Path Selector (never grade-locked) */}
+        <nav aria-label="ជ្រើសរើសផ្លូវរៀន" className="flex flex-wrap gap-2">
+          {paths.map((p) => {
+            const isActive = p.id === activePath?.id;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                data-testid={`path-tab-${p.id}`}
+                aria-pressed={isActive}
+                onClick={() => setSelectedPathId(p.id)}
+                className={`khmer-chip rounded-2xl border-2 px-4 text-sm font-bold transition-colors ${
+                  isActive
+                    ? "border-accent bg-accent text-white shadow-xs"
+                    : "border-border bg-surface text-ink hover:bg-surface-subtle"
+                }`}
+              >
+                {formatTextNumerals(p.shortTitleKm, numeralPref)}{" "}
+                <span className={isActive ? "text-white/90" : "text-ink-muted"}>
+                  ({formatTextNumerals(p.gradeRangeKm, numeralPref)})
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Active Learning Path Header & Unrestricted Lesson List */}
+        {activePath && (
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h2 className="text-xl font-bold text-ink">
+                  {formatTextNumerals(activePath.titleKm, numeralPref)}
+                </h2>
+                <p className="text-sm text-ink-muted">
+                  {formatTextNumerals(activePath.subtitleKm, numeralPref)}
+                </p>
+              </div>
+              <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink-muted">
+                បានរៀន {formatDisplayNumber(completedInActivePath, numeralPref)}{" "}
+                /{" "}
+                {formatDisplayNumber(activePath.lessons.length, numeralPref)}{" "}
+                មេរៀន
+              </span>
             </div>
-            <span className="rounded-full border border-border bg-surface px-3 py-1 text-xs font-semibold text-ink-muted">
-              បានរៀន {formatDisplayNumber(completedCount, numeralPref)} /{" "}
-              {formatDisplayNumber(path.lessons.length, numeralPref)} មេរៀន
-            </span>
-          </div>
 
-          {/* Unrestricted Lesson List (never locked by grade) */}
-          <div className="grid grid-cols-1 gap-3">
-            {path.lessons.map((lesson) => {
-              const prog = progressByLesson[lesson.id];
-              const tier: MasteryTier = prog?.masteryTier ?? "not_started";
-              const gradeNum = lesson.moeysGradeRef.replace("G", "");
+            <div className="grid grid-cols-1 gap-3">
+              {activePath.lessons.map((lesson) => {
+                const prog = progressByLesson[lesson.id];
+                const tier: MasteryTier = prog?.masteryTier ?? "not_started";
+                const gradeNum = lesson.moeysGradeRef.replace("G", "");
 
-              return (
-                <Link
-                  key={lesson.id}
-                  href={`/learn/${lesson.id}`}
-                  data-testid={`lesson-card-${lesson.id}`}
-                  className="group rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs transition-colors hover:border-accent hover:bg-surface-subtle flex items-start gap-4"
-                >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-lg font-bold text-accent group-hover:bg-accent group-hover:text-white transition-colors">
-                    {formatDisplayNumber(lesson.order, numeralPref)}
-                  </div>
-
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-base sm:text-lg font-bold text-ink">
-                        {formatTextNumerals(lesson.titleKm, numeralPref)}
-                      </h3>
-                      <span
-                        data-testid={`mastery-badge-${lesson.id}`}
-                        className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${MASTERY_BADGE_STYLE[tier]}`}
-                      >
-                        {MASTERY_LABELS_KM[tier]}
-                      </span>
+                return (
+                  <Link
+                    key={lesson.id}
+                    href={`/learn/${lesson.id}`}
+                    data-testid={`lesson-card-${lesson.id}`}
+                    className="group rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs transition-colors hover:border-accent hover:bg-surface-subtle flex items-start gap-4"
+                  >
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-soft text-lg font-bold text-accent group-hover:bg-accent group-hover:text-white transition-colors">
+                      {formatDisplayNumber(lesson.order, numeralPref)}
                     </div>
 
-                    <p className="text-sm text-ink-muted">
-                      {formatTextNumerals(lesson.subtitleKm, numeralPref)}
-                    </p>
+                    <div className="flex-1 min-w-0 space-y-1.5">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="text-base sm:text-lg font-bold text-ink">
+                          {formatTextNumerals(lesson.titleKm, numeralPref)}
+                        </h3>
+                        <span
+                          data-testid={`mastery-badge-${lesson.id}`}
+                          className={`rounded-full border px-2.5 py-0.5 text-xs font-bold ${MASTERY_BADGE_STYLE[tier]}`}
+                        >
+                          {MASTERY_LABELS_KM[tier]}
+                        </span>
+                      </div>
 
-                    <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-ink-muted">
-                      <span>
-                        ថ្នាក់ទី {formatDisplayNumber(gradeNum, numeralPref)}
-                      </span>
-                      <span aria-hidden="true">•</span>
-                      <span>
-                        ប្រហែល{" "}
-                        {formatDisplayNumber(
-                          lesson.estimatedMinutes,
-                          numeralPref
-                        )}{" "}
-                        នាទី
-                      </span>
-                      <span aria-hidden="true">•</span>
-                      <span>
-                        {formatDisplayNumber(lesson.steps.length, numeralPref)}{" "}
-                        ជំហាន
-                      </span>
+                      <p className="text-sm text-ink-muted">
+                        {formatTextNumerals(lesson.subtitleKm, numeralPref)}
+                      </p>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-ink-muted">
+                        <span>
+                          ថ្នាក់ទី {formatDisplayNumber(gradeNum, numeralPref)}
+                        </span>
+                        <span aria-hidden="true">•</span>
+                        <span>
+                          ប្រហែល{" "}
+                          {formatDisplayNumber(
+                            lesson.estimatedMinutes,
+                            numeralPref
+                          )}{" "}
+                          នាទី
+                        </span>
+                        <span aria-hidden="true">•</span>
+                        <span>
+                          {formatDisplayNumber(
+                            lesson.steps.length,
+                            numeralPref
+                          )}{" "}
+                          ជំហាន
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

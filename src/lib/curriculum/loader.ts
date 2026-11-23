@@ -7,7 +7,9 @@ const CONTENT_ROOT = path.join(process.cwd(), "content", "paths");
 export interface LearningPathMeta {
   id: string;
   titleKm: string;
+  shortTitleKm: string;
   subtitleKm: string;
+  gradeRangeKm: string;
   lessons: LessonDocumentV1[];
 }
 
@@ -56,7 +58,7 @@ export function loadAllLessons(): LessonDocumentV1[] {
   for (const pathId of pathDirs) {
     all.push(...loadLessonsForPath(pathId));
   }
-  return all.sort((a, b) => a.order - b.order);
+  return all;
 }
 
 export function loadLessonById(lessonId: string): LessonDocumentV1 | null {
@@ -68,7 +70,34 @@ export function getEarlyFoundationsPath(): LearningPathMeta {
   return {
     id: "early-foundations",
     titleKm: "គ្រឹះគណិតវិទ្យាថ្នាក់ដំបូង",
-    subtitleKm: "រៀនរាប់ បន្ទាត់ចំនួន វិធីបូក វិធីដក និងការបង្គ្រប់ ១០ តាមរយៈរូបភាពរស់រវើក",
+    shortTitleKm: "គ្រឹះថ្នាក់ដំបូង",
+    subtitleKm:
+      "រៀនរាប់ បន្ទាត់ចំនួន វិធីបូក វិធីដក លំនាំក្រមា និងប្រាក់រៀលតាមរយៈរូបភាពរស់រវើក",
+    gradeRangeKm: "ថ្នាក់ ១–២",
     lessons: loadLessonsForPath("early-foundations"),
   };
+}
+
+export function getAllLearningPaths(): LearningPathMeta[] {
+  return [
+    getEarlyFoundationsPath(),
+    {
+      id: "geometry-foundations",
+      titleKm: "ធរណីមាត្រ និងផ្ទៃក្រឡា",
+      shortTitleKm: "ធរណីមាត្រ",
+      subtitleKm:
+        "ស្គាល់លក្ខណៈរូបធរណីមាត្រ ២D ផ្ទៃក្រឡាលើក្រឡាចត្រង្គ និងបរិមាត្រចតុកោណ",
+      gradeRangeKm: "ថ្នាក់ ៣–៥",
+      lessons: loadLessonsForPath("geometry-foundations"),
+    },
+    {
+      id: "fractions-and-decimals",
+      titleKm: "ប្រភាគ និងចំនួនទសភាគ",
+      shortTitleKm: "ប្រភាគ និងទសភាគ",
+      subtitleKm:
+        "មើលឃើញប្រភាគស្មើគ្នា ភាគដប់លើបន្ទាត់ចំនួន ០–១ និងការប្រៀបធៀបចំនួនទសភាគ",
+      gradeRangeKm: "ថ្នាក់ ៣–៥",
+      lessons: loadLessonsForPath("fractions-and-decimals"),
+    },
+  ];
 }
