@@ -14,6 +14,11 @@ import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
 import { AudioReadButton, AudioToggle } from "@/components/ui/AudioReadButton";
 import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
+import {
+  playGentleNudgeChime,
+  playHintChime,
+  playSuccessChime,
+} from "@/lib/audio/chimes";
 
 interface LessonPlayerProps {
   lesson: LessonDocumentV1;
@@ -34,6 +39,7 @@ const HINT_KIND_LABELS_KM: Record<string, string> = {
 export function LessonPlayer({ lesson }: LessonPlayerProps) {
   const {
     numeralPref,
+    audioEnabled,
     isOnline,
     recordStepCompleted,
     recordLessonFinished,
@@ -86,6 +92,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
     setGradeResult(result);
 
     if (result.isCorrect) {
+      playSuccessChime(audioEnabled);
       if (nextAttempts === 1 && revealedHintCount === 0) {
         setFirstTryCorrectCount((c) => c + 1);
       }
@@ -93,11 +100,14 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
         prev.includes(activeStep.id) ? prev : [...prev, activeStep.id]
       );
       await recordStepCompleted(lesson.id, activeStep.id);
+    } else {
+      playGentleNudgeChime(audioEnabled);
     }
   };
 
   const handleRevealNextHint = () => {
     if (!activeStep || revealedHintCount >= activeStep.hints.length) return;
+    playHintChime(audioEnabled);
     const nextCount = revealedHintCount + 1;
     setRevealedHintCount(nextCount);
     setTotalHintsUsed((h) => h + 1);

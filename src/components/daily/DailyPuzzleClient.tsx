@@ -16,6 +16,11 @@ import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
 import { AudioReadButton, AudioToggle } from "@/components/ui/AudioReadButton";
 import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
+import {
+  playGentleNudgeChime,
+  playHintChime,
+  playSuccessChime,
+} from "@/lib/audio/chimes";
 
 interface DailyPuzzleClientProps {
   puzzles: DailyPuzzleItem[];
@@ -30,8 +35,12 @@ function getLocalTodayIso(): string {
 }
 
 export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
-  const { numeralPref, progressByLesson, recordDailyPuzzleCompleted } =
-    useLearner();
+  const {
+    numeralPref,
+    audioEnabled,
+    progressByLesson,
+    recordDailyPuzzleCompleted,
+  } = useLearner();
 
   const [todayIso, setTodayIso] = useState<string>("2026-11-23");
   const [activePuzzleIndex, setActivePuzzleIndex] = useState<number>(0);
@@ -74,11 +83,14 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
     setGradeResult(res);
 
     if (res.isCorrect) {
+      playSuccessChime(audioEnabled);
       const saved = await recordDailyPuzzleCompleted({
         dateIso: todayIso,
         puzzleId: puzzle.id,
       });
       setXpAwarded(saved.xpEarned);
+    } else {
+      playGentleNudgeChime(audioEnabled);
     }
   };
 
@@ -224,7 +236,10 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
                 type="button"
                 data-testid="daily-hint-btn"
                 disabled={revealedHints >= puzzle.step.hints.length}
-                onClick={() => setRevealedHints((c) => c + 1)}
+                onClick={() => {
+                  playHintChime(audioEnabled);
+                  setRevealedHints((c) => c + 1);
+                }}
                 className="khmer-chip rounded-2xl border-2 border-border bg-surface px-4 py-3 text-sm font-bold text-ink hover:bg-surface-subtle disabled:opacity-45"
               >
                 សុំជំនួយ

@@ -46,7 +46,8 @@
           "textKm": "ប៉ះលេខ ៥ ឬចុចប៊ូតុង «+១ ជំហាន» ម្ដង ដើម្បីនាំកង្កែបទៅលេខ ៥!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ចាប់ផ្ដើមពី ៤ លោតទៅស្ដាំ ១ ជំហានបាន ៥ (៤ + ១ = ៥)។"
+      "explanationKm": "ល្អណាស់! ចាប់ផ្ដើមពី ៤ លោតទៅស្ដាំ ១ ជំហានបាន ៥ (៤ + ១ = ៥)។",
+      "audioUrl": "/audio/steps/l04-s1-frog-forward.mp3"
     },
     {
       "id": "l04-s2-frog-back",
@@ -84,7 +85,8 @@
           "textKm": "ប៉ះលេខ ៧ ឬចុច «−១ ជំហាន» ម្ដង!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ៨ ថយក្រោយ ១ ជំហានស្មើ ៧ (៨ − ១ = ៧)។"
+      "explanationKm": "ពូកែណាស់! ៨ ថយក្រោយ ១ ជំហានស្មើ ៧ (៨ − ១ = ៧)។",
+      "audioUrl": "/audio/steps/l04-s2-frog-back.mp3"
     },
     {
       "id": "l04-s3-missing-tick",
@@ -97,7 +99,9 @@
         "step": 1,
         "startValue": 3,
         "showJumps": true,
-        "hiddenTickValues": [6],
+        "hiddenTickValues": [
+          6
+        ],
         "theme": "default"
       },
       "solution": {
@@ -122,7 +126,8 @@
           "textKm": "ប៉ះចំណុចសញ្ញា ? រវាងលេខ ៥ និង ៧ នោះគឺជាលេខ ៦!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! លេខ ៦ ស្ថិតនៅចន្លោះលេខ ៥ និងលេខ ៧ ជានិច្ចលើបន្ទាត់ចំនួន។"
+      "explanationKm": "អស្ចារ្យ! លេខ ៦ ស្ថិតនៅចន្លោះលេខ ៥ និងលេខ ៧ ជានិច្ចលើបន្ទាត់ចំនួន។",
+      "audioUrl": "/audio/steps/l04-s3-missing-tick.mp3"
     }
   ]
 }

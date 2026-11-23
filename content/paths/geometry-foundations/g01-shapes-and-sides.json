@@ -23,10 +23,30 @@
         "allowPartitionChange": false,
         "showNumberLine": false,
         "shapeOptions": [
-          { "id": "sq", "shape": "square", "labelKm": "ការ៉េ", "sides": 4 },
-          { "id": "rect", "shape": "rectangle", "labelKm": "ចតុកោណកែង", "sides": 4 },
-          { "id": "tri", "shape": "triangle", "labelKm": "ត្រីកោណ", "sides": 3 },
-          { "id": "circ", "shape": "circle", "labelKm": "រង្វង់", "sides": 0 }
+          {
+            "id": "sq",
+            "shape": "square",
+            "labelKm": "ការ៉េ",
+            "sides": 4
+          },
+          {
+            "id": "rect",
+            "shape": "rectangle",
+            "labelKm": "ចតុកោណកែង",
+            "sides": 4
+          },
+          {
+            "id": "tri",
+            "shape": "triangle",
+            "labelKm": "ត្រីកោណ",
+            "sides": 3
+          },
+          {
+            "id": "circ",
+            "shape": "circle",
+            "labelKm": "រង្វង់",
+            "sides": 0
+          }
         ]
       },
       "solution": {
@@ -50,7 +70,8 @@
           "textKm": "ប៉ះរូប «ការ៉េ» ដែលមានជ្រុងស្មើគ្នាទាំង ៤!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ការ៉េមាន ៤ ជ្រុងស្មើគ្នា និង ៤ មុំកែង។"
+      "explanationKm": "ល្អណាស់! ការ៉េមាន ៤ ជ្រុងស្មើគ្នា និង ៤ មុំកែង។",
+      "audioUrl": "/audio/steps/g01-s1-square.mp3"
     },
     {
       "id": "g01-s2-compare-sides",
@@ -86,7 +107,8 @@
           "textKm": "ប៉ះសញ្ញា «> (ធំជាង)» ដើម្បីបង្ហាញ ៤ > ៣!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ចតុកោណកែងមាន ៤ ជ្រុង ច្រើនជាងត្រីកោណដែលមាន ៣ ជ្រុង (៤ > ៣)។"
+      "explanationKm": "ពូកែណាស់! ចតុកោណកែងមាន ៤ ជ្រុង ច្រើនជាងត្រីកោណដែលមាន ៣ ជ្រុង (៤ > ៣)។",
+      "audioUrl": "/audio/steps/g01-s2-compare-sides.mp3"
     },
     {
       "id": "g01-s3-worked-error",
@@ -134,7 +156,8 @@
           "textKm": "ជ្រើសរើសចម្លើយថា «រង្វង់ជាខ្សែកោង និងមាន ០ ជ្រុងត្រង់»!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! រង្វង់ជាខ្សែកោងបិទជិតដែលមាន ០ ជ្រុងត្រង់ និង ០ កំពូល។"
+      "explanationKm": "អស្ចារ្យ! រង្វង់ជាខ្សែកោងបិទជិតដែលមាន ០ ជ្រុងត្រង់ និង ០ កំពូល។",
+      "audioUrl": "/audio/steps/g01-s3-worked-error.mp3"
     }
   ]
 }

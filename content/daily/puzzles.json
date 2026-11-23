@@ -43,7 +43,8 @@
             "textKm": "ប៉ះស្វាយ ៣ ផ្លែនៅខាងក្រៅដាក់ចូលថាស នោះខាងក្រៅនៅសល់ ១ ផ្លែ (១០ + ១ = ១១)!"
           }
         ],
-        "explanationKm": "ពូកែណាស់! ៧ + ៤ = ៧ + ៣ + ១ = ១០ + ១ = ១១!"
+        "explanationKm": "ពូកែណាស់! ៧ + ៤ = ៧ + ៣ + ១ = ១០ + ១ = ១១!",
+        "audioUrl": "/audio/steps/daily-01-step.mp3"
       }
     },
     {
@@ -62,7 +63,11 @@
           "visualStyle": "scale-oranges",
           "leftValue": 8,
           "rightValue": 5,
-          "availableTiles": [1, 2, 3]
+          "availableTiles": [
+            1,
+            2,
+            3
+          ]
         },
         "solution": {
           "expectedRightTotal": 8
@@ -84,7 +89,8 @@
             "textKm": "ប៉ះប៊ូតុង «+៣» ដើម្បីឱ្យខាងស្ដាំបាន ៥ + ៣ = ៨!"
           }
         ],
-        "explanationKm": "ល្អណាស់! ៥ + ៣ = ៨ ធ្វើឱ្យជញ្ជីងទាំងពីរខាងស្មើគ្នា!"
+        "explanationKm": "ល្អណាស់! ៥ + ៣ = ៨ ធ្វើឱ្យជញ្ជីងទាំងពីរខាងស្មើគ្នា!",
+        "audioUrl": "/audio/steps/daily-02-step.mp3"
       }
     },
     {
@@ -129,7 +135,8 @@
             "textKm": "ប៉ះលេខ ៨ លើបន្ទាត់ចំនួន ព្រោះ ៥ + ៣ = ៨!"
           }
         ],
-        "explanationKm": "អស្ចារ្យ! ៥ លោតទៅស្ដាំ ៣ ជំហានបាន ៨ (៥ + ៣ = ៨)!"
+        "explanationKm": "អស្ចារ្យ! ៥ លោតទៅស្ដាំ ៣ ជំហានបាន ៨ (៥ + ៣ = ៨)!",
+        "audioUrl": "/audio/steps/daily-03-step.mp3"
       }
     },
     {
@@ -145,15 +152,35 @@
         "promptKm": "បំពេញផ្ទាំងក្រមាដែលបាត់៖ ក្រហម, លឿង, ក្រហម, លឿង, ...",
         "config": {
           "variant": "krama-tiles",
-          "sequence": ["red", "gold", "red", "gold", null],
+          "sequence": [
+            "red",
+            "gold",
+            "red",
+            "gold",
+            null
+          ],
           "palette": [
-            { "id": "red", "labelKm": "ក្រហម", "glyph": "stripe-red" },
-            { "id": "gold", "labelKm": "លឿង", "glyph": "stripe-gold" },
-            { "id": "blue", "labelKm": "ខៀវ", "glyph": "stripe-blue" }
+            {
+              "id": "red",
+              "labelKm": "ក្រហម",
+              "glyph": "stripe-red"
+            },
+            {
+              "id": "gold",
+              "labelKm": "លឿង",
+              "glyph": "stripe-gold"
+            },
+            {
+              "id": "blue",
+              "labelKm": "ខៀវ",
+              "glyph": "stripe-blue"
+            }
           ]
         },
         "solution": {
-          "expectedSlotValues": ["red"]
+          "expectedSlotValues": [
+            "red"
+          ]
         },
         "hints": [
           {
@@ -172,7 +199,8 @@
             "textKm": "ប៉ះផ្ទាំង «ក្រហម» រួចប៉ះប្រឡោះ «?»!"
           }
         ],
-        "explanationKm": "ល្អណាស់! ក្រមានេះឆ្លាស់គ្នារវាងក្រហម និងលឿង!"
+        "explanationKm": "ល្អណាស់! ក្រមានេះឆ្លាស់គ្នារវាងក្រហម និងលឿង!",
+        "audioUrl": "/audio/steps/daily-04-step.mp3"
       }
     },
     {
@@ -188,7 +216,12 @@
         "promptKm": "នំបញ្ចុកមួយចានថ្លៃ ១,៥០០៛។ ប៉ះក្រដាសប្រាក់ដាក់លើថាសឱ្យគ្រប់ ១,៥០០៛!",
         "config": {
           "variant": "banknote-builder",
-          "availableNotesKhr": [100, 500, 1000, 2000]
+          "availableNotesKhr": [
+            100,
+            500,
+            1000,
+            2000
+          ]
         },
         "solution": {
           "expectedSumKhr": 1500
@@ -210,7 +243,8 @@
             "textKm": "ប៉ះ «+១,០០០៛» ម្ដង និង «+៥០០៛» ម្ដង!"
           }
         ],
-        "explanationKm": "ពូកែណាស់! ១,០០០៛ + ៥០០៛ = ១,៥០០៛ គ្រប់ត្រឹមត្រូវ!"
+        "explanationKm": "ពូកែណាស់! ១,០០០៛ + ៥០០៛ = ១,៥០០៛ គ្រប់ត្រឹមត្រូវ!",
+        "audioUrl": "/audio/steps/daily-05-step.mp3"
       }
     },
     {
@@ -230,7 +264,10 @@
           "denominator": 4,
           "initialShaded": 0,
           "allowPartitionChange": true,
-          "availableDenominators": [2, 4],
+          "availableDenominators": [
+            2,
+            4
+          ],
           "showNumberLine": true
         },
         "solution": {
@@ -255,7 +292,8 @@
             "textKm": "ប៉ះ ២ ផ្នែកនៃរបារ ៤ ផ្នែក ដើម្បីបាន ២/៤ = ១/២!"
           }
         ],
-        "explanationKm": "អស្ចារ្យ! ២/៤ ស្មើនឹង ១/២!"
+        "explanationKm": "អស្ចារ្យ! ២/៤ ស្មើនឹង ១/២!",
+        "audioUrl": "/audio/steps/daily-06-step.mp3"
       }
     },
     {
@@ -301,7 +339,8 @@
             "textKm": "ចុច + លើ «ចំនួនជួរ» ២ ដង ដើម្បីបាន ៣ × ២ = ៦!"
           }
         ],
-        "explanationKm": "ល្អណាស់! ៣ ជួរ × ២ ផ្លែ = ៦ ផ្លែ!"
+        "explanationKm": "ល្អណាស់! ៣ ជួរ × ២ ផ្លែ = ៦ ផ្លែ!",
+        "audioUrl": "/audio/steps/daily-07-step.mp3"
       }
     }
   ]

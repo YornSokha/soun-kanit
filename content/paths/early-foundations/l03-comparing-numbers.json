@@ -42,7 +42,8 @@
           "textKm": "ប៉ះសញ្ញា «> (ធំជាង)» ដើម្បីបង្ហាញថា ៧ > ៤!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ក្រូច ៧ ផ្លែច្រើនជាង ៤ ផ្លែ ដូច្នេះយើងសរសេរ ៧ > ៤។"
+      "explanationKm": "ល្អណាស់! ក្រូច ៧ ផ្លែច្រើនជាង ៤ ផ្លែ ដូច្នេះយើងសរសេរ ៧ > ៤។",
+      "audioUrl": "/audio/steps/l03-s1-oranges-gt.mp3"
     },
     {
       "id": "l03-s2-bars-lt",
@@ -78,7 +79,8 @@
           "textKm": "ប៉ះសញ្ញា «< (តូចជាង)» ដើម្បីបង្ហាញថា ៣ < ៨!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ៣ តូចជាង ៨ យើងសរសេរ ៣ < ៨។"
+      "explanationKm": "ពូកែណាស់! ៣ តូចជាង ៨ យើងសរសេរ ៣ < ៨។",
+      "audioUrl": "/audio/steps/l03-s2-bars-lt.mp3"
     },
     {
       "id": "l03-s3-balance-equal",
@@ -90,7 +92,11 @@
         "visualStyle": "scale-oranges",
         "leftValue": 6,
         "rightValue": 4,
-        "availableTiles": [1, 2, 3]
+        "availableTiles": [
+          1,
+          2,
+          3
+        ]
       },
       "solution": {
         "expectedRightTotal": 6
@@ -112,7 +118,8 @@
           "textKm": "ប៉ះប៊ូតុង «+២» ម្ដង ដើម្បីឱ្យខាងស្ដាំបាន ៤ + ២ = ៦ ស្មើខាងឆ្វេង!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ពេលខាងឆ្វេង ៦ និងខាងស្ដាំ ៦ ជញ្ជីងស្មើគ្នា (៦ = ៦)!"
+      "explanationKm": "អស្ចារ្យ! ពេលខាងឆ្វេង ៦ និងខាងស្ដាំ ៦ ជញ្ជីងស្មើគ្នា (៦ = ៦)!",
+      "audioUrl": "/audio/steps/l03-s3-balance-equal.mp3"
     }
   ]
 }

@@ -17,15 +17,37 @@
       "promptKm": "បំពេញលំនាំក្រមាខ្មែរ៖ ក្រហម, ខៀវ, ក្រហម, ខៀវ... តើពីរផ្ទាំងបន្ទាប់ពណ៌អ្វី?",
       "config": {
         "variant": "krama-tiles",
-        "sequence": ["red", "blue", "red", "blue", null, null],
+        "sequence": [
+          "red",
+          "blue",
+          "red",
+          "blue",
+          null,
+          null
+        ],
         "palette": [
-          { "id": "red", "labelKm": "ក្រហម", "glyph": "stripe-red" },
-          { "id": "blue", "labelKm": "ខៀវ", "glyph": "stripe-blue" },
-          { "id": "gold", "labelKm": "លឿង", "glyph": "stripe-gold" }
+          {
+            "id": "red",
+            "labelKm": "ក្រហម",
+            "glyph": "stripe-red"
+          },
+          {
+            "id": "blue",
+            "labelKm": "ខៀវ",
+            "glyph": "stripe-blue"
+          },
+          {
+            "id": "gold",
+            "labelKm": "លឿង",
+            "glyph": "stripe-gold"
+          }
         ]
       },
       "solution": {
-        "expectedSlotValues": ["red", "blue"]
+        "expectedSlotValues": [
+          "red",
+          "blue"
+        ]
       },
       "hints": [
         {
@@ -44,7 +66,8 @@
           "textKm": "ប៉ះផ្ទាំង «ក្រហម» ដាក់ប្រឡោះទី ១ រួចប៉ះផ្ទាំង «ខៀវ» ដាក់ប្រឡោះទី ២!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ក្រមានេះប្រើលំនាំឆ្លាស់ ក្រហម–ខៀវ ដដែលៗ៖ ក្រហម, ខៀវ, ក្រហម, ខៀវ, ក្រហម, ខៀវ!"
+      "explanationKm": "ល្អណាស់! ក្រមានេះប្រើលំនាំឆ្លាស់ ក្រហម–ខៀវ ដដែលៗ៖ ក្រហម, ខៀវ, ក្រហម, ខៀវ, ក្រហម, ខៀវ!",
+      "audioUrl": "/audio/steps/l09-s1-krama-pattern.mp3"
     },
     {
       "id": "l09-s2-triangle-shape",
@@ -59,10 +82,30 @@
         "allowPartitionChange": false,
         "showNumberLine": false,
         "shapeOptions": [
-          { "id": "shape-tri", "shape": "triangle", "labelKm": "ត្រីកោណ", "sides": 3 },
-          { "id": "shape-sq", "shape": "square", "labelKm": "ការ៉េ", "sides": 4 },
-          { "id": "shape-rect", "shape": "rectangle", "labelKm": "ចតុកោណកែង", "sides": 4 },
-          { "id": "shape-circ", "shape": "circle", "labelKm": "រង្វង់", "sides": 0 }
+          {
+            "id": "shape-tri",
+            "shape": "triangle",
+            "labelKm": "ត្រីកោណ",
+            "sides": 3
+          },
+          {
+            "id": "shape-sq",
+            "shape": "square",
+            "labelKm": "ការ៉េ",
+            "sides": 4
+          },
+          {
+            "id": "shape-rect",
+            "shape": "rectangle",
+            "labelKm": "ចតុកោណកែង",
+            "sides": 4
+          },
+          {
+            "id": "shape-circ",
+            "shape": "circle",
+            "labelKm": "រង្វង់",
+            "sides": 0
+          }
         ]
       },
       "solution": {
@@ -85,7 +128,8 @@
           "textKm": "ប៉ះរូប «ត្រីកោណ» ដែលមាន ៣ ជ្រុង និង ៣ កំពូល!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ត្រីកោណមាន ៣ ជ្រុង និង ៣ កំពូល ចំណែកការ៉េ និងចតុកោណកែងមាន ៤ ជ្រុង!"
+      "explanationKm": "ពូកែណាស់! ត្រីកោណមាន ៣ ជ្រុង និង ៣ កំពូល ចំណែកការ៉េ និងចតុកោណកែងមាន ៤ ជ្រុង!",
+      "audioUrl": "/audio/steps/l09-s2-triangle-shape.mp3"
     },
     {
       "id": "l09-s3-equal-groups",
@@ -124,7 +168,8 @@
           "textKm": "ចុច + លើ «ចំនួនជួរ» ឱ្យបាន ២ និងចុច + លើ «ក្នុង ១ ជួរ» ឱ្យបាន ៣!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ២ ជួរ ក្នុង ១ ជួរមាន ៣ ផ្លែ សរុបស្មើ ៦ ផ្លែ (២ × ៣ = ៦)!"
+      "explanationKm": "ល្អណាស់! ២ ជួរ ក្នុង ១ ជួរមាន ៣ ផ្លែ សរុបស្មើ ៦ ផ្លែ (២ × ៣ = ៦)!",
+      "audioUrl": "/audio/steps/l09-s3-equal-groups.mp3"
     },
     {
       "id": "l09-s4-skip-counting-2",
@@ -133,17 +178,44 @@
       "promptKm": "រាប់បន្ថែមម្ដង ២៖ ២, ៤, ៦, ... តើលេខបន្ទាប់គឺលេខប៉ុន្មាន?",
       "config": {
         "variant": "number-skip",
-        "sequence": ["2", "4", "6", null],
+        "sequence": [
+          "2",
+          "4",
+          "6",
+          null
+        ],
         "palette": [
-          { "id": "2", "labelKm": "២", "glyph": "number" },
-          { "id": "4", "labelKm": "៤", "glyph": "number" },
-          { "id": "6", "labelKm": "៦", "glyph": "number" },
-          { "id": "7", "labelKm": "៧", "glyph": "number" },
-          { "id": "8", "labelKm": "៨", "glyph": "number" }
+          {
+            "id": "2",
+            "labelKm": "២",
+            "glyph": "number"
+          },
+          {
+            "id": "4",
+            "labelKm": "៤",
+            "glyph": "number"
+          },
+          {
+            "id": "6",
+            "labelKm": "៦",
+            "glyph": "number"
+          },
+          {
+            "id": "7",
+            "labelKm": "៧",
+            "glyph": "number"
+          },
+          {
+            "id": "8",
+            "labelKm": "៨",
+            "glyph": "number"
+          }
         ]
       },
       "solution": {
-        "expectedSlotValues": ["8"]
+        "expectedSlotValues": [
+          "8"
+        ]
       },
       "hints": [
         {
@@ -162,7 +234,8 @@
           "textKm": "៦ + ២ = ៨! ប៉ះលេខ «៨» រួចប៉ះប្រឡោះ «?»!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ពេលរាប់បន្ថែមម្ដង ២ យើងបានលំនាំ ២, ៤, ៦, ៨!"
+      "explanationKm": "អស្ចារ្យ! ពេលរាប់បន្ថែមម្ដង ២ យើងបានលំនាំ ២, ៤, ៦, ៨!",
+      "audioUrl": "/audio/steps/l09-s4-skip-counting-2.mp3"
     }
   ]
 }

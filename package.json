@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "validate:content": "tsx scripts/validate-content.ts",
+    "generate:audio": "tsx scripts/generate-khmer-audio.ts",
     "test:unit": "vitest run",
     "test:e2e": "node scripts/run-e2e.mjs",
     "db:generate": "drizzle-kit generate",

@@ -21,7 +21,10 @@
         "denominator": 4,
         "initialShaded": 0,
         "allowPartitionChange": true,
-        "availableDenominators": [2, 4],
+        "availableDenominators": [
+          2,
+          4
+        ],
         "showNumberLine": true
       },
       "solution": {
@@ -46,7 +49,8 @@
           "textKm": "ប៉ះ ២ ផ្នែកនៃរបារ ៤ ផ្នែក ដើម្បីលាបពណ៌ ២/៤ = ១/២!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ២/៤ និង ១/២ ជាប្រភាគស្មើគ្នា ព្រោះលាបពណ៌បានពាក់កណ្តាលរបារដូចគ្នា!"
+      "explanationKm": "ល្អណាស់! ២/៤ និង ១/២ ជាប្រភាគស្មើគ្នា ព្រោះលាបពណ៌បានពាក់កណ្តាលរបារដូចគ្នា!",
+      "audioUrl": "/audio/steps/f01-s1-equiv-bar.mp3"
     },
     {
       "id": "f01-s2-three-quarters",
@@ -83,7 +87,8 @@
           "textKm": "ប៉ះបន្ថែម ២ ផ្នែកទៀត ឱ្យបានសរុប ៣ ផ្នែកក្នុងចំណោម ៤ (៣/៤)!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ៣/៤ នៅជិតលេខ ១ ជាង ១/២ ព្រោះនៅខ្វះតែ ១/៤ ទៀតទេដល់ ១!"
+      "explanationKm": "ពូកែណាស់! ៣/៤ នៅជិតលេខ ១ ជាង ១/២ ព្រោះនៅខ្វះតែ ១/៤ ទៀតទេដល់ ១!",
+      "audioUrl": "/audio/steps/f01-s2-three-quarters.mp3"
     },
     {
       "id": "f01-s3-explain-equiv",
@@ -130,7 +135,8 @@
           "textKm": "ជ្រើសរើសចម្លើយ «៣/៦»!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ១/២ = ២/៤ = ៣/៦ សុទ្ធតែតំណាងឱ្យពាក់កណ្តាលដូចគ្នា!"
+      "explanationKm": "អស្ចារ្យ! ១/២ = ២/៤ = ៣/៦ សុទ្ធតែតំណាងឱ្យពាក់កណ្តាលដូចគ្នា!",
+      "audioUrl": "/audio/steps/f01-s3-explain-equiv.mp3"
     }
   ]
 }

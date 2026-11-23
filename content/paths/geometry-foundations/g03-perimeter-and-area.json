@@ -47,7 +47,8 @@
           "textKm": "ចុច + លើ «ចំនួនជួរ» ដល់ ២ និង «ក្នុង ១ ជួរ» ដល់ ៦!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ចតុកោណកែង ២ × ៦ មានផ្ទៃក្រឡា ១២ ការ៉េ ប៉ុន្តែបរិមាត្ររបស់វាគឺ ២ + ៦ + ២ + ៦ = ១៦!"
+      "explanationKm": "ល្អណាស់! ចតុកោណកែង ២ × ៦ មានផ្ទៃក្រឡា ១២ ការ៉េ ប៉ុន្តែបរិមាត្ររបស់វាគឺ ២ + ៦ + ២ + ៦ = ១៦!",
+      "audioUrl": "/audio/steps/g03-s1-build-2x6.mp3"
     },
     {
       "id": "g03-s2-perimeter-balance",
@@ -59,7 +60,12 @@
         "visualStyle": "scale-oranges",
         "leftValue": 16,
         "rightValue": 11,
-        "availableTiles": [1, 2, 3, 5]
+        "availableTiles": [
+          1,
+          2,
+          3,
+          5
+        ]
       },
       "solution": {
         "expectedRightTotal": 16
@@ -81,7 +87,8 @@
           "textKm": "ប៉ះប៊ូតុង «+៥» ម្ដង ដើម្បីឱ្យបាន ១១ + ៥ = ១៦!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! បរិមាត្រចតុកោណកែង = (៣ + ៥) × ២ = ១៦!"
+      "explanationKm": "ពូកែណាស់! បរិមាត្រចតុកោណកែង = (៣ + ៥) × ២ = ១៦!",
+      "audioUrl": "/audio/steps/g03-s2-perimeter-balance.mp3"
     },
     {
       "id": "g03-s3-spot-perimeter-error",
@@ -129,7 +136,8 @@
           "textKm": "ជ្រើសរើសចម្លើយថា «ដារ៉ាបូកតែ ២ ជ្រុង ភ្លេចបូក ២ ជ្រុងទៀត (ត្រូវជា ១៦ ម)»!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ចងចាំជានិច្ច៖ បរិមាត្រ = បូកជ្រុងជុំវិញទាំង ៤ ចំណែកផ្ទៃក្រឡា = ទទឹង × បណ្ដោយ!"
+      "explanationKm": "អស្ចារ្យ! ចងចាំជានិច្ច៖ បរិមាត្រ = បូកជ្រុងជុំវិញទាំង ៤ ចំណែកផ្ទៃក្រឡា = ទទឹង × បណ្ដោយ!",
+      "audioUrl": "/audio/steps/g03-s3-spot-perimeter-error.mp3"
     }
   ]
 }

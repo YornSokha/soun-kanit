@@ -46,7 +46,8 @@
           "textKm": "ប៉ះលេខ ០.៥ លើបន្ទាត់ចំនួន!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ០.៥ ស្មើនឹង ៥/១០ ឬពាក់កណ្តាល (១/២) នៃ ១!"
+      "explanationKm": "ល្អណាស់! ០.៥ ស្មើនឹង ៥/១០ ឬពាក់កណ្តាល (១/២) នៃ ១!",
+      "audioUrl": "/audio/steps/f02-s1-locate-0-5.mp3"
     },
     {
       "id": "f02-s2-add-tenths",
@@ -84,7 +85,8 @@
           "textKm": "ប៉ះលេខ ០.៧ លើបន្ទាត់ចំនួន!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ០.៣ + ០.៤ = ០.៧ ព្រោះ ៣ ភាគដប់ បូក ៤ ភាគដប់ ស្មើ ៧ ភាគដប់!"
+      "explanationKm": "ពូកែណាស់! ០.៣ + ០.៤ = ០.៧ ព្រោះ ៣ ភាគដប់ បូក ៤ ភាគដប់ ស្មើ ៧ ភាគដប់!",
+      "audioUrl": "/audio/steps/f02-s2-add-tenths.mp3"
     },
     {
       "id": "f02-s3-decimal-fraction-link",
@@ -131,7 +133,8 @@
           "textKm": "ជ្រើសរើសចម្លើយ «៥/១០ ឬ ១/២»!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ០.៥ = ៥/១០ = ១/២!"
+      "explanationKm": "អស្ចារ្យ! ០.៥ = ៥/១០ = ១/២!",
+      "audioUrl": "/audio/steps/f02-s3-decimal-fraction-link.mp3"
     }
   ]
 }

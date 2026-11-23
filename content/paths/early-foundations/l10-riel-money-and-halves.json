@@ -17,7 +17,12 @@
       "promptKm": "នំមួយដុំថ្លៃ ១,០០០៛។ ប៉ះក្រដាសប្រាក់រៀលដាក់លើថាសឱ្យគ្រប់ ១,០០០៛!",
       "config": {
         "variant": "banknote-builder",
-        "availableNotesKhr": [100, 500, 1000, 2000]
+        "availableNotesKhr": [
+          100,
+          500,
+          1000,
+          2000
+        ]
       },
       "solution": {
         "expectedSumKhr": 1000
@@ -39,7 +44,8 @@
           "textKm": "ប៉ះ «+៥០០៛» ២ ដង (៥០០ + ៥០០ = ១,០០០៛) ឬប៉ះ «+១,០០០៛» ១ ដង!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ៥០០៛ + ៥០០៛ = ១,០០០៛ ស្មើនឹងក្រដាសប្រាក់ ១,០០០៛ មួយសន្លឹក!"
+      "explanationKm": "ល្អណាស់! ៥០០៛ + ៥០០៛ = ១,០០០៛ ស្មើនឹងក្រដាសប្រាក់ ១,០០០៛ មួយសន្លឹក!",
+      "audioUrl": "/audio/steps/l10-s1-build-1000-riel.mp3"
     },
     {
       "id": "l10-s2-riel-change",
@@ -86,7 +92,8 @@
           "textKm": "២,០០០៛ − ១,៥០០៛ = ៥០០៛ ដូច្នេះសូមជ្រើសរើស «៥០០៛»!"
         }
       ],
-      "explanationKm": "ពូកែណាស់! ២,០០០៛ − ១,៥០០៛ = ៥០០៛ ព្រោះ ១,៥០០៛ + ៥០០៛ = ២,០០០៛។"
+      "explanationKm": "ពូកែណាស់! ២,០០០៛ − ១,៥០០៛ = ៥០០៛ ព្រោះ ១,៥០០៛ + ៥០០៛ = ២,០០០៛។",
+      "audioUrl": "/audio/steps/l10-s2-riel-change.mp3"
     },
     {
       "id": "l10-s3-half-cake",
@@ -123,7 +130,8 @@
           "textKm": "ប៉ះ ១ ផ្នែកនៃរបារនំ ដើម្បីលាបពណ៌ ១/២!"
         }
       ],
-      "explanationKm": "ល្អណាស់! ១ ចំណែកក្នុងចំណោម ២ ចំណែកស្មើគ្នា ហៅថាពាក់កណ្តាល ឬ ១/២។"
+      "explanationKm": "ល្អណាស់! ១ ចំណែកក្នុងចំណោម ២ ចំណែកស្មើគ្នា ហៅថាពាក់កណ្តាល ឬ ១/២។",
+      "audioUrl": "/audio/steps/l10-s3-half-cake.mp3"
     },
     {
       "id": "l10-s4-equivalent-half",
@@ -136,7 +144,10 @@
         "denominator": 4,
         "initialShaded": 0,
         "allowPartitionChange": true,
-        "availableDenominators": [2, 4],
+        "availableDenominators": [
+          2,
+          4
+        ],
         "showNumberLine": true
       },
       "solution": {
@@ -161,7 +172,8 @@
           "textKm": "ប៉ះ ២ ផ្នែកនៃរបារ ៤ ចំណែក ដើម្បីបង្ហាញថា ២/៤ = ១/២!"
         }
       ],
-      "explanationKm": "អស្ចារ្យ! ២/៤ ស្មើនឹង ១/២ ព្រោះចំណែកនំ និងទីតាំងលើបន្ទាត់ចំនួន ០ ដល់ ១ ស្ថិតនៅកណ្ដាលដូចគ្នា!"
+      "explanationKm": "អស្ចារ្យ! ២/៤ ស្មើនឹង ១/២ ព្រោះចំណែកនំ និងទីតាំងលើបន្ទាត់ចំនួន ០ ដល់ ១ ស្ថិតនៅកណ្ដាលដូចគ្នា!",
+      "audioUrl": "/audio/steps/l10-s4-equivalent-half.mp3"
     }
   ]
 }
