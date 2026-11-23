@@ -13,6 +13,7 @@ import {
   playPatternMelody,
   playScaleNote,
   playSuccessChime,
+  playWaterPlop,
 } from "@/lib/audio/chimes";
 import {
   formatDisplayNumber,
@@ -86,11 +87,41 @@ const KRAMA_COLORS = [
 
 const BANKNOTES = [100, 500, 1000, 2000] as const;
 
+interface FrogPuzzle {
+  start: number;
+  target: number;
+  hintKm: string;
+}
+
+const FROG_PUZZLES: FrogPuzzle[] = [
+  { start: 3, target: 10, hintKm: "ពី ៣ ទៅ ១០ ត្រូវលោតបូក ៧ (ឧ. +៥ រួច +២)!" },
+  { start: 6, target: 15, hintKm: "ពី ៦ លោតទៅ ១០ (+៤) រួច +៥ ដល់ ១៥!" },
+  { start: 8, target: 13, hintKm: "ពី ៨ លោត +៥ ម្ដង ដល់ ១៣ ភ្លាម!" },
+  { start: 14, target: 10, hintKm: "ពី ១៤ លោតថយក្រោយ −១ ចំនួន ៤ ដង!" },
+  { start: 2, target: 12, hintKm: "ពី ២ លោត +៥ ពីរដង ដល់ ១២!" },
+];
+
+interface MysteryScalePuzzle {
+  knownLeft: number;
+  rightTotal: number;
+  expectedMystery: number;
+}
+
+const MYSTERY_SCALE_PUZZLES: MysteryScalePuzzle[] = [
+  { knownLeft: 3, rightTotal: 8, expectedMystery: 5 },
+  { knownLeft: 4, rightTotal: 10, expectedMystery: 6 },
+  { knownLeft: 2, rightTotal: 9, expectedMystery: 7 },
+  { knownLeft: 5, rightTotal: 12, expectedMystery: 7 },
+  { knownLeft: 6, rightTotal: 9, expectedMystery: 3 },
+];
+
 export function PlayStudioClient() {
   const { numeralPref, audioEnabled } = useLearner();
-  const [activeMode, setActiveMode] = useState<"market" | "krama">("market");
+  const [activeMode, setActiveMode] = useState<
+    "market" | "krama" | "frog" | "scale"
+  >("market");
 
-  // Market Stall state
+  // 1. Market Stall state
   const [orderIdx, setOrderIdx] = useState<number>(0);
   const [packedCount, setPackedCount] = useState<number>(0);
   const [notesOnTray, setNotesOnTray] = useState<number[]>([]);
@@ -100,20 +131,39 @@ export function PlayStudioClient() {
   } | null>(null);
   const [customersServed, setCustomersServed] = useState<number>(0);
 
-  // Krama Pattern Weaver state
+  // 2. Krama Pattern Weaver state
   const [loomSlots, setLoomSlots] = useState<Array<string | null>>(() =>
     Array.from({ length: 8 }, () => null)
   );
   const [selectedColorId, setSelectedColorId] = useState<string>("red");
   const [kramaChecked, setKramaChecked] = useState<boolean>(false);
 
+  // 3. Frog Pond Target Jump state
+  const [frogPuzzleIdx, setFrogPuzzleIdx] = useState<number>(0);
+  const [frogPos, setFrogPos] = useState<number>(FROG_PUZZLES[0].start);
+  const [frogJumps, setFrogJumps] = useState<number>(0);
+  const [frogWonCount, setFrogWonCount] = useState<number>(0);
+
+  // 4. Mystery Balance Scale state
+  const [scalePuzzleIdx, setScalePuzzleIdx] = useState<number>(0);
+  const [chosenStone, setChosenStone] = useState<number | null>(null);
+  const [scaleSolvedCount, setScaleSolvedCount] = useState<number>(0);
+
   const currentOrder = MARKET_ORDERS[orderIdx % MARKET_ORDERS.length];
   const traySumKhr = notesOnTray.reduce((s, n) => s + n, 0);
-
   const kramaAnalysis = useMemo(
     () => detectKramaPattern(loomSlots),
     [loomSlots]
   );
+
+  const currentFrogPuzzle = FROG_PUZZLES[frogPuzzleIdx % FROG_PUZZLES.length];
+  const frogReachedTarget = frogPos === currentFrogPuzzle.target;
+
+  const currentScalePuzzle =
+    MYSTERY_SCALE_PUZZLES[scalePuzzleIdx % MYSTERY_SCALE_PUZZLES.length];
+  const scaleLeftTotal = currentScalePuzzle.knownLeft + (chosenStone ?? 0);
+  const scaleBalanced =
+    chosenStone !== null && scaleLeftTotal === currentScalePuzzle.rightTotal;
 
   // Market Stall handlers
   const handleAddFruit = () => {
@@ -228,6 +278,47 @@ export function PlayStudioClient() {
     }
   };
 
+  // Frog Pond Jump handlers
+  const handleFrogJump = (delta: number) => {
+    if (frogReachedTarget) return;
+    const nextPos = Math.max(0, Math.min(20, frogPos + delta));
+    setFrogPos(nextPos);
+    setFrogJumps((j) => j + 1);
+    if (nextPos === currentFrogPuzzle.target) {
+      playSuccessChime(audioEnabled);
+      setFrogWonCount((w) => w + 1);
+    } else {
+      playWaterPlop(audioEnabled);
+    }
+  };
+
+  const handleNextFrogPuzzle = () => {
+    const nextIdx = (frogPuzzleIdx + 1) % FROG_PUZZLES.length;
+    setFrogPuzzleIdx(nextIdx);
+    setFrogPos(FROG_PUZZLES[nextIdx].start);
+    setFrogJumps(0);
+  };
+
+  // Mystery Balance Scale handlers
+  const handlePickStone = (val: number) => {
+    setChosenStone(val);
+    const leftSum = currentScalePuzzle.knownLeft + val;
+    if (leftSum === currentScalePuzzle.rightTotal) {
+      playSuccessChime(audioEnabled);
+      setScaleSolvedCount((c) => c + 1);
+    } else {
+      playScaleNote(Math.min(10, val), audioEnabled);
+    }
+  };
+
+  const handleNextScalePuzzle = () => {
+    setScalePuzzleIdx((i) => (i + 1) % MYSTERY_SCALE_PUZZLES.length);
+    setChosenStone(null);
+  };
+
+  const scaleDiff = scaleLeftTotal - currentScalePuzzle.rightTotal;
+  const scaleTilt = scaleDiff === 0 ? 0 : scaleDiff > 0 ? -8 : 8;
+
   return (
     <div className="min-h-screen bg-canvas flex flex-col">
       <header className="sticky top-0 z-20 border-b border-border bg-surface/95 backdrop-blur px-3 py-2.5">
@@ -263,14 +354,17 @@ export function PlayStudioClient() {
           </Link>
         </div>
 
-        {/* Mode Switcher */}
-        <nav aria-label="ជ្រើសរើសហ្គេមគណិត" className="grid grid-cols-2 gap-2.5">
+        {/* 4-Game Mode Switcher */}
+        <nav
+          aria-label="ជ្រើសរើសហ្គេមគណិត"
+          className="grid grid-cols-2 gap-2"
+        >
           <button
             type="button"
             data-testid="play-tab-market"
             aria-pressed={activeMode === "market"}
             onClick={() => setActiveMode("market")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2.5 text-sm font-bold transition-colors ${
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
               activeMode === "market"
                 ? "border-accent bg-accent text-white shadow-xs"
                 : "border-border bg-surface text-ink hover:bg-surface-subtle"
@@ -283,7 +377,7 @@ export function PlayStudioClient() {
             data-testid="play-tab-krama"
             aria-pressed={activeMode === "krama"}
             onClick={() => setActiveMode("krama")}
-            className={`khmer-chip rounded-2xl border-2 px-3 py-2.5 text-sm font-bold transition-colors ${
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
               activeMode === "krama"
                 ? "border-accent bg-accent text-white shadow-xs"
                 : "border-border bg-surface text-ink hover:bg-surface-subtle"
@@ -291,14 +385,40 @@ export function PlayStudioClient() {
           >
             ត្បាញក្រមាគណិត
           </button>
+          <button
+            type="button"
+            data-testid="play-tab-frog"
+            aria-pressed={activeMode === "frog"}
+            onClick={() => setActiveMode("frog")}
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+              activeMode === "frog"
+                ? "border-accent bg-accent text-white shadow-xs"
+                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+            }`}
+          >
+            កង្កែបលោតដល់ផ្កាឈូក
+          </button>
+          <button
+            type="button"
+            data-testid="play-tab-scale"
+            aria-pressed={activeMode === "scale"}
+            onClick={() => setActiveMode("scale")}
+            className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+              activeMode === "scale"
+                ? "border-accent bg-accent text-white shadow-xs"
+                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+            }`}
+          >
+            ជញ្ជីងអាថ៌កំបាំង
+          </button>
         </nav>
 
-        {activeMode === "market" ? (
+        {/* MODE 1: Cambodian Market Stall */}
+        {activeMode === "market" && (
           <section
             data-testid="market-stall-panel"
             className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
           >
-            {/* Customer Order Bubble */}
             <div className="flex items-start gap-3 rounded-2xl border border-border bg-canvas p-3.5">
               <MascotFrog
                 mood={marketStatus?.ok ? "happy" : "curious"}
@@ -330,7 +450,6 @@ export function PlayStudioClient() {
 
             <CelebrationBurst active={Boolean(marketStatus?.ok)} />
 
-            {/* Woven Fruit Tray SVG (Safari-safe, zero foreignObject) */}
             <div className="rounded-2xl border border-border bg-canvas p-3 space-y-3">
               <div className="flex items-center justify-between text-sm font-bold text-ink">
                 <span>ថាសរៀប{currentOrder.itemNameKm}៖</span>
@@ -410,7 +529,6 @@ export function PlayStudioClient() {
               </div>
             </div>
 
-            {/* Riel Banknote Cash Tray */}
             <div className="rounded-2xl border border-border bg-canvas p-3 space-y-2.5">
               <div className="flex items-center justify-between text-sm font-bold text-ink">
                 <span>ប្រាក់រៀលលើថាស៖</span>
@@ -503,8 +621,10 @@ export function PlayStudioClient() {
               )}
             </div>
           </section>
-        ) : (
-          /* Krama Pattern Weaver */
+        )}
+
+        {/* MODE 2: Krama Pattern Weaver */}
+        {activeMode === "krama" && (
           <section
             data-testid="krama-weaver-panel"
             className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
@@ -522,7 +642,6 @@ export function PlayStudioClient() {
               active={kramaChecked && kramaAnalysis.isRepeating}
             />
 
-            {/* 8-slot Krama Loom (>= 56x56px each) */}
             <div className="rounded-2xl border border-border bg-canvas p-3 grid grid-cols-4 gap-2">
               {loomSlots.map((colorId, idx) => {
                 const cObj = KRAMA_COLORS.find((c) => c.id === colorId);
@@ -545,14 +664,7 @@ export function PlayStudioClient() {
                         className="h-12 w-12"
                         aria-hidden="true"
                       >
-                        <rect
-                          x={2}
-                          y={2}
-                          width={40}
-                          height={40}
-                          rx={8}
-                          fill={cObj.fill}
-                        />
+                        <rect x={2} y={2} width={40} height={40} rx={8} fill={cObj.fill} />
                         <line x1={2} y1={14} x2={42} y2={14} stroke={cObj.stripe} strokeWidth={3} />
                         <line x1={2} y1={30} x2={42} y2={30} stroke={cObj.stripe} strokeWidth={3} />
                         <line x1={14} y1={2} x2={14} y2={42} stroke={cObj.stripe} strokeWidth={2.5} />
@@ -568,7 +680,6 @@ export function PlayStudioClient() {
               })}
             </div>
 
-            {/* Thread color palette (>= 56x56px) */}
             <div className="grid grid-cols-4 gap-2">
               {KRAMA_COLORS.map((c) => {
                 const active = selectedColorId === c.id;
@@ -599,7 +710,6 @@ export function PlayStudioClient() {
               })}
             </div>
 
-            {/* Quick actions & starter presets */}
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
@@ -669,6 +779,289 @@ export function PlayStudioClient() {
                 ស្ដាប់ភ្លេងក្រមា
               </button>
             </div>
+          </section>
+        )}
+
+        {/* MODE 3: Frog Pond Target Jump */}
+        {activeMode === "frog" && (
+          <section
+            data-testid="frog-jump-panel"
+            className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
+          >
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-canvas p-3.5">
+              <MascotFrog
+                mood={frogReachedTarget ? "happy" : "curious"}
+                size={46}
+              />
+              <div className="flex-1 space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-accent">
+                    នាំកង្កែបលោតដល់ផ្កាឈូកមាស!
+                  </p>
+                  <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success">
+                    ជោគជ័យ៖ {formatDisplayNumber(frogWonCount, numeralPref)} ដង
+                  </span>
+                </div>
+                <p className="text-base font-bold text-ink">
+                  ចាប់ផ្ដើមពីលេខ{" "}
+                  <strong className="text-accent">
+                    {formatDisplayNumber(currentFrogPuzzle.start, numeralPref)}
+                  </strong>{" "}
+                  → គោលដៅលេខ{" "}
+                  <strong className="text-success">
+                    {formatDisplayNumber(currentFrogPuzzle.target, numeralPref)}
+                  </strong>
+                </p>
+              </div>
+            </div>
+
+            <CelebrationBurst active={frogReachedTarget} />
+
+            {/* Visual Pond Progress SVG (0..20, Safari-safe) */}
+            <div className="rounded-2xl border border-border bg-sky-50 p-3 space-y-2">
+              <div className="flex items-center justify-between text-xs font-bold text-ink">
+                <span data-testid="frog-current-pos">
+                  ទីតាំងកង្កែប៖ {formatDisplayNumber(frogPos, numeralPref)}
+                </span>
+                <span>
+                  ចំនួនលោត៖ {formatDisplayNumber(frogJumps, numeralPref)}
+                </span>
+              </div>
+
+              <svg
+                viewBox="0 0 320 96"
+                className="w-full h-auto select-none"
+                role="img"
+                aria-label={`កង្កែបនៅលេខ ${formatDisplayNumber(frogPos, numeralPref)} ក្នុងគោលដៅលេខ ${formatDisplayNumber(currentFrogPuzzle.target, numeralPref)}`}
+              >
+                <rect x={0} y={0} width={320} height={96} rx={14} fill="#bae6fd" />
+                <line x1={18} y1={60} x2={302} y2={60} stroke="#0284c7" strokeWidth={4} strokeLinecap="round" />
+
+                {/* 0, 10, 20 landmark pads */}
+                {[0, 5, 10, 15, 20].map((v) => {
+                  const x = 18 + (v / 20) * 284;
+                  return (
+                    <g key={v}>
+                      <line x1={x} y1={52} x2={x} y2={68} stroke="#0369a1" strokeWidth={2.5} />
+                      <text x={x} y={84} textAnchor="middle" fontSize={12} fontWeight={700} fill="#0c4a6e">
+                        {formatDisplayNumber(v, numeralPref)}
+                      </text>
+                    </g>
+                  );
+                })}
+
+                {/* Glowing golden lotus target */}
+                {(() => {
+                  const tx = 18 + (currentFrogPuzzle.target / 20) * 284;
+                  return (
+                    <g>
+                      <ellipse cx={tx} cy={60} rx={15} ry={7} fill="#4ade80" stroke="#15803d" strokeWidth={1.5} />
+                      <circle cx={tx} cy={47} r={10} fill="#facc15" stroke="#b45309" strokeWidth={2} />
+                      <text x={tx} y={28} textAnchor="middle" fontSize={12} fontWeight={700} fill="#92400e">
+                        {formatDisplayNumber(currentFrogPuzzle.target, numeralPref)}
+                      </text>
+                    </g>
+                  );
+                })()}
+
+                {/* Hopping Frog */}
+                {(() => {
+                  const fx = 18 + (frogPos / 20) * 284;
+                  return (
+                    <g>
+                      <circle cx={fx} cy={46} r={13} fill="#22c55e" stroke="#15803d" strokeWidth={2} />
+                      <circle cx={fx - 5} cy={35} r={4} fill="#22c55e" stroke="#15803d" strokeWidth={1.4} />
+                      <circle cx={fx + 5} cy={35} r={4} fill="#22c55e" stroke="#15803d" strokeWidth={1.4} />
+                      <circle cx={fx - 5} cy={35} r={1.6} fill="#111827" />
+                      <circle cx={fx + 5} cy={35} r={1.6} fill="#111827" />
+                    </g>
+                  );
+                })()}
+              </svg>
+            </div>
+
+            {/* Jump lily-pad buttons (>= 56x56px) */}
+            <div className="grid grid-cols-4 gap-2">
+              {([-1, 1, 2, 5] as const).map((delta) => (
+                <button
+                  key={delta}
+                  type="button"
+                  data-testid={`frog-jump-${delta < 0 ? "m1" : `p${delta}`}`}
+                  disabled={frogReachedTarget}
+                  onClick={() => handleFrogJump(delta)}
+                  className={`manipulative-target rounded-2xl border-2 px-2 text-base font-bold transition-colors disabled:opacity-45 ${
+                    delta < 0
+                      ? "border-border bg-surface text-ink"
+                      : "border-accent bg-accent-soft text-accent hover:bg-accent hover:text-white"
+                  }`}
+                >
+                  {delta > 0 ? "+" : "−"}
+                  {formatDisplayNumber(Math.abs(delta), numeralPref)}
+                </button>
+              ))}
+            </div>
+
+            {frogReachedTarget ? (
+              <div
+                data-testid="frog-win-banner"
+                role="status"
+                className="rounded-2xl border-2 border-success bg-success-soft p-3.5 text-center space-y-2.5"
+              >
+                <p className="text-base font-bold text-ink">
+                  អស្ចារ្យ! កង្កែបតូចលោតដល់ផ្កាឈូកលេខ{" "}
+                  {formatDisplayNumber(currentFrogPuzzle.target, numeralPref)} ហើយ!
+                </p>
+                <button
+                  type="button"
+                  data-testid="frog-next-btn"
+                  onClick={handleNextFrogPuzzle}
+                  className="khmer-chip rounded-2xl bg-success px-5 py-2.5 text-sm font-bold text-white"
+                >
+                  លេងស្រះបន្ទាប់ →
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-ink-muted text-center">
+                គន្លឹះ៖ {formatTextNumerals(currentFrogPuzzle.hintKm, numeralPref)}
+              </p>
+            )}
+          </section>
+        )}
+
+        {/* MODE 4: Mystery Balance Scale */}
+        {activeMode === "scale" && (
+          <section
+            data-testid="mystery-scale-panel"
+            className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
+          >
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-canvas p-3.5">
+              <MascotFrog
+                mood={scaleBalanced ? "happy" : "curious"}
+                size={46}
+              />
+              <div className="flex-1 space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-accent">
+                    រកលេខអាថ៌កំបាំងក្នុងប្រអប់មាស!
+                  </p>
+                  <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success">
+                    ដោះស្រាយ៖ {formatDisplayNumber(scaleSolvedCount, numeralPref)}
+                  </span>
+                </div>
+                <p className="text-base font-bold text-ink">
+                  {formatTextNumerals(
+                    `ប្រអប់ ? + ${currentScalePuzzle.knownLeft} = ${currentScalePuzzle.rightTotal}`,
+                    numeralPref
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <CelebrationBurst active={scaleBalanced} />
+
+            {/* Tilting Mystery Balance SVG */}
+            <div className="rounded-2xl border border-border bg-canvas p-3">
+              <svg
+                viewBox="0 0 320 160"
+                className="w-full max-w-[360px] mx-auto h-auto select-none"
+                role="img"
+                aria-label={`ជញ្ជីងអាថ៌កំបាំង៖ ខាងឆ្វេង ${formatDisplayNumber(scaleLeftTotal, numeralPref)} និងខាងស្ដាំ ${formatDisplayNumber(currentScalePuzzle.rightTotal, numeralPref)}`}
+              >
+                <polygon points="160,86 136,144 184,144" fill="#d6cfc2" stroke="#78716c" strokeWidth={2} />
+                <rect x={112} y={142} width={96} height={10} rx={5} fill="#78716c" />
+
+                <g transform={`rotate(${scaleTilt} 160 88)`}>
+                  <line
+                    x1={42}
+                    y1={88}
+                    x2={278}
+                    y2={88}
+                    stroke={scaleBalanced ? "#15803d" : "#374151"}
+                    strokeWidth={6}
+                    strokeLinecap="round"
+                  />
+
+                  {/* Left pan: Mystery Box + Known */}
+                  <rect x={18} y={34} width={104} height={52} rx={12} fill="#fffbeb" stroke="#d97706" strokeWidth={2} />
+                  <rect x={26} y={42} width={40} height={36} rx={8} fill={scaleBalanced ? "#dcfce7" : "#fef08a"} stroke="#b45309" strokeWidth={2} />
+                  <text x={46} y={66} textAnchor="middle" fontSize={18} fontWeight={700} fill="#92400e">
+                    {chosenStone !== null
+                      ? formatDisplayNumber(chosenStone, numeralPref)
+                      : "?"}
+                  </text>
+                  <text x={94} y={66} textAnchor="middle" fontSize={16} fontWeight={700} fill="#1f2937">
+                    +{formatDisplayNumber(currentScalePuzzle.knownLeft, numeralPref)}
+                  </text>
+
+                  {/* Right pan: Target Total */}
+                  <rect x={198} y={34} width={104} height={52} rx={12} fill="#eff6ff" stroke="#2563eb" strokeWidth={2} />
+                  <text x={250} y={67} textAnchor="middle" fontSize={24} fontWeight={700} fill="#1d4ed8">
+                    {formatDisplayNumber(currentScalePuzzle.rightTotal, numeralPref)}
+                  </text>
+                </g>
+
+                <circle cx={160} cy={88} r={7} fill="#ffffff" stroke="#374151" strokeWidth={2.5} />
+              </svg>
+            </div>
+
+            {/* Number stones 1..9 (>= 56x56px each) */}
+            <div className="grid grid-cols-3 gap-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((stone) => {
+                const isPicked = chosenStone === stone;
+                return (
+                  <button
+                    key={stone}
+                    type="button"
+                    data-testid={`scale-stone-${stone}`}
+                    aria-pressed={isPicked}
+                    onClick={() => handlePickStone(stone)}
+                    className={`manipulative-target rounded-2xl border-2 text-lg font-bold transition-colors ${
+                      isPicked && scaleBalanced
+                        ? "border-success bg-success text-white"
+                        : isPicked
+                          ? "border-hint bg-hint-soft text-hint-ink"
+                          : "border-border bg-surface text-ink hover:border-accent hover:bg-accent-soft"
+                    }`}
+                  >
+                    {formatDisplayNumber(stone, numeralPref)}
+                  </button>
+                );
+              })}
+            </div>
+
+            {scaleBalanced ? (
+              <div
+                data-testid="scale-win-banner"
+                role="status"
+                className="rounded-2xl border-2 border-success bg-success-soft p-3.5 text-center space-y-2.5"
+              >
+                <p className="text-base font-bold text-ink">
+                  {formatTextNumerals(
+                    `ពូកែណាស់! ${chosenStone} + ${currentScalePuzzle.knownLeft} = ${currentScalePuzzle.rightTotal} — ជញ្ជីងស្មើគ្នាហើយ!`,
+                    numeralPref
+                  )}
+                </p>
+                <button
+                  type="button"
+                  data-testid="scale-next-btn"
+                  onClick={handleNextScalePuzzle}
+                  className="khmer-chip rounded-2xl bg-success px-5 py-2.5 text-sm font-bold text-white"
+                >
+                  ជញ្ជីងបន្ទាប់ →
+                </button>
+              </div>
+            ) : (
+              chosenStone !== null && (
+                <p
+                  role="status"
+                  className="rounded-xl bg-hint-soft px-3.5 py-2 text-center text-xs font-bold text-hint-ink"
+                >
+                  {scaleLeftTotal < currentScalePuzzle.rightTotal
+                    ? `ខាងឆ្វេងបាន ${formatDisplayNumber(scaleLeftTotal, numeralPref)} នៅស្រាលជាង ${formatDisplayNumber(currentScalePuzzle.rightTotal, numeralPref)} — សាករើសលេខធំជាងនេះបន្តិចណា៎!`
+                    : `ខាងឆ្វេងបាន ${formatDisplayNumber(scaleLeftTotal, numeralPref)} ធ្ងន់ជាង ${formatDisplayNumber(currentScalePuzzle.rightTotal, numeralPref)} — សាករើសលេខតូចជាងនេះបន្តិចណា៎!`}
+                </p>
+              )
+            )}
           </section>
         )}
       </main>

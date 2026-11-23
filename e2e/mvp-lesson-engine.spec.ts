@@ -534,5 +534,30 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await page.getByTestId("krama-check-btn").click();
     await expect(page.getByTestId("krama-result-panel")).toContainText("AB");
     await expectNoWcag22Violations(page);
+
+    // 4. Switch to Frog Pond Target Jump (3 -> 10 via +5, +2)
+    await page.getByTestId("play-tab-frog").click();
+    await expect(page.getByTestId("frog-jump-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("frog-jump-p5").click();
+    await page.getByTestId("frog-jump-p2").click();
+    await expect(page.getByTestId("frog-win-banner")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 5. Switch to Mystery Balance Scale (? + 3 = 8 -> stone 5)
+    await page.getByTestId("play-tab-scale").click();
+    await expect(page.getByTestId("mystery-scale-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("scale-stone-5").click();
+    await expect(page.getByTestId("scale-win-banner")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 6. Verify 4th path (Multiplication, Division & Algebra) on /learn
+    await page.goto("/learn");
+    await page.getByTestId("path-tab-multiplication-and-algebra").click();
+    await expect(
+      page.getByTestId("lesson-card-m03-balance-scale-algebra")
+    ).toBeVisible();
+    await expectNoWcag22Violations(page);
   });
 });

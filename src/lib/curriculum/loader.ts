@@ -95,9 +95,18 @@ export function getAllLearningPaths(): LearningPathMeta[] {
       titleKm: "ប្រភាគ និងចំនួនទសភាគ",
       shortTitleKm: "ប្រភាគ និងទសភាគ",
       subtitleKm:
-        "មើលឃើញប្រភាគស្មើគ្នា ភាគដប់លើបន្ទាត់ចំនួន ០–១ និងការប្រៀបធៀបចំនួនទសភាគ",
+        "មើលឃើញប្រភាគស្មើគ្នា បូកប្រភាគ ភាគដប់លើបន្ទាត់ចំនួន ០–១ និងការប្រៀបធៀបចំនួនទសភាគ",
       gradeRangeKm: "ថ្នាក់ ៣–៥",
       lessons: loadLessonsForPath("fractions-and-decimals"),
+    },
+    {
+      id: "multiplication-and-algebra",
+      titleKm: "វិធីគុណ ចែក និងពិជគណិតដំបូង",
+      shortTitleKm: "គុណ ចែក និងពិជគណិត",
+      subtitleKm:
+        "រៀនវិធីគុណ ចែកស្មើៗគ្នា ជញ្ជីងសមីការអាថ៌កំបាំង និងភាគរយក្នុងការទិញឥវ៉ាន់",
+      gradeRangeKm: "ថ្នាក់ ២–៦",
+      lessons: loadLessonsForPath("multiplication-and-algebra"),
     },
   ];
 }
