@@ -1,5 +1,10 @@
 import type { ActivityStep } from "@/lib/curriculum/schema";
 import { normalizeNumericInput, stripZwsp } from "@/lib/khmer/numerals";
+import {
+  analyzeDrawnPolygon,
+  checkSymmetryMirror,
+  type DrawnEdge,
+} from "@/lib/math/geometryDraw";
 
 export type StepAnswer =
   | {
@@ -45,6 +50,11 @@ export type StepAnswer =
   | {
       type: "pattern-sequence";
       slotValues: Array<string | null>;
+    }
+  | {
+      type: "geometry-draw";
+      edges?: DrawnEdge[];
+      paintedCells?: string[];
     };
 
 export interface GradeDiscrepancy {
@@ -62,6 +72,7 @@ export interface GradeDiscrepancy {
     | "fraction-mismatch"
     | "shape-mismatch"
     | "pattern-mismatch"
+    | "drawing-mismatch"
     | "invalid-input";
   expected?: number;
   actual?: number;
@@ -620,6 +631,108 @@ export function gradeStep(step: ActivityStep, answer: StepAnswer): GradeResult {
         feedbackKm:
           "ជិតត្រូវហើយ! សាកមើលលំនាំដែលកើតឡើងដដែលៗពីឆ្វេងទៅស្ដាំម្ដងទៀតណា៎។",
         discrepancy: { kind: "pattern-mismatch" },
+      };
+    }
+
+    case "geometry-draw": {
+      const ans = answer as Extract<StepAnswer, { type: "geometry-draw" }>;
+
+      if (step.config.mode === "dot-connect") {
+        const cleanEdges = (ans.edges ?? []).map((e) => ({
+          from: stripZwsp(e.from).trim(),
+          to: stripZwsp(e.to).trim(),
+        }));
+        const poly = analyzeDrawnPolygon(cleanEdges);
+        const expected = step.solution.expectedShape;
+
+        if (!poly.isClosed) {
+          return {
+            isCorrect: false,
+            feedbackKm:
+              "រូបនៅមិនទាន់បិទជិតទេ! សូមភ្ជាប់ចំណុចចុងក្រោយត្រឡប់ទៅចំណុចដំបូងវិញណា៎។",
+            discrepancy: { kind: "drawing-mismatch" },
+          };
+        }
+
+        const matched =
+          expected === "triangle"
+            ? poly.kind === "triangle"
+            : expected === "square"
+              ? poly.kind === "square"
+              : expected === "rectangle"
+                ? poly.kind === "rectangle" || poly.kind === "square"
+                : poly.isClosed;
+
+        if (matched) {
+          return {
+            isCorrect: true,
+            feedbackKm: "អស្ចារ្យណាស់! អ្នកគូររូបធរណីមាត្របានស្អាត និងត្រឹមត្រូវ!",
+          };
+        }
+
+        return {
+          isCorrect: false,
+          feedbackKm:
+            expected === "triangle"
+              ? "សាកគូររូបបិទជិតដែលមាន ៣ ជ្រុង (ត្រីកោណ) ណា៎!"
+              : expected === "square"
+                ? "សាកគូររូបការ៉េដែលមាន ៤ ជ្រុងស្មើគ្នា និង ៤ មុំកែងណា៎!"
+                : "សាកគូររូបចតុកោណកែងដែលមាន ៤ ជ្រុង និង ៤ មុំកែងណា៎!",
+          discrepancy: { kind: "drawing-mismatch" },
+        };
+      }
+
+      if (step.config.mode === "symmetry-mirror") {
+        const cleanPainted = (ans.paintedCells ?? []).map((c) =>
+          stripZwsp(c).trim()
+        );
+        const check = checkSymmetryMirror(
+          step.config.gridCols,
+          step.config.templateLeftCells,
+          cleanPainted
+        );
+
+        if (check.isMatch) {
+          return {
+            isCorrect: true,
+            feedbackKm: "ពូកែណាស់! រូបឆ្លុះស៊ីមេទ្រីរបស់អ្នកស្មើឥតខ្ចោះ!",
+          };
+        }
+
+        return {
+          isCorrect: false,
+          feedbackKm:
+            check.extraCount > 0
+              ? "ជិតត្រូវហើយ! មានប្រឡោះខ្លះមិនទាន់ឆ្លុះស្មើនឹងខាងឆ្វេង សាកប៉ះលុបពណ៌ចេញវិញបន្តិចណា៎។"
+              : "ជិតត្រូវហើយ! នៅខ្វះប្រឡោះពណ៌ខ្លះនៅខាងស្ដាំ សាកមើលឆ្លុះពីអ័ក្សស៊ីមេទ្រីម្ដងទៀតណា៎!",
+          discrepancy: { kind: "drawing-mismatch" },
+        };
+      }
+
+      // area-paint mode
+      const cleanPainted = Array.from(
+        new Set((ans.paintedCells ?? []).map((c) => stripZwsp(c).trim()))
+      ).filter(Boolean);
+      const expectedArea = step.solution.expectedArea ?? 4;
+
+      if (cleanPainted.length === expectedArea) {
+        return {
+          isCorrect: true,
+          feedbackKm: "ល្អណាស់! ផ្ទៃក្រឡានៃរូបដែលអ្នកគូរគ្រប់ត្រឹមត្រូវហើយ!",
+        };
+      }
+
+      return {
+        isCorrect: false,
+        feedbackKm:
+          cleanPainted.length < expectedArea
+            ? "ផ្ទៃក្រឡានៅតិចជាងគោលដៅបន្តិច សាកលាបពណ៌បន្ថែមប្រឡោះទៀតណា៎!"
+            : "ផ្ទៃក្រឡាលើសគោលដៅបន្តិចហើយ សាកប៉ះលុបពណ៌ចេញខ្លះវិញណា៎!",
+        discrepancy: {
+          kind: "drawing-mismatch",
+          expected: expectedArea,
+          actual: cleanPainted.length,
+        },
       };
     }
   }

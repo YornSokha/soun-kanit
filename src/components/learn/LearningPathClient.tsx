@@ -278,7 +278,7 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
             <div className="space-y-0.5">
               <p className="text-base font-bold text-ink">ក្ដារលេងគណិត</p>
               <p className="text-xs text-ink-muted">
-                ហាងផ្លែឈើ ត្បាញក្រមា កង្កែបលោត និងជញ្ជីងអាថ៌កំបាំង
+                ហាងផ្លែឈើ ត្បាញក្រមា កង្កែបលោត ជញ្ជីង និងគូររូបគណិត
               </p>
             </div>
             <span className="rounded-full border border-hint bg-surface px-3 py-1 text-xs font-bold text-hint-ink shrink-0">

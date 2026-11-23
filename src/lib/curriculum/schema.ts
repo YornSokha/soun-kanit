@@ -245,6 +245,28 @@ export const PatternSequenceStepSchema = z.object({
   explanationKm: z.string().min(4).max(240),
 });
 
+export const GeometryDrawStepSchema = z.object({
+  id: z.string().min(1),
+  type: z.literal("geometry-draw"),
+  stage: ConcretenessStageSchema,
+  promptKm: z.string().min(4).max(180),
+  audioUrl: z.string().optional(),
+  config: z.object({
+    mode: z.enum(["dot-connect", "symmetry-mirror", "area-paint"]),
+    gridRows: z.number().int().min(3).max(5).default(4),
+    gridCols: z.number().int().min(3).max(5).default(4),
+    templateLeftCells: z.array(z.string()).default([]),
+    inkColor: z.string().default("#2563eb"),
+  }),
+  solution: z.object({
+    expectedShape: z.enum(["triangle", "square", "rectangle"]).optional(),
+    expectedArea: z.number().int().positive().optional(),
+    requireSymmetryMirror: z.boolean().default(false),
+  }),
+  hints: HintsArraySchema,
+  explanationKm: z.string().min(4).max(240),
+});
+
 export const ActivityStepSchema = z.discriminatedUnion("type", [
   CountingStageStepSchema,
   NumberLineStepSchema,
@@ -254,6 +276,7 @@ export const ActivityStepSchema = z.discriminatedUnion("type", [
   ArrayGroupsStepSchema,
   FractionBarShapeStepSchema,
   PatternSequenceStepSchema,
+  GeometryDrawStepSchema,
 ]);
 
 export const LessonDocumentV1Schema = z.object({
@@ -280,5 +303,6 @@ export type ComparisonBalanceStep = z.infer<typeof ComparisonBalanceStepSchema>;
 export type ArrayGroupsStep = z.infer<typeof ArrayGroupsStepSchema>;
 export type FractionBarShapeStep = z.infer<typeof FractionBarShapeStepSchema>;
 export type PatternSequenceStep = z.infer<typeof PatternSequenceStepSchema>;
+export type GeometryDrawStep = z.infer<typeof GeometryDrawStepSchema>;
 export type ActivityStep = z.infer<typeof ActivityStepSchema>;
 export type LessonDocumentV1 = z.infer<typeof LessonDocumentV1Schema>;

@@ -6,6 +6,7 @@ import {
 } from "../src/lib/curriculum/schema";
 import { DailyPuzzlePackV1Schema } from "../src/lib/curriculum/daily";
 import { gradeStep, type StepAnswer } from "../src/lib/math/grader";
+import { computeMirrorCells } from "../src/lib/math/geometryDraw";
 import { toKhmerDigits } from "../src/lib/khmer/numerals";
 
 const PATHS_DIR = path.join(process.cwd(), "content", "paths");
@@ -132,6 +133,49 @@ function buildValidAnswer(step: ActivityStep, useKhmer = false): StepAnswer {
         ),
       };
     }
+    case "geometry-draw": {
+      if (step.config.mode === "dot-connect") {
+        const z = useKhmer ? "\u200B" : "";
+        if (step.solution.expectedShape === "triangle") {
+          return {
+            type: "geometry-draw",
+            edges: [
+              { from: `0,0${z}`, to: "0,2" },
+              { from: "0,2", to: "2,1" },
+              { from: "2,1", to: "0,0" },
+            ],
+          };
+        }
+        // square or rectangle
+        return {
+          type: "geometry-draw",
+          edges: [
+            { from: `0,0${z}`, to: "0,2" },
+            { from: "0,2", to: "2,2" },
+            { from: "2,2", to: "2,0" },
+            { from: "2,0", to: "0,0" },
+          ],
+        };
+      }
+      if (step.config.mode === "symmetry-mirror") {
+        const mirrored = computeMirrorCells(
+          step.config.gridCols,
+          step.config.templateLeftCells
+        );
+        return {
+          type: "geometry-draw",
+          paintedCells: mirrored.map((c) => (useKhmer ? `${c}\u200B` : c)),
+        };
+      }
+      const area = step.solution.expectedArea ?? 4;
+      const cells: string[] = [];
+      for (let r = 0; r < step.config.gridRows && cells.length < area; r++) {
+        for (let c = 0; c < step.config.gridCols && cells.length < area; c++) {
+          cells.push(useKhmer ? `${r},${c}\u200B` : `${r},${c}`);
+        }
+      }
+      return { type: "geometry-draw", paintedCells: cells };
+    }
   }
 }
 
@@ -234,6 +278,12 @@ function buildInvalidAnswers(step: ActivityStep): StepAnswer[] {
           slotValues: step.solution.expectedSlotValues.map(() => "__wrong__"),
         },
       ];
+    }
+    case "geometry-draw": {
+      if (step.config.mode === "dot-connect") {
+        return [{ type: "geometry-draw", edges: [{ from: "0,0", to: "0,1" }] }];
+      }
+      return [{ type: "geometry-draw", paintedCells: [] }];
     }
   }
 }

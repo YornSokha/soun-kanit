@@ -560,4 +560,97 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     ).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 7: Geometry Drawing Lesson (g05) and /play Drawing Studio at 360x800 (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Open Lesson g05 (Geometry Drawing & Symmetry)
+    await page.goto("/learn/g05-drawing-shapes-and-symmetry");
+    await expect(page.getByTestId("draw-status-badge")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    // Step 1: Draw a closed triangle by tapping pegs
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("draw-peg-0-2").click();
+    await page.getByTestId("draw-peg-2-1").click();
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 2: Draw a closed square
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("draw-peg-0-2").click();
+    await page.getByTestId("draw-peg-2-2").click();
+    await page.getByTestId("draw-peg-2-0").click();
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 3: Mirror-symmetry butterfly wing painting
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+    for (const id of [
+      "draw-cell-0-3",
+      "draw-cell-1-3",
+      "draw-cell-1-2",
+      "draw-cell-2-3",
+      "draw-cell-2-2",
+      "draw-cell-3-3",
+    ]) {
+      await page.getByTestId(id).click();
+    }
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+
+    // Step 4: Paint exact area = 6 square units
+    for (const id of [
+      "draw-cell-0-0",
+      "draw-cell-0-1",
+      "draw-cell-0-2",
+      "draw-cell-1-0",
+      "draw-cell-1-1",
+      "draw-cell-1-2",
+    ]) {
+      await page.getByTestId(id).click();
+    }
+    await page.getByTestId("check-answer-btn").click();
+    await expect(page.getByTestId("continue-btn")).toBeVisible();
+    await page.getByTestId("continue-btn").click();
+    await expect(page.getByTestId("lesson-summary")).toBeVisible();
+    await expectNoWcag22Violations(page);
+
+    // 2. Open /play -> Drawing Studio tab -> complete Geoboard triangle + Butterfly symmetry
+    await page.goto("/play");
+    await page.getByTestId("play-tab-draw").click();
+    await expect(page.getByTestId("draw-studio-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("draw-peg-0-2").click();
+    await page.getByTestId("draw-peg-2-1").click();
+    await page.getByTestId("draw-peg-0-0").click();
+    await page.getByTestId("play-draw-check-btn").click();
+    await expect(page.getByTestId("play-draw-next-btn")).toBeVisible();
+
+    await page.getByTestId("play-draw-sub-symmetry").click();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    for (const id of [
+      "draw-cell-0-3",
+      "draw-cell-1-3",
+      "draw-cell-1-2",
+      "draw-cell-2-3",
+      "draw-cell-2-2",
+      "draw-cell-3-3",
+    ]) {
+      await page.getByTestId(id).click();
+    }
+    await page.getByTestId("play-draw-check-btn").click();
+    await expect(page.getByTestId("play-draw-next-btn")).toBeVisible();
+    await expectNoWcag22Violations(page);
+  });
 });

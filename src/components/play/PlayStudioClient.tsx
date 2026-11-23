@@ -8,6 +8,9 @@ import { AudioToggle } from "@/components/ui/AudioReadButton";
 import { MascotFrog } from "@/components/ui/MascotFrog";
 import { CelebrationBurst } from "@/components/ui/CelebrationBurst";
 import { detectKramaPattern } from "@/lib/math/kramaPattern";
+import { GeometryDraw } from "@/components/activities/GeometryDraw";
+import { gradeStep, type StepAnswer } from "@/lib/math/grader";
+import type { GeometryDrawStep } from "@/lib/curriculum/schema";
 import {
   playGentleNudgeChime,
   playPatternMelody,
@@ -115,10 +118,185 @@ const MYSTERY_SCALE_PUZZLES: MysteryScalePuzzle[] = [
   { knownLeft: 6, rightTotal: 9, expectedMystery: 3 },
 ];
 
+interface DrawStudioChallenge {
+  id: string;
+  subMode: "shapes" | "symmetry";
+  titleKm: string;
+  step: GeometryDrawStep;
+}
+
+const DRAW_STUDIO_CHALLENGES: DrawStudioChallenge[] = [
+  {
+    id: "play-draw-triangle",
+    subMode: "shapes",
+    titleKm: "គូរត្រីកោណ (៣ ជ្រុង)",
+    step: {
+      id: "play-draw-triangle",
+      type: "geometry-draw",
+      stage: "concrete",
+      promptKm: "ប៉ះចំណុចលើក្ដារ ដើម្បីគូររូបត្រីកោណបិទជិតមួយ!",
+      config: {
+        mode: "dot-connect",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: [],
+        inkColor: "#2563eb",
+      },
+      solution: {
+        expectedShape: "triangle",
+        requireSymmetryMirror: false,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "ត្រីកោណមាន ៣ ជ្រុង។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ភ្ជាប់ចំណុច ៣ ត្រឡប់មកចំណុចដើមវិញ។" },
+        { tier: 3, kind: "worked-step", textKm: "ប៉ះ (១,១) → (១,៣) → (៣,២) → (១,១)!" },
+      ],
+      explanationKm: "ត្រីកោណមាន ៣ ជ្រុង និង ៣ កំពូលបិទជិត។",
+    },
+  },
+  {
+    id: "play-draw-square",
+    subMode: "shapes",
+    titleKm: "គូរការ៉េ (៤ ជ្រុងស្មើ)",
+    step: {
+      id: "play-draw-square",
+      type: "geometry-draw",
+      stage: "iconic",
+      promptKm: "គូររូបការ៉េបិទជិតដែលមានជ្រុងទាំង ៤ ស្មើគ្នា!",
+      config: {
+        mode: "dot-connect",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: [],
+        inkColor: "#15803d",
+      },
+      solution: {
+        expectedShape: "square",
+        requireSymmetryMirror: false,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "ការ៉េមាន ៤ ជ្រុងស្មើគ្នា។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "រាប់ចន្លោះស្មើគ្នាទាំងដេក និងឈរ។" },
+        { tier: 3, kind: "worked-step", textKm: "ប៉ះ (១,១) → (១,៣) → (៣,៣) → (៣,១) → (១,១)!" },
+      ],
+      explanationKm: "ការ៉េមាន ៤ ជ្រុងស្មើគ្នា និងមុំកែងទាំង ៤។",
+    },
+  },
+  {
+    id: "play-draw-rectangle",
+    subMode: "shapes",
+    titleKm: "គូរចតុកោណកែង",
+    step: {
+      id: "play-draw-rectangle",
+      type: "geometry-draw",
+      stage: "iconic",
+      promptKm: "គូររូបចតុកោណកែងដែលមានបណ្ដោយវែងជាងទទឹង!",
+      config: {
+        mode: "dot-connect",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: [],
+        inkColor: "#d97706",
+      },
+      solution: {
+        expectedShape: "rectangle",
+        requireSymmetryMirror: false,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "ចតុកោណកែងមាន ៤ ជ្រុង ហើយជ្រុងទល់មុខស្មើគ្នា។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "គូរបណ្ដោយ ៣ ចន្លោះ និងទទឹង ១ ឬ ២ ចន្លោះ។" },
+        { tier: 3, kind: "worked-step", textKm: "ប៉ះ (១,១) → (១,៤) → (៣,៤) → (៣,១) → (១,១)!" },
+      ],
+      explanationKm: "ចតុកោណកែងមានមុំកែងទាំង ៤ និងជ្រុងឈមស្មើគ្នា។",
+    },
+  },
+  {
+    id: "play-sym-butterfly",
+    subMode: "symmetry",
+    titleKm: "មេអំបៅស៊ីមេទ្រី",
+    step: {
+      id: "play-sym-butterfly",
+      type: "geometry-draw",
+      stage: "iconic",
+      promptKm: "លាបពណ៌ស្លាបមេអំបៅខាងស្ដាំ ឱ្យឆ្លុះស៊ីមេទ្រីនឹងខាងឆ្វេង!",
+      config: {
+        mode: "symmetry-mirror",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: ["0,0", "1,0", "1,1", "2,0", "2,1", "3,0"],
+        inkColor: "#db2777",
+      },
+      solution: {
+        requireSymmetryMirror: true,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "មើលបន្ទាត់កញ្ចក់ចំកណ្ដាល។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ជួរឈរទី ១ ឆ្លុះទៅទី ៤ ហើយទី ២ ឆ្លុះទៅទី ៣។" },
+        { tier: 3, kind: "worked-step", textKm: "លាបជួរឈរទី ៤ ទាំងអស់ និងជួរឈរទី ៣ ត្រង់ជួរ ២ និង ៣!" },
+      ],
+      explanationKm: "ស្លាបមេអំបៅទាំងពីរឆ្លុះស៊ីមេទ្រីគ្នាយ៉ាងស្អាត!",
+    },
+  },
+  {
+    id: "play-sym-lotus",
+    subMode: "symmetry",
+    titleKm: "ផ្កាឈូកស៊ីមេទ្រី",
+    step: {
+      id: "play-sym-lotus",
+      type: "geometry-draw",
+      stage: "iconic",
+      promptKm: "លាបពណ៌ត្របកផ្កាឈូកខាងស្ដាំ ឱ្យឆ្លុះស៊ីមេទ្រីស្មើគ្នា!",
+      config: {
+        mode: "symmetry-mirror",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: ["0,1", "1,0", "1,1", "2,1", "3,0", "3,1"],
+        inkColor: "#db2777",
+      },
+      solution: {
+        requireSymmetryMirror: true,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "រាប់ចម្ងាយប្រឡោះពីបន្ទាត់កញ្ចក់ក្រហម។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ជួរឈរទី ២ ឆ្លុះទៅទី ៣ ហើយទី ១ ឆ្លុះទៅទី ៤។" },
+        { tier: 3, kind: "worked-step", textKm: "លាបជួរឈរទី ៣ ទាំង ៤ ប្រឡោះ និងជួរឈរទី ៤ ត្រង់ជួរ ២ និង ៤!" },
+      ],
+      explanationKm: "ផ្កាឈូករីកឆ្លុះស៊ីមេទ្រីទាំងសងខាង!",
+    },
+  },
+  {
+    id: "play-sym-prasat",
+    subMode: "symmetry",
+    titleKm: "កំពូលប្រាសាទស៊ីមេទ្រី",
+    step: {
+      id: "play-sym-prasat",
+      type: "geometry-draw",
+      stage: "iconic",
+      promptKm: "លាបពណ៌ជ្រុងប្រាសាទខាងស្ដាំ ឱ្យឆ្លុះស៊ីមេទ្រីនឹងខាងឆ្វេង!",
+      config: {
+        mode: "symmetry-mirror",
+        gridRows: 4,
+        gridCols: 4,
+        templateLeftCells: ["0,1", "1,1", "2,0", "2,1", "3,0", "3,1"],
+        inkColor: "#d97706",
+      },
+      solution: {
+        requireSymmetryMirror: true,
+      },
+      hints: [
+        { tier: 1, kind: "visual-cue", textKm: "កំពូលប្រាសាទតូចខាងលើ ហើយជើងប្រាសាទធំខាងក្រោម។" },
+        { tier: 2, kind: "strategy-nudge", textKm: "ឆ្លុះប្រឡោះម្ដងមួយជួរពីលើចុះក្រោម។" },
+        { tier: 3, kind: "worked-step", textKm: "លាបជួរឈរទី ៣ ទាំង ៤ ប្រឡោះ និងជួរឈរទី ៤ ត្រង់ជួរ ៣ និង ៤!" },
+      ],
+      explanationKm: "ស្ថាបត្យកម្មប្រាសាទខ្មែរមានស៊ីមេទ្រីយ៉ាងស្រស់ស្អាត!",
+    },
+  },
+];
+
 export function PlayStudioClient() {
   const { numeralPref, audioEnabled } = useLearner();
   const [activeMode, setActiveMode] = useState<
-    "market" | "krama" | "frog" | "scale"
+    "market" | "krama" | "frog" | "scale" | "draw"
   >("market");
 
   // 1. Market Stall state
@@ -148,6 +326,28 @@ export function PlayStudioClient() {
   const [scalePuzzleIdx, setScalePuzzleIdx] = useState<number>(0);
   const [chosenStone, setChosenStone] = useState<number | null>(null);
   const [scaleSolvedCount, setScaleSolvedCount] = useState<number>(0);
+
+  // 5. Math Drawing Studio state
+  const [drawSubMode, setDrawSubMode] = useState<"shapes" | "symmetry">(
+    "shapes"
+  );
+  const [drawChallengeIdx, setDrawChallengeIdx] = useState<number>(0);
+  const [drawAnswer, setDrawAnswer] = useState<
+    Extract<StepAnswer, { type: "geometry-draw" }>
+  >({ type: "geometry-draw", edges: [], paintedCells: [] });
+  const [drawStatus, setDrawStatus] = useState<{
+    ok: boolean;
+    messageKm: string;
+  } | null>(null);
+  const [drawSolvedCount, setDrawSolvedCount] = useState<number>(0);
+
+  const filteredDrawChallenges = useMemo(
+    () => DRAW_STUDIO_CHALLENGES.filter((c) => c.subMode === drawSubMode),
+    [drawSubMode]
+  );
+  const currentDrawChallenge =
+    filteredDrawChallenges[drawChallengeIdx % filteredDrawChallenges.length] ??
+    DRAW_STUDIO_CHALLENGES[0];
 
   const currentOrder = MARKET_ORDERS[orderIdx % MARKET_ORDERS.length];
   const traySumKhr = notesOnTray.reduce((s, n) => s + n, 0);
@@ -316,6 +516,38 @@ export function PlayStudioClient() {
     setChosenStone(null);
   };
 
+  // Drawing Studio handlers
+  const handleSwitchDrawSubMode = (nextSub: "shapes" | "symmetry") => {
+    setDrawSubMode(nextSub);
+    setDrawChallengeIdx(0);
+    setDrawAnswer({ type: "geometry-draw", edges: [], paintedCells: [] });
+    setDrawStatus(null);
+  };
+
+  const handleCheckDrawing = () => {
+    const res = gradeStep(currentDrawChallenge.step, drawAnswer);
+    if (res.isCorrect) {
+      playSuccessChime(audioEnabled);
+      setDrawSolvedCount((c) => c + 1);
+      setDrawStatus({
+        ok: true,
+        messageKm: `អស្ចារ្យណាស់! ${currentDrawChallenge.step.explanationKm}`,
+      });
+    } else {
+      playGentleNudgeChime(audioEnabled);
+      setDrawStatus({
+        ok: false,
+        messageKm: res.feedbackKm || "សាកពិនិត្យរូបគូរម្ដងទៀតណា៎!",
+      });
+    }
+  };
+
+  const handleNextDrawChallenge = () => {
+    setDrawChallengeIdx((i) => (i + 1) % filteredDrawChallenges.length);
+    setDrawAnswer({ type: "geometry-draw", edges: [], paintedCells: [] });
+    setDrawStatus(null);
+  };
+
   const scaleDiff = scaleLeftTotal - currentScalePuzzle.rightTotal;
   const scaleTilt = scaleDiff === 0 ? 0 : scaleDiff > 0 ? -8 : 8;
 
@@ -410,6 +642,19 @@ export function PlayStudioClient() {
             }`}
           >
             ជញ្ជីងអាថ៌កំបាំង
+          </button>
+          <button
+            type="button"
+            data-testid="play-tab-draw"
+            aria-pressed={activeMode === "draw"}
+            onClick={() => setActiveMode("draw")}
+            className={`khmer-chip col-span-2 rounded-2xl border-2 px-3 py-2 text-sm font-bold transition-colors ${
+              activeMode === "draw"
+                ? "border-accent bg-accent text-white shadow-xs"
+                : "border-border bg-surface text-ink hover:bg-surface-subtle"
+            }`}
+          >
+            គូររូបគណិត និងស៊ីមេទ្រី
           </button>
         </nav>
 
@@ -1062,6 +1307,133 @@ export function PlayStudioClient() {
                 </p>
               )
             )}
+          </section>
+        )}
+
+        {/* MODE 5: Math Drawing Studio (Geoboard Shapes + Cambodian Symmetry Art) */}
+        {activeMode === "draw" && (
+          <section
+            data-testid="draw-studio-panel"
+            className="rounded-3xl border border-border bg-surface p-4 sm:p-5 shadow-xs space-y-4"
+          >
+            <div className="flex items-start gap-3 rounded-2xl border border-border bg-canvas p-3.5">
+              <MascotFrog
+                mood={drawStatus?.ok ? "happy" : "curious"}
+                size={46}
+              />
+              <div className="flex-1 space-y-1">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-bold text-accent">
+                    {formatTextNumerals(
+                      currentDrawChallenge.titleKm,
+                      numeralPref
+                    )}
+                  </p>
+                  <span
+                    data-testid="play-draw-solved-count"
+                    className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-bold text-success"
+                  >
+                    បានគូរជោគជ័យ៖{" "}
+                    {formatDisplayNumber(drawSolvedCount, numeralPref)} រូប
+                  </span>
+                </div>
+                <p
+                  data-testid="play-draw-prompt"
+                  className="text-base font-bold text-ink"
+                >
+                  {formatTextNumerals(
+                    currentDrawChallenge.step.promptKm,
+                    numeralPref
+                  )}
+                </p>
+              </div>
+            </div>
+
+            {/* Sub-mode switcher: Geoboard Shapes vs Symmetry Mirror Art */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                data-testid="play-draw-sub-shapes"
+                aria-pressed={drawSubMode === "shapes"}
+                onClick={() => handleSwitchDrawSubMode("shapes")}
+                className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-xs font-bold transition-colors ${
+                  drawSubMode === "shapes"
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                }`}
+              >
+                គូររូបធរណីមាត្រ
+              </button>
+              <button
+                type="button"
+                data-testid="play-draw-sub-symmetry"
+                aria-pressed={drawSubMode === "symmetry"}
+                onClick={() => handleSwitchDrawSubMode("symmetry")}
+                className={`khmer-chip rounded-2xl border-2 px-3 py-2 text-xs font-bold transition-colors ${
+                  drawSubMode === "symmetry"
+                    ? "border-accent bg-accent-soft text-accent"
+                    : "border-border bg-surface text-ink-muted hover:text-ink"
+                }`}
+              >
+                គូរសិល្បៈស៊ីមេទ្រី
+              </button>
+            </div>
+
+            <CelebrationBurst active={Boolean(drawStatus?.ok)} />
+
+            <GeometryDraw
+              key={`${currentDrawChallenge.id}-${drawChallengeIdx}`}
+              step={currentDrawChallenge.step}
+              numeralPref={numeralPref}
+              disabled={Boolean(drawStatus?.ok)}
+              onAnswerChange={(ans) => {
+                setDrawAnswer(ans);
+                setDrawStatus(null);
+              }}
+            />
+
+            {drawStatus && (
+              <div
+                data-testid="play-draw-feedback"
+                role="status"
+                aria-live="polite"
+                className={`rounded-2xl border-2 p-3.5 text-sm font-bold ${
+                  drawStatus.ok
+                    ? "border-success bg-success-soft text-ink"
+                    : "border-hint bg-hint-soft text-ink"
+                }`}
+              >
+                {formatTextNumerals(drawStatus.messageKm, numeralPref)}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2.5">
+              {!drawStatus?.ok ? (
+                <button
+                  type="button"
+                  data-testid="play-draw-check-btn"
+                  onClick={handleCheckDrawing}
+                  className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                >
+                  ពិនិត្យរូបគូរ
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="play-draw-next-btn"
+                  onClick={handleNextDrawChallenge}
+                  className="khmer-chip flex-1 rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                >
+                  រូបបន្ទាប់ →
+                </button>
+              )}
+              <Link
+                href="/learn/g05-drawing-shapes-and-symmetry"
+                className="khmer-chip inline-flex items-center justify-center rounded-2xl border border-border bg-surface px-4 py-3 text-xs font-bold text-ink hover:bg-surface-subtle"
+              >
+                មេរៀនគូររូប →
+              </Link>
+            </div>
           </section>
         )}
       </main>

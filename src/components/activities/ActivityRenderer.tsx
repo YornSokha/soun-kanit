@@ -12,6 +12,7 @@ import { ComparisonBalance } from "./ComparisonBalance";
 import { ArrayGroups } from "./ArrayGroups";
 import { FractionBarShape } from "./FractionBarShape";
 import { PatternSequence } from "./PatternSequence";
+import { GeometryDraw } from "./GeometryDraw";
 
 interface ActivityRendererProps {
   step: ActivityStep;
@@ -23,7 +24,7 @@ interface ActivityRendererProps {
 
 /**
  * Single decoupled renderer mapping any Zod-validated ActivityStep JSON
- * across all 8 reusable Safari-safe SVG manipulative primitives.
+ * across all 9 reusable Safari-safe SVG manipulative primitives.
  */
 export function ActivityRenderer({
   step,
@@ -110,6 +111,16 @@ export function ActivityRenderer({
     case "pattern-sequence":
       return (
         <PatternSequence
+          key={step.id}
+          step={step}
+          numeralPref={numeralPref}
+          disabled={disabled}
+          onAnswerChange={onAnswerChange}
+        />
+      );
+    case "geometry-draw":
+      return (
+        <GeometryDraw
           key={step.id}
           step={step}
           numeralPref={numeralPref}
