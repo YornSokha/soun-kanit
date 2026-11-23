@@ -268,8 +268,40 @@ export function LearningPathClient({ paths }: LearningPathClientProps) {
           </div>
         </section>
 
-        {/* Quick calm actions: 2-min Daily Puzzle & Leitner Review Queue */}
+        {/* Quick calm actions: Daily Puzzle, Leitner Review, Living Garden & Play Studio */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Link
+            href="/play"
+            data-testid="play-studio-card"
+            className="rounded-3xl border-2 border-hint/60 bg-hint-soft/50 p-4 shadow-xs hover:border-accent hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <p className="text-base font-bold text-ink">ក្ដារលេងគណិត</p>
+              <p className="text-xs text-ink-muted">
+                ហាងផ្លែឈើខ្មែរ និងត្បាញក្រមាគណិត
+              </p>
+            </div>
+            <span className="rounded-full border border-hint bg-surface px-3 py-1 text-xs font-bold text-hint-ink shrink-0">
+              លេងសប្បាយ
+            </span>
+          </Link>
+
+          <Link
+            href="/garden"
+            data-testid="garden-card"
+            className="rounded-3xl border-2 border-success/50 bg-success-soft/50 p-4 shadow-xs hover:border-success hover:bg-surface-subtle transition-colors flex items-center justify-between gap-3"
+          >
+            <div className="space-y-0.5">
+              <p className="text-base font-bold text-ink">សួនគណិតរបស់ខ្ញុំ</p>
+              <p className="text-xs text-ink-muted">
+                ដើមស្វាយ កង្កែបតូច និងផ្កាឈូករីកតាមការរៀន
+              </p>
+            </div>
+            <span className="rounded-full border border-success bg-surface px-3 py-1 text-xs font-bold text-success shrink-0">
+              មើលសួន
+            </span>
+          </Link>
+
           <Link
             href="/daily"
             data-testid="daily-puzzle-card"

@@ -41,7 +41,7 @@ function playTone(
   osc.frequency.setValueAtTime(freq, now);
 
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.02);
+  gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.018);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
   osc.connect(gain);
@@ -49,6 +49,86 @@ function playTone(
 
   osc.start(now);
   osc.stop(now + duration + 0.02);
+}
+
+// Warm C-major pentatonic xylophone scale (pleasant at every step)
+const PENTATONIC_FREQS = [
+  261.63, // C4
+  293.66, // D4
+  329.63, // E4
+  392.0,  // G4
+  440.0,  // A4
+  523.25, // C5
+  587.33, // D5
+  659.25, // E5
+  783.99, // G5
+  880.0,  // A5
+  1046.5, // C6
+] as const;
+
+/**
+ * Plays an ascending pentatonic wooden-xylophone note mapped to count/position.
+ */
+export function playScaleNote(stepIndex: number, enabled: boolean): void {
+  if (!enabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const idx = Math.max(
+      0,
+      Math.min(PENTATONIC_FREQS.length - 1, Math.round(stepIndex))
+    );
+    playTone(ctx, PENTATONIC_FREQS[idx], 0, 0.16, 0.11, "triangle");
+  } catch {
+    // Non-blocking
+  }
+}
+
+/**
+ * Playful soft water-plop sound for frog hops on lotus pads.
+ */
+export function playWaterPlop(enabled: boolean): void {
+  if (!enabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(340, now);
+    osc.frequency.exponentialRampToValueAtTime(620, now + 0.09);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.16);
+  } catch {
+    // Non-blocking
+  }
+}
+
+/**
+ * Plays a short musical sequence for Krama pattern playback.
+ */
+export function playPatternMelody(
+  colorIndices: number[],
+  enabled: boolean
+): void {
+  if (!enabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const notes = [392.0, 440.0, 523.25, 659.25]; // G4, A4, C5, E5
+  try {
+    colorIndices.forEach((colorIdx, pos) => {
+      const freq = notes[((colorIdx % notes.length) + notes.length) % notes.length];
+      playTone(ctx, freq, pos * 0.16, 0.14, 0.11, "triangle");
+    });
+  } catch {
+    // Non-blocking
+  }
 }
 
 /**

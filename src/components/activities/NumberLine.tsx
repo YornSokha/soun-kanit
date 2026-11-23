@@ -7,6 +7,8 @@ import {
   formatDisplayNumber,
   type NumeralPreference,
 } from "@/lib/khmer/numerals";
+import { playScaleNote, playWaterPlop } from "@/lib/audio/chimes";
+import { useLearner } from "@/components/providers/LearnerProvider";
 
 interface NumberLineProps {
   step: NumberLineStep;
@@ -36,6 +38,7 @@ export function NumberLine({
     return list;
   }, [min, max, tickStep]);
 
+  const { audioEnabled } = useLearner();
   const [currentValue, setCurrentValue] = useState<number>(startValue);
   const [jumpStops, setJumpStops] = useState<number[]>([startValue]);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -85,6 +88,13 @@ export function NumberLine({
         min + Math.round((clamped - min) / tickStep) * tickStep;
       const cleanVal = Number(snapped.toFixed(6));
 
+      if (theme === "frog-lotus") {
+        playWaterPlop(audioEnabled);
+      } else {
+        const idx = Math.round((cleanVal - min) / tickStep);
+        playScaleNote(idx % 11, audioEnabled);
+      }
+
       setCurrentValue(cleanVal);
       setJumpStops((prev) => {
         if (prev[prev.length - 1] === cleanVal) return prev;
@@ -93,7 +103,7 @@ export function NumberLine({
         return next.length > 8 ? next.slice(-8) : next;
       });
     },
-    [disabled, min, max, tickStep]
+    [disabled, min, max, tickStep, theme, audioEnabled]
   );
 
   const handleReset = () => {

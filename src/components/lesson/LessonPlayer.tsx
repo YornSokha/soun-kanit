@@ -13,6 +13,8 @@ import { cacheLessons } from "@/lib/storage/idb";
 import { useLearner } from "@/components/providers/LearnerProvider";
 import { NumeralToggle } from "@/components/ui/NumeralToggle";
 import { AudioReadButton, AudioToggle } from "@/components/ui/AudioReadButton";
+import { MascotFrog } from "@/components/ui/MascotFrog";
+import { CelebrationBurst } from "@/components/ui/CelebrationBurst";
 import { ActivityRenderer } from "@/components/activities/ActivityRenderer";
 import {
   playGentleNudgeChime,
@@ -353,28 +355,35 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
         </section>
 
         {/* Immediate non-punitive feedback & visual explanation */}
+        <CelebrationBurst active={isStepSolved} />
         {gradeResult && (
           <section
             data-testid="feedback-panel"
             role="status"
             aria-live="polite"
-            className={`rounded-2xl border-2 p-4 space-y-2 ${
+            className={`rounded-2xl border-2 p-4 flex items-start gap-3 ${
               gradeResult.isCorrect
                 ? "border-success bg-success-soft text-ink"
                 : "border-hint bg-hint-soft text-ink"
             }`}
           >
-            <p className="text-base font-bold">
-              {formatTextNumerals(gradeResult.feedbackKm, numeralPref)}
-            </p>
-            {gradeResult.isCorrect && (
-              <p
-                data-testid="step-explanation"
-                className="text-sm text-ink"
-              >
-                {formatTextNumerals(activeStep.explanationKm, numeralPref)}
+            <MascotFrog
+              mood={gradeResult.isCorrect ? "happy" : "encouraging"}
+              size={46}
+            />
+            <div className="flex-1 space-y-1.5">
+              <p className="text-base font-bold">
+                {formatTextNumerals(gradeResult.feedbackKm, numeralPref)}
               </p>
-            )}
+              {gradeResult.isCorrect && (
+                <p
+                  data-testid="step-explanation"
+                  className="text-sm text-ink"
+                >
+                  {formatTextNumerals(activeStep.explanationKm, numeralPref)}
+                </p>
+              )}
+            </div>
           </section>
         )}
 

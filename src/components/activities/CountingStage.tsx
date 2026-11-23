@@ -7,6 +7,8 @@ import {
   formatDisplayNumber,
   type NumeralPreference,
 } from "@/lib/khmer/numerals";
+import { playScaleNote } from "@/lib/audio/chimes";
+import { useLearner } from "@/components/providers/LearnerProvider";
 
 interface TokenItem {
   id: string;
@@ -161,6 +163,7 @@ export function CountingStage({
   disabled = false,
   onAnswerChange,
 }: CountingStageProps) {
+  const { audioEnabled } = useLearner();
   const [tokens, setTokens] = useState<TokenItem[]>(() =>
     buildInitialTokens(step)
   );
@@ -277,13 +280,14 @@ export function CountingStage({
           }
         }
         if (slot === undefined) return prev;
+        playScaleNote(used.size, audioEnabled);
         return prev.map((t) =>
           t.id === tokenId ? { ...t, location: "frame", slotIndex: slot! } : t
         );
       });
       setSelectedTokenId(null);
     },
-    [disabled, step.config.frameSize]
+    [disabled, step.config.frameSize, audioEnabled]
   );
 
   const moveTokenToOutside = useCallback(

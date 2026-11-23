@@ -494,4 +494,45 @@ test.describe("Konleuh Kanit Milestone 1 E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("admin-publish-result")).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 6: Living Khmer Garden (/garden) and Market Stall + Krama Weaver (/play) at 360x800 (WCAG 2.2 AA)", async ({
+    page,
+  }) => {
+    // 1. Living Khmer Garden (/garden)
+    await page.goto("/learn");
+    await page.getByTestId("garden-card").click();
+    await expect(page).toHaveURL(/\/garden$/);
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    await page.getByTestId("garden-count-mango-btn").click();
+    await expect(page.getByTestId("garden-status-message")).toContainText("១");
+    await page.getByTestId("garden-hop-frog-btn").click();
+    await page.getByTestId("garden-bloom-lotus-btn").click();
+    await expectNoWcag22Violations(page);
+
+    // 2. Interactive Play Studio (/play) — Cambodian Market Stall
+    await page.goto("/play");
+    await expect(page.getByTestId("market-stall-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await expectNoWcag22Violations(page);
+
+    // Order 1 asks for 2 mangoes totaling 1,000៛
+    await page.getByTestId("market-fruit-inc").click();
+    await page.getByTestId("market-fruit-inc").click();
+    await page.getByTestId("market-note-500").click();
+    await page.getByTestId("market-note-500").click();
+    await page.getByTestId("market-serve-btn").click();
+    await expect(page.getByTestId("market-feedback")).toContainText("អរគុណ");
+    await expect(page.getByTestId("market-next-btn")).toBeVisible();
+
+    // 3. Switch to Krama Pattern Weaver & weave an AB pattern
+    await page.getByTestId("play-tab-krama").click();
+    await expect(page.getByTestId("krama-weaver-panel")).toBeVisible();
+    await expectAllManipulativeTargetsAtLeast56px(page);
+    await page.getByTestId("krama-preset-ab").click();
+    await page.getByTestId("krama-check-btn").click();
+    await expect(page.getByTestId("krama-result-panel")).toContainText("AB");
+    await expectNoWcag22Violations(page);
+  });
 });
