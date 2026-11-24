@@ -55,6 +55,8 @@ export function GeometryDraw({
   const [edges, setEdges] = useState<DrawnEdge[]>([]);
   const [activePeg, setActivePeg] = useState<string | null>(null);
   const [paintedCells, setPaintedCells] = useState<string[]>([]);
+  const paintedCellsRef = useRef<string[]>([]);
+  const lastPointerToggleRef = useRef<{ key: string; at: number } | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragPaintRef = useRef<{
     active: boolean;
@@ -145,28 +147,38 @@ export function GeometryDraw({
     if (disabled) return;
     setEdges([]);
     setActivePeg(null);
+    paintedCellsRef.current = [];
     setPaintedCells([]);
   };
 
   const applyCellPaintMode = (key: string, paintMode: "paint" | "erase") => {
     if (disabled) return;
-    setPaintedCells((prev) => {
-      const exists = prev.includes(key);
-      if (paintMode === "erase") {
-        return exists ? prev.filter((k) => k !== key) : prev;
-      }
-      if (!exists) {
-        playScaleNote(prev.length % 10, audioEnabled);
-        return [...prev, key];
-      }
-      return prev;
-    });
+    const curr = paintedCellsRef.current;
+    const exists = curr.includes(key);
+    let next = curr;
+    if (paintMode === "erase") {
+      next = exists ? curr.filter((k) => k !== key) : curr;
+    } else if (!exists) {
+      playScaleNote(curr.length % 10, audioEnabled);
+      next = [...curr, key];
+    }
+    paintedCellsRef.current = next;
+    setPaintedCells(next);
   };
 
   const toggleGridCell = (key: string) => {
     if (disabled) return;
-    const isPainted = paintedCells.includes(key);
+    const isPainted = paintedCellsRef.current.includes(key);
     applyCellPaintMode(key, isPainted ? "erase" : "paint");
+  };
+
+  const handleCellClick = (key: string) => {
+    if (disabled) return;
+    const last = lastPointerToggleRef.current;
+    if (last && last.key === key && Date.now() - last.at < 400) {
+      return;
+    }
+    toggleGridCell(key);
   };
 
   const startCellPointerPaint = (
@@ -175,8 +187,9 @@ export function GeometryDraw({
   ) => {
     if (disabled) return;
     e.stopPropagation();
-    const isPainted = paintedCells.includes(key);
+    const isPainted = paintedCellsRef.current.includes(key);
     const nextMode: "paint" | "erase" = isPainted ? "erase" : "paint";
+    lastPointerToggleRef.current = { key, at: Date.now() };
     dragPaintRef.current = {
       active: true,
       mode: nextMode,
@@ -503,6 +516,7 @@ export function GeometryDraw({
                       aria-pressed={isUserPainted}
                       aria-label={`ប្រឡោះជួរ ${formatDisplayNumber(r + 1, numeralPref)} ជួរឈរ ${formatDisplayNumber(c + 1, numeralPref)}`}
                       onPointerDown={(e) => startCellPointerPaint(e, key)}
+                      onClick={() => handleCellClick(key)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
                           e.preventDefault();

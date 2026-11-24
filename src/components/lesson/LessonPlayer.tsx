@@ -533,7 +533,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
         </div>
       </header>
 
-      <main className="lesson-container-wide mx-auto flex w-full max-w-xl flex-1 flex-col gap-4 px-2.5 sm:px-3 py-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))]">
+      <main className="lesson-container-wide mx-auto flex w-full max-w-xl flex-1 flex-col gap-3 sm:gap-4 px-2.5 sm:px-3 py-2.5 sm:py-4">
         {/* Lesson title + Concreteness Fading stage chip + Scratchpad toggle */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-bold text-ink-muted">
@@ -567,7 +567,7 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
         {/* Responsive Workspace: Single-Column on Mobile (<900px), Two-Column Side-by-Side on Landscape/Desktop (>=900px) */}
         <div
           data-testid="lesson-workspace-grid"
-          className="lesson-workspace-grid grid grid-cols-1 gap-4"
+          className="lesson-workspace-grid grid grid-cols-1 gap-3 sm:gap-4 flex-1"
         >
           {/* Persistent Conversational Mascot Prompt Bubble (Top on mobile, Right column row 1 on >=900px) */}
           <section
@@ -661,87 +661,94 @@ export function LessonPlayer({ lesson }: LessonPlayerProps) {
             />
           </section>
 
-          {/* Right Column Controls: Feedback, Hints, and Primary Action Row */}
-          <div
-            data-testid="lesson-control-rail"
-            className="lesson-controls-col order-3 space-y-4"
-          >
-            {/* Immediate non-punitive feedback & visual explanation */}
-            <CelebrationBurst active={isStepSolved} />
-            {gradeResult && (
-              <section
-                data-testid="feedback-panel"
-                role="status"
-                aria-live="polite"
-                className={`rounded-3xl border-2 p-4 flex items-start gap-3 ${
-                  gradeResult.isCorrect
-                    ? "border-[#148F56] bg-[#E3FBEF] text-[#0D2B1D] shadow-[0_4px_0_#148F56]"
-                    : "border-[#C89600] bg-[#FFF3BF] text-[#1E2A4A] shadow-[0_4px_0_#C89600]"
-                }`}
-              >
-                <MascotFrog
-                  mood={gradeResult.isCorrect ? "happy" : "encouraging"}
-                  size={46}
-                />
-                <div className="flex-1 space-y-1.5">
-                  <p className="text-base font-bold">
-                    {formatTextNumerals(gradeResult.feedbackKm, numeralPref)}
-                  </p>
-                  {gradeResult.isCorrect && (
-                    <div className="space-y-2">
-                      <p
-                        data-testid="step-explanation"
-                        className="text-sm text-[#0D2B1D]"
-                      >
-                        {formatTextNumerals(activeStep.explanationKm, numeralPref)}
-                      </p>
-                      <AudioReadButton
-                        textKm={activeStep.explanationKm}
-                        labelKm="ស្តាប់ការពន្យល់"
-                        testId="explanation-audio-btn"
-                      />
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Gated 3-tier elaborative hint drawer */}
-            {revealedHintCount > 0 && (
-              <section
-                data-testid="hint-drawer"
-                aria-label="ជំនួយជាដំណាក់កាល"
-                className="rounded-3xl border-2 border-[#C89600] bg-[#FFF9E2] p-4 shadow-[0_4px_0_#C89600] space-y-2.5"
-              >
-                {activeStep.hints.slice(0, revealedHintCount).map((hint) => (
-                  <div
-                    key={hint.tier}
-                    data-testid={`hint-tier-${hint.tier}`}
-                    className="rounded-2xl bg-surface p-3 border-2 border-[#c9c2b2] space-y-1.5"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-xs font-extrabold text-[#1E2A4A]">
-                        {formatTextNumerals(
-                          HINT_KIND_LABELS_KM[hint.kind] ?? `ជំនួយទី ${hint.tier}`,
-                          numeralPref
-                        )}
-                      </p>
-                      <AudioReadButton
-                        textKm={hint.textKm}
-                        labelKm="ស្តាប់ជំនួយ"
-                        testId={`hint-audio-btn-${hint.tier}`}
-                      />
-                    </div>
-                    <p className="text-sm text-ink">
-                      {formatTextNumerals(hint.textKm, numeralPref)}
+          {/* Right Column Controls: Feedback & Gated 3-Tier Hints */}
+          {(gradeResult || revealedHintCount > 0) && (
+            <div
+              data-testid="lesson-control-rail"
+              className="lesson-controls-col order-3 space-y-3"
+            >
+              {/* Immediate non-punitive feedback & visual explanation */}
+              {gradeResult && (
+                <section
+                  data-testid="feedback-panel"
+                  role="status"
+                  aria-live="polite"
+                  className={`rounded-3xl border-2 p-3.5 sm:p-4 flex items-start gap-3 ${
+                    gradeResult.isCorrect
+                      ? "border-[#148F56] bg-[#E3FBEF] text-[#0D2B1D] shadow-[0_4px_0_#148F56]"
+                      : "border-[#C89600] bg-[#FFF3BF] text-[#1E2A4A] shadow-[0_4px_0_#C89600]"
+                  }`}
+                >
+                  <MascotFrog
+                    mood={gradeResult.isCorrect ? "happy" : "encouraging"}
+                    size={46}
+                  />
+                  <div className="flex-1 space-y-1.5">
+                    <p className="text-base font-bold">
+                      {formatTextNumerals(gradeResult.feedbackKm, numeralPref)}
                     </p>
+                    {gradeResult.isCorrect && (
+                      <div className="space-y-2">
+                        <p
+                          data-testid="step-explanation"
+                          className="text-sm text-[#0D2B1D]"
+                        >
+                          {formatTextNumerals(activeStep.explanationKm, numeralPref)}
+                        </p>
+                        <AudioReadButton
+                          textKm={activeStep.explanationKm}
+                          labelKm="ស្តាប់ការពន្យល់"
+                          testId="explanation-audio-btn"
+                        />
+                      </div>
+                    )}
                   </div>
-                ))}
-              </section>
-            )}
+                </section>
+              )}
 
-            {/* Primary Action Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+              {/* Gated 3-tier elaborative hint drawer */}
+              {revealedHintCount > 0 && (
+                <section
+                  data-testid="hint-drawer"
+                  aria-label="ជំនួយជាដំណាក់កាល"
+                  className="rounded-3xl border-2 border-[#C89600] bg-[#FFF9E2] p-3.5 sm:p-4 shadow-[0_4px_0_#C89600] space-y-2.5"
+                >
+                  {activeStep.hints.slice(0, revealedHintCount).map((hint) => (
+                    <div
+                      key={hint.tier}
+                      data-testid={`hint-tier-${hint.tier}`}
+                      className="rounded-2xl bg-surface p-3 border-2 border-[#c9c2b2] space-y-1.5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs font-extrabold text-[#1E2A4A]">
+                          {formatTextNumerals(
+                            HINT_KIND_LABELS_KM[hint.kind] ?? `ជំនួយទី ${hint.tier}`,
+                            numeralPref
+                          )}
+                        </p>
+                        <AudioReadButton
+                          textKm={hint.textKm}
+                          labelKm="ស្តាប់ជំនួយ"
+                          testId={`hint-audio-btn-${hint.tier}`}
+                        />
+                      </div>
+                      <p className="text-sm text-ink">
+                        {formatTextNumerals(hint.textKm, numeralPref)}
+                      </p>
+                    </div>
+                  ))}
+                </section>
+              )}
+            </div>
+          )}
+
+          {/* Sticky Mobile Bottom Action Dock (<900px) / Right Column Row 3 (>=900px) */}
+          <div
+            data-testid="lesson-action-dock"
+            className="lesson-action-dock-col order-4 sticky bottom-0 z-20 -mx-2.5 sm:-mx-3 border-t-2 border-[#c9c2b2] bg-surface/95 backdrop-blur px-2.5 sm:px-3 pt-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] min-[900px]:mx-0 min-[900px]:border-0 min-[900px]:bg-transparent min-[900px]:p-0 min-[900px]:backdrop-blur-none"
+          >
+            <CelebrationBurst active={isStepSolved} />
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
               {!isStepSolved ? (
                 <>
                   <button

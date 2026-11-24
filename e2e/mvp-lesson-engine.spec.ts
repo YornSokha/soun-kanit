@@ -1090,4 +1090,170 @@ test.describe("Soun Kanit (សួនគណិត) E2E (360x800 Mobile)", () => {
     await expect(page.getByTestId("mascot-crown")).toBeVisible();
     await expectNoWcag22Violations(page);
   });
+
+  test("Milestone 12: 360x640 Short Mobile Sticky Action Dock, Same-Frame Synchronous Touch Drag/Tap, and Clean Service Worker Precache (WCAG 2.2 AA)", async ({
+    page,
+    request,
+  }) => {
+    // 1. Verify /sw.js precache manifest never includes raw bracketed route literals like /learn/[lessonId]
+    const swRes = await request.get("/sw.js");
+    expect(swRes.ok()).toBe(true);
+    const swText = await swRes.text();
+    expect(swText).not.toContain("/learn/[lessonId]");
+    expect(swText).not.toContain("/learn/%5BlessonId%5D");
+
+    // 2. Emulate a compact 360x640 mobile phone viewport (typical mobile browser with address/nav bars visible)
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto("/learn");
+    await page.getByTestId("lesson-card-l07-making-ten").click();
+    await expect(page).toHaveURL(/\/learn\/l07-making-ten$/);
+
+    // 3. Verify sticky bottom action dock keeps Check Answer & Hint buttons inside the 640px mobile viewport without scrolling
+    const checkBtn = page.getByTestId("check-answer-btn");
+    await expect(checkBtn).toBeVisible();
+    const checkBox = await checkBtn.boundingBox();
+    expect(checkBox).not.toBeNull();
+    expect(
+      checkBox!.y + checkBox!.height,
+      `Sticky check button bottom (${checkBox!.y + checkBox!.height}) must sit inside 640px mobile viewport`
+    ).toBeLessThanOrEqual(640);
+    await expectNoWcag22Violations(page);
+
+    // 4. Same-frame synchronous touch drag on CountingStage (pointerdown -> pointermove -> pointerup in one JS turn)
+    await page.evaluate(() => {
+      const tok = document.querySelector(
+        '[data-testid="outside-token-0"]'
+      ) as SVGGElement | null;
+      const slot = document.querySelector(
+        '[data-testid="frame-slot-8"]'
+      ) as SVGGElement | null;
+      if (!tok || !slot) throw new Error("Missing token or slot");
+      const tokRect = tok.getBoundingClientRect();
+      const slotRect = slot.getBoundingClientRect();
+      const startX = tokRect.left + tokRect.width / 2;
+      const startY = tokRect.top + tokRect.height / 2;
+      const endX = slotRect.left + slotRect.width / 2;
+      const endY = slotRect.top + slotRect.height / 2;
+
+      tok.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerId: 11,
+          clientX: startX,
+          clientY: startY,
+          isPrimary: true,
+        })
+      );
+      tok.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerId: 11,
+          clientX: endX,
+          clientY: endY,
+          isPrimary: true,
+        })
+      );
+      tok.dispatchEvent(
+        new PointerEvent("pointerup", {
+          bubbles: true,
+          pointerId: 11,
+          clientX: endX,
+          clientY: endY,
+          isPrimary: true,
+        })
+      );
+    });
+    await expect(page.getByTestId("counting-in-frame-badge")).toContainText("៩");
+
+    // 5. Same-frame synchronous stroke on LessonScratchpad
+    await page.getByTestId("scratchpad-toggle-btn").click();
+    await expect(page.getByTestId("lesson-scratchpad-panel")).toBeVisible();
+    await page.evaluate(() => {
+      const padSvg = document.querySelector(
+        '[data-testid="lesson-scratchpad-panel"] svg'
+      ) as SVGSVGElement | null;
+      if (!padSvg) throw new Error("Missing scratchpad svg");
+      const r = padSvg.getBoundingClientRect();
+      padSvg.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerId: 12,
+          clientX: r.left + 30,
+          clientY: r.top + 30,
+        })
+      );
+      padSvg.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerId: 12,
+          clientX: r.left + 90,
+          clientY: r.top + 60,
+        })
+      );
+      padSvg.dispatchEvent(
+        new PointerEvent("pointerup", {
+          bubbles: true,
+          pointerId: 12,
+          clientX: r.left + 90,
+          clientY: r.top + 60,
+        })
+      );
+    });
+    await expect(
+      page.locator('[data-testid="lesson-scratchpad-panel"] svg polyline')
+    ).toHaveCount(1);
+    await page.getByTestId("scratchpad-toggle-btn").click();
+
+    // Complete Step 1 and advance to Step 2 (NumberLine)
+    await page.getByTestId("outside-token-0").click();
+    await page.getByTestId("frame-slot-9").click();
+    await page.getByTestId("check-answer-btn").click();
+    const continueBtn = page.getByTestId("continue-btn");
+    await expect(continueBtn).toBeVisible();
+    const continueBox = await continueBtn.boundingBox();
+    expect(continueBox).not.toBeNull();
+    expect(continueBox!.y + continueBox!.height).toBeLessThanOrEqual(640);
+    await continueBtn.click();
+
+    // 6. Same-frame synchronous marker drag on NumberLine (Step 2: 9 -> 10)
+    await page.evaluate(() => {
+      const marker = document.querySelector(
+        '[data-testid="number-line-marker"]'
+      ) as SVGGElement | null;
+      const tick10 = document.querySelector(
+        '[data-testid="tick-10"]'
+      ) as SVGGElement | null;
+      if (!marker || !tick10) throw new Error("Missing marker or tick-10");
+      const mRect = marker.getBoundingClientRect();
+      const tRect = tick10.getBoundingClientRect();
+      marker.dispatchEvent(
+        new PointerEvent("pointerdown", {
+          bubbles: true,
+          pointerId: 15,
+          clientX: mRect.left + mRect.width / 2,
+          clientY: mRect.top + mRect.height / 2,
+        })
+      );
+      marker.dispatchEvent(
+        new PointerEvent("pointermove", {
+          bubbles: true,
+          pointerId: 15,
+          clientX: tRect.left + tRect.width / 2,
+          clientY: tRect.top + tRect.height / 2,
+        })
+      );
+      marker.dispatchEvent(
+        new PointerEvent("pointerup", {
+          bubbles: true,
+          pointerId: 15,
+          clientX: tRect.left + tRect.width / 2,
+          clientY: tRect.top + tRect.height / 2,
+        })
+      );
+    });
+    await expect(page.getByTestId("number-line-value-badge")).toContainText(
+      "១០"
+    );
+    await expectNoWcag22Violations(page);
+  });
 });

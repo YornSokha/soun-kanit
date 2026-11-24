@@ -278,6 +278,13 @@
     grid-row: 2 / 3 !important;
     order: 0 !important;
   }
+
+  .lesson-action-dock-col {
+    grid-column: 2 / 3 !important;
+    grid-row: 3 / 4 !important;
+    order: 0 !important;
+    position: static !important;
+  }
 }
 
 html[lang="km"] {

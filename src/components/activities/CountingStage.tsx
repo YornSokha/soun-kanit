@@ -176,6 +176,15 @@ export function CountingStage({
     y: number;
     moved: boolean;
   } | null>(null);
+  const dragRef = useRef<{
+    id: string;
+    startX: number;
+    startY: number;
+    x: number;
+    y: number;
+    moved: boolean;
+  } | null>(null);
+  const lastPointerUpAtRef = useRef<number>(0);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const onAnswerChangeRef = useRef(onAnswerChange);
@@ -334,25 +343,31 @@ export function CountingStage({
     } catch {
       // Ignore synthetic events in tests without active pointerId
     }
-    setDragging({
+    const nextDrag = {
       id: token.id,
       startX: pos.x,
       startY: pos.y,
       x: pos.x,
       y: pos.y,
       moved: false,
-    });
+    };
+    dragRef.current = nextDrag;
+    setDragging(nextDrag);
   };
 
   const handleTokenPointerMove = (e: React.PointerEvent<SVGGElement>) => {
-    if (!dragging || disabled) return;
+    const current = dragRef.current;
+    if (!current || disabled) return;
     const pos = toSvgCoords(e.clientX, e.clientY);
-    const dist = Math.hypot(pos.x - dragging.startX, pos.y - dragging.startY);
-    setDragging((prev) =>
-      prev
-        ? { ...prev, x: pos.x, y: pos.y, moved: prev.moved || dist > 14 }
-        : null
-    );
+    const dist = Math.hypot(pos.x - current.startX, pos.y - current.startY);
+    const nextDrag = {
+      ...current,
+      x: pos.x,
+      y: pos.y,
+      moved: current.moved || dist > 14,
+    };
+    dragRef.current = nextDrag;
+    setDragging(nextDrag);
   };
 
   const handleTokenPointerCancel = (e: React.PointerEvent<SVGGElement>) => {
@@ -363,6 +378,7 @@ export function CountingStage({
     } catch {
       // Ignore synthetic events
     }
+    dragRef.current = null;
     setDragging(null);
   };
 
@@ -379,8 +395,10 @@ export function CountingStage({
     } catch {
       // Ignore synthetic events
     }
-    const activeDrag = dragging;
+    const activeDrag = dragRef.current;
+    dragRef.current = null;
     setDragging(null);
+    lastPointerUpAtRef.current = Date.now();
 
     if (activeDrag && activeDrag.moved) {
       // Forgiving drop zone split at midpoint between ten-frame and outside tray (zero dead zone)
@@ -409,11 +427,13 @@ export function CountingStage({
     }
 
     // Single-pointer tap-to-select behavior (WCAG 2.2 SC 2.5.7)
-    if (selectedTokenId === token.id) {
-      setSelectedTokenId(null);
-    } else {
-      setSelectedTokenId(token.id);
-    }
+    setSelectedTokenId((prev) => (prev === token.id ? null : token.id));
+  };
+
+  const handleTokenClick = (token: TokenItem) => {
+    if (disabled) return;
+    if (Date.now() - lastPointerUpAtRef.current < 350) return;
+    setSelectedTokenId((prev) => (prev === token.id ? null : token.id));
   };
 
   const handleEmptySlotTap = (slotIndex: number) => {
@@ -635,6 +655,7 @@ export function CountingStage({
                   onPointerMove={handleTokenPointerMove}
                   onPointerUp={(e) => handleTokenPointerUp(e, tok)}
                   onPointerCancel={handleTokenPointerCancel}
+                  onClick={() => handleTokenClick(tok)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
@@ -679,6 +700,7 @@ export function CountingStage({
                 onPointerMove={handleTokenPointerMove}
                 onPointerUp={(e) => handleTokenPointerUp(e, tok)}
                 onPointerCancel={handleTokenPointerCancel}
+                onClick={() => handleTokenClick(tok)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();

@@ -72,19 +72,91 @@ interface KonleuhKanitDB extends DBSchema {
   };
 }
 
-let dbPromise: Promise<IDBPDatabase<KonleuhKanitDB>> | null = null;
+let dbPromise: Promise<IDBPDatabase<KonleuhKanitDB> | null> | null = null;
+const STORAGE_TIMEOUT_MS = 1500;
+
+// In-memory fallback stores when mobile IndexedDB is unavailable, private-locked, or stalled
+const memoryProfiles = new Map<string, LocalStudentProfile>();
+const memoryProgress = new Map<string, LocalLessonProgress>();
+
+export async function withStorageTimeout<T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+  fallbackValue: T
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  try {
+    const timeoutPromise = new Promise<T>((resolve) => {
+      timer = setTimeout(() => {
+        resolve(fallbackValue);
+      }, timeoutMs);
+    });
+    return await Promise.race([
+      operation.catch(() => fallbackValue),
+      timeoutPromise,
+    ]);
+  } finally {
+    if (timer !== null) {
+      clearTimeout(timer);
+    }
+  }
+}
+
+export async function cleanupStaleServiceWorkersAndCaches(options?: {
+  unregisterAll?: boolean;
+}): Promise<{ unregistered: number; deletedCaches: number }> {
+  let unregistered = 0;
+  let deletedCaches = 0;
+
+  if (typeof window === "undefined") {
+    return { unregistered, deletedCaches };
+  }
+
+  try {
+    if (
+      options?.unregisterAll &&
+      typeof navigator !== "undefined" &&
+      "serviceWorker" in navigator &&
+      typeof navigator.serviceWorker.getRegistrations === "function"
+    ) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (const reg of registrations) {
+        const ok = await reg.unregister();
+        if (ok) unregistered++;
+      }
+    }
+  } catch {
+    // Ignore restricted SW environments
+  }
+
+  try {
+    if (options?.unregisterAll && "caches" in window) {
+      const keys = await window.caches.keys();
+      for (const key of keys) {
+        if (key.includes("serwist-precache") || key.includes("precache")) {
+          const ok = await window.caches.delete(key);
+          if (ok) deletedCaches++;
+        }
+      }
+    }
+  } catch {
+    // Ignore restricted CacheStorage environments
+  }
+
+  return { unregistered, deletedCaches };
+}
 
 function isIndexedDbAvailable(): boolean {
   return typeof window !== "undefined" && "indexedDB" in window;
 }
 
-export function getLocalDb(): Promise<IDBPDatabase<KonleuhKanitDB>> | null {
+export function getLocalDb(): Promise<IDBPDatabase<KonleuhKanitDB> | null> | null {
   if (!isIndexedDbAvailable()) {
     return null;
   }
 
   if (!dbPromise) {
-    dbPromise = openDB<KonleuhKanitDB>(DB_NAME, DB_VERSION, {
+    const rawOpen = openDB<KonleuhKanitDB>(DB_NAME, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains("profiles")) {
           db.createObjectStore("profiles", { keyPath: "id" });
@@ -102,7 +174,21 @@ export function getLocalDb(): Promise<IDBPDatabase<KonleuhKanitDB>> | null {
           db.createObjectStore("syncOutbox", { keyPath: "id" });
         }
       },
+      blocked() {
+        dbPromise = null;
+      },
+      blocking() {
+        dbPromise = null;
+      },
+      terminated() {
+        dbPromise = null;
+      },
+    }).catch(() => {
+      dbPromise = null;
+      return null;
     });
+
+    dbPromise = withStorageTimeout(rawOpen, STORAGE_TIMEOUT_MS, null);
   }
 
   return dbPromise;
@@ -170,47 +256,77 @@ export function setActiveProfileId(id: string): void {
 
 export async function listProfiles(): Promise<LocalStudentProfile[]> {
   const db = await getLocalDb();
-  if (!db) return [];
-  return db.getAll("profiles");
+  if (!db) return Array.from(memoryProfiles.values());
+  const list = await withStorageTimeout(
+    db.getAll("profiles"),
+    STORAGE_TIMEOUT_MS,
+    Array.from(memoryProfiles.values())
+  );
+  for (const p of list) {
+    memoryProfiles.set(p.id, p);
+  }
+  return list;
 }
 
 export async function getProfile(
   id: string
 ): Promise<LocalStudentProfile | undefined> {
   const db = await getLocalDb();
-  if (!db) return undefined;
-  return db.get("profiles", id);
+  if (!db) return memoryProfiles.get(id);
+  const found = await withStorageTimeout(
+    db.get("profiles", id),
+    STORAGE_TIMEOUT_MS,
+    memoryProfiles.get(id)
+  );
+  if (found) {
+    memoryProfiles.set(found.id, found);
+  }
+  return found;
 }
 
 export async function saveProfile(
   profile: LocalStudentProfile,
   queueSync = true
 ): Promise<void> {
-  const db = await getLocalDb();
-  if (!db) return;
-  const tx = db.transaction(["profiles", "syncOutbox"], "readwrite");
-  await tx.objectStore("profiles").put(profile);
-  if (queueSync) {
-    await tx.objectStore("syncOutbox").put({
-      id: `profile:${profile.id}:${Date.now()}`,
-      kind: "profile_upsert",
-      payload: profile,
-      createdAt: new Date().toISOString(),
-    });
-  }
-  await tx.done;
+  memoryProfiles.set(profile.id, profile);
   setActiveProfileId(profile.id);
   saveNumeralPrefLocal(profile.numeralPreference);
+
+  const db = await getLocalDb();
+  if (!db) return;
+  await withStorageTimeout(
+    (async () => {
+      const tx = db.transaction(["profiles", "syncOutbox"], "readwrite");
+      await tx.objectStore("profiles").put(profile);
+      if (queueSync) {
+        await tx.objectStore("syncOutbox").put({
+          id: `profile:${profile.id}:${Date.now()}`,
+          kind: "profile_upsert",
+          payload: profile,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      await tx.done;
+    })(),
+    STORAGE_TIMEOUT_MS,
+    undefined
+  );
 }
 
 export async function cacheLessons(lessons: LessonDocumentV1[]): Promise<void> {
   const db = await getLocalDb();
   if (!db || lessons.length === 0) return;
-  const tx = db.transaction("lessonCache", "readwrite");
-  for (const lesson of lessons) {
-    await tx.store.put(lesson);
-  }
-  await tx.done;
+  await withStorageTimeout(
+    (async () => {
+      const tx = db.transaction("lessonCache", "readwrite");
+      for (const lesson of lessons) {
+        await tx.store.put(lesson);
+      }
+      await tx.done;
+    })(),
+    STORAGE_TIMEOUT_MS,
+    undefined
+  );
 }
 
 export async function getCachedLesson(
@@ -218,63 +334,104 @@ export async function getCachedLesson(
 ): Promise<LessonDocumentV1 | undefined> {
   const db = await getLocalDb();
   if (!db) return undefined;
-  return db.get("lessonCache", lessonId);
+  return withStorageTimeout(
+    db.get("lessonCache", lessonId),
+    STORAGE_TIMEOUT_MS,
+    undefined
+  );
 }
 
 export async function listCachedLessons(): Promise<LessonDocumentV1[]> {
   const db = await getLocalDb();
   if (!db) return [];
-  return db.getAll("lessonCache");
+  return withStorageTimeout(
+    db.getAll("lessonCache"),
+    STORAGE_TIMEOUT_MS,
+    []
+  );
 }
 
 export async function getProgressForStudent(
   studentId: string
 ): Promise<LocalLessonProgress[]> {
+  const fallback = Array.from(memoryProgress.values()).filter(
+    (p) => p.studentId === studentId
+  );
   const db = await getLocalDb();
-  if (!db) return [];
-  return db.getAllFromIndex("progress", "by-student", studentId);
+  if (!db) return fallback;
+  const list = await withStorageTimeout(
+    db.getAllFromIndex("progress", "by-student", studentId),
+    STORAGE_TIMEOUT_MS,
+    fallback
+  );
+  for (const item of list) {
+    memoryProgress.set(item.id, item);
+  }
+  return list;
 }
 
 export async function getLessonProgress(
   studentId: string,
   lessonId: string
 ): Promise<LocalLessonProgress | undefined> {
+  const key = `${studentId}:${lessonId}`;
   const db = await getLocalDb();
-  if (!db) return undefined;
-  return db.get("progress", `${studentId}:${lessonId}`);
+  if (!db) return memoryProgress.get(key);
+  return withStorageTimeout(
+    db.get("progress", key),
+    STORAGE_TIMEOUT_MS,
+    memoryProgress.get(key)
+  );
 }
 
 export async function saveLessonProgress(
   progress: LocalLessonProgress,
   queueSync = true
 ): Promise<void> {
+  memoryProgress.set(progress.id, progress);
   const db = await getLocalDb();
   if (!db) return;
-  const tx = db.transaction(["progress", "syncOutbox"], "readwrite");
-  await tx.objectStore("progress").put(progress);
-  if (queueSync) {
-    await tx.objectStore("syncOutbox").put({
-      id: `progress:${progress.id}:${Date.now()}`,
-      kind: "progress_upsert",
-      payload: progress,
-      createdAt: new Date().toISOString(),
-    });
-  }
-  await tx.done;
+  await withStorageTimeout(
+    (async () => {
+      const tx = db.transaction(["progress", "syncOutbox"], "readwrite");
+      await tx.objectStore("progress").put(progress);
+      if (queueSync) {
+        await tx.objectStore("syncOutbox").put({
+          id: `progress:${progress.id}:${Date.now()}`,
+          kind: "progress_upsert",
+          payload: progress,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      await tx.done;
+    })(),
+    STORAGE_TIMEOUT_MS,
+    undefined
+  );
 }
 
 export async function listOutboxItems(): Promise<SyncOutboxItem[]> {
   const db = await getLocalDb();
   if (!db) return [];
-  return db.getAll("syncOutbox");
+  return withStorageTimeout(
+    db.getAll("syncOutbox"),
+    STORAGE_TIMEOUT_MS,
+    []
+  );
 }
 
 export async function clearOutboxItems(ids: string[]): Promise<void> {
   const db = await getLocalDb();
   if (!db || ids.length === 0) return;
-  const tx = db.transaction("syncOutbox", "readwrite");
-  for (const id of ids) {
-    await tx.store.delete(id);
-  }
-  await tx.done;
+  await withStorageTimeout(
+    (async () => {
+      const tx = db.transaction("syncOutbox", "readwrite");
+      for (const id of ids) {
+        await tx.store.delete(id);
+      }
+      await tx.done;
+    })(),
+    STORAGE_TIMEOUT_MS,
+    undefined
+  );
 }

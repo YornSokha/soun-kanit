@@ -26,6 +26,7 @@ export function LessonScratchpad({ numeralPref }: LessonScratchpadProps) {
   const [inkColor, setInkColor] = useState<string>("#2563eb");
   const [strokes, setStrokes] = useState<Stroke[]>([]);
   const [activeStroke, setActiveStroke] = useState<Stroke | null>(null);
+  const activeStrokeRef = useRef<Stroke | null>(null);
   const [tallyCount, setTallyCount] = useState<number>(0);
 
   const getSvgCoords = (e: React.PointerEvent<SVGSVGElement>) => {
@@ -41,22 +42,31 @@ export function LessonScratchpad({ numeralPref }: LessonScratchpadProps) {
   const handlePointerDown = (e: React.PointerEvent<SVGSVGElement>) => {
     const pt = getSvgCoords(e);
     if (!pt) return;
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-    setActiveStroke({ color: inkColor, points: [pt] });
+    try {
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+    } catch {
+      // Ignore synthetic events in tests
+    }
+    const nextStroke: Stroke = { color: inkColor, points: [pt] };
+    activeStrokeRef.current = nextStroke;
+    setActiveStroke(nextStroke);
   };
 
   const handlePointerMove = (e: React.PointerEvent<SVGSVGElement>) => {
-    if (!activeStroke) return;
+    const curr = activeStrokeRef.current;
+    if (!curr) return;
     const pt = getSvgCoords(e);
     if (!pt) return;
-    setActiveStroke((prev) =>
-      prev ? { ...prev, points: [...prev.points, pt] } : null
-    );
+    const nextStroke: Stroke = { ...curr, points: [...curr.points, pt] };
+    activeStrokeRef.current = nextStroke;
+    setActiveStroke(nextStroke);
   };
 
   const handlePointerUp = () => {
-    if (!activeStroke) return;
-    setStrokes((prev) => [...prev, activeStroke]);
+    const finished = activeStrokeRef.current;
+    if (!finished) return;
+    activeStrokeRef.current = null;
+    setStrokes((prev) => [...prev, finished]);
     setActiveStroke(null);
   };
 
@@ -69,6 +79,7 @@ export function LessonScratchpad({ numeralPref }: LessonScratchpadProps) {
   };
 
   const handleClear = () => {
+    activeStrokeRef.current = null;
     setStrokes([]);
     setActiveStroke(null);
     setTallyCount(0);

@@ -11,6 +11,7 @@ import React, {
 import { LazyMotion, domAnimation } from "motion/react";
 import type { NumeralPreference } from "@/lib/khmer/numerals";
 import {
+  cleanupStaleServiceWorkersAndCaches,
   clearOutboxItems,
   getActiveProfileId,
   getProfile,
@@ -193,19 +194,41 @@ export function LearnerProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    if (
-      "serviceWorker" in navigator &&
-      process.env.NODE_ENV === "production"
-    ) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        // Non-blocking SW registration
-      });
+    if ("serviceWorker" in navigator) {
+      if (process.env.NODE_ENV === "production") {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => {
+            void reg.update().catch(() => {
+              // Ignore update check failure when offline
+            });
+          })
+          .catch(() => {
+            // Non-blocking SW registration
+          });
+      } else {
+        void cleanupStaleServiceWorkersAndCaches({ unregisterAll: true });
+      }
     }
+
+    const handleChunkError = (event: ErrorEvent) => {
+      const msg = event.message ?? "";
+      if (
+        msg.includes("ChunkLoadError") ||
+        msg.includes("Loading chunk") ||
+        msg.includes("Failed to fetch dynamically imported module")
+      ) {
+        void cleanupStaleServiceWorkersAndCaches({ unregisterAll: true });
+      }
+    };
+
+    window.addEventListener("error", handleChunkError);
 
     return () => {
       active = false;
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("error", handleChunkError);
     };
   }, [flushSyncOutbox, hydrateForProfile]);
 

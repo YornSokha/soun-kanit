@@ -221,14 +221,17 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
           </section>
         )}
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div
+          data-testid="daily-action-dock"
+          className="sticky bottom-[calc(4.75rem+env(safe-area-inset-bottom))] min-[900px]:static z-20 -mx-3 border-t-2 border-[#c9c2b2] bg-surface/95 backdrop-blur px-3 py-2.5 min-[900px]:mx-0 min-[900px]:border-0 min-[900px]:bg-transparent min-[900px]:p-0 flex flex-wrap items-center gap-3"
+        >
           {!isSolved ? (
             <>
               <button
                 type="button"
                 data-testid="daily-check-btn"
                 onClick={() => void handleCheck()}
-                className="khmer-chip flex-1 rounded-2xl bg-accent px-5 py-3 text-base font-bold text-white shadow-xs hover:bg-accent-hover"
+                className="khmer-chip btn-3d candy-ocean flex-1 rounded-2xl border-2 border-[#13429E] bg-[#1D5FD6] px-5 py-3 text-base font-extrabold text-white hover:bg-[#1751BA]"
               >
                 ពិនិត្យចម្លើយ
               </button>
@@ -240,7 +243,7 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
                   playHintChime(audioEnabled);
                   setRevealedHints((c) => c + 1);
                 }}
-                className="khmer-chip rounded-2xl border-2 border-border bg-surface px-4 py-3 text-sm font-bold text-ink hover:bg-surface-subtle disabled:opacity-45"
+                className="khmer-chip btn-3d [--btn-edge:#c9c2b2] rounded-2xl border-2 border-[#c9c2b2] bg-surface px-4 py-3 text-sm font-bold text-ink hover:bg-surface-subtle disabled:opacity-45"
               >
                 សុំជំនួយ
               </button>
@@ -250,7 +253,7 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
               <Link
                 href="/learn"
                 data-testid="daily-return-btn"
-                className="khmer-chip flex-1 inline-flex items-center justify-center rounded-2xl bg-success px-5 py-3 text-base font-bold text-white shadow-xs"
+                className="khmer-chip btn-3d candy-leaf flex-1 inline-flex items-center justify-center rounded-2xl border-2 border-[#148F56] bg-[#22C57B] px-5 py-3 text-base font-extrabold text-[#0D2B1D]"
               >
                 ត្រឡប់ទៅផ្លូវរៀន
               </Link>
@@ -258,7 +261,7 @@ export function DailyPuzzleClient({ puzzles }: DailyPuzzleClientProps) {
                 type="button"
                 data-testid="daily-next-puzzle-btn"
                 onClick={handleTryAnother}
-                className="khmer-chip rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-subtle"
+                className="khmer-chip btn-3d [--btn-edge:#c9c2b2] rounded-2xl border-2 border-[#c9c2b2] bg-surface px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-subtle"
               >
                 សាកល្បងលំហាត់មួយទៀត
               </button>

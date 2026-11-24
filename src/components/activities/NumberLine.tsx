@@ -41,7 +41,9 @@ export function NumberLine({
   const { audioEnabled } = useLearner();
   const [currentValue, setCurrentValue] = useState<number>(startValue);
   const [jumpStops, setJumpStops] = useState<number[]>([startValue]);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [, setIsDragging] = useState<boolean>(false);
+  const isDraggingRef = useRef<boolean>(false);
+  const activeValueRef = useRef<number>(startValue);
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -102,6 +104,7 @@ export function NumberLine({
         playScaleNote(idx % 11, audioEnabled);
       }
 
+      activeValueRef.current = cleanVal;
       setCurrentValue(cleanVal);
       setJumpStops((prev) => {
         if (prev[prev.length - 1] === cleanVal) return prev;
@@ -115,6 +118,7 @@ export function NumberLine({
 
   const handleReset = () => {
     if (disabled) return;
+    activeValueRef.current = startValue;
     setCurrentValue(startValue);
     setJumpStops([startValue]);
   };
@@ -127,23 +131,25 @@ export function NumberLine({
     } catch {
       // ignore synthetic events
     }
+    isDraggingRef.current = true;
     setIsDragging(true);
   };
 
   const handleMarkerPointerMove = (e: React.PointerEvent<SVGGElement>) => {
-    if (!isDragging || disabled || !svgRef.current) return;
+    if (!isDraggingRef.current || disabled || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * svgWidth;
     const idx = Math.round((x - padX) / tickSpacing);
     const val = min + Math.max(0, Math.min(ticks.length - 1, idx)) * tickStep;
     const cleanVal = Number(val.toFixed(6));
-    if (cleanVal !== currentValue) {
+    if (cleanVal !== activeValueRef.current) {
+      activeValueRef.current = cleanVal;
       setCurrentValue(cleanVal);
     }
   };
 
   const handleMarkerPointerUp = (e: React.PointerEvent<SVGGElement>) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     try {
       if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -151,9 +157,11 @@ export function NumberLine({
     } catch {
       // ignore synthetic events
     }
+    isDraggingRef.current = false;
     setIsDragging(false);
+    const landedVal = activeValueRef.current;
     setJumpStops((prev) =>
-      prev[prev.length - 1] === currentValue ? prev : [...prev, currentValue]
+      prev[prev.length - 1] === landedVal ? prev : [...prev, landedVal]
     );
   };
 
@@ -165,6 +173,7 @@ export function NumberLine({
     } catch {
       // ignore synthetic events
     }
+    isDraggingRef.current = false;
     setIsDragging(false);
   };
 
