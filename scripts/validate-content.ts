@@ -8,6 +8,12 @@ import { DailyPuzzlePackV1Schema } from "../src/lib/curriculum/daily";
 import { gradeStep, type StepAnswer } from "../src/lib/math/grader";
 import { computeMirrorCells } from "../src/lib/math/geometryDraw";
 import { toKhmerDigits } from "../src/lib/khmer/numerals";
+import {
+  audioProblem,
+  collectStepPrompts,
+  manifestPath,
+  readManifest,
+} from "../src/lib/audio/stepAudioManifest";
 
 const PATHS_DIR = path.join(process.cwd(), "content", "paths");
 const DAILY_FILE = path.join(process.cwd(), "content", "daily", "puzzles.json");
@@ -448,6 +454,25 @@ function main() {
       console.error(`FAIL [${relDaily}]: Invalid JSON syntax`, err);
       errorCount++;
     }
+  }
+
+  // Step prompt audio: every step needs a current KiriTTS "Sota" clip.
+  {
+    const manifest = readManifest(manifestPath(process.cwd()));
+    const byId = new Map(manifest.entries.map((e) => [e.id, e]));
+    let audioErrors = 0;
+    for (const step of collectStepPrompts(process.cwd())) {
+      const file = path.join(process.cwd(), "public", step.audioUrl.replace(/^\//, ""));
+      const problem = audioProblem(step, byId.get(step.id), file);
+      if (problem) {
+        console.error(`FAIL [audio -> ${step.id}]: ${problem} (run npm run audio:manifest)`);
+        audioErrors++;
+      }
+    }
+    if (audioErrors === 0) {
+      console.log(`PASS [audio] — ${manifest.entries.length} step clips voiced by Sota and current`);
+    }
+    errorCount += audioErrors;
   }
 
   console.log(

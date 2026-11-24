@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "validate:content": "tsx scripts/validate-content.ts",
-    "generate:audio": "tsx scripts/generate-khmer-audio.ts",
+    "audio:manifest": "tsx scripts/generate-khmer-audio.ts",
+    "audio:commit": "tsx scripts/commit-step-audio.ts",
     "test:unit": "vitest run",
     "test:e2e": "node scripts/run-e2e.mjs",
     "db:generate": "drizzle-kit generate",
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@breezystack/lamejs": "^1.2.7",
     "@playwright/test": "^1.65.1",
     "@serwist/cli": "^9.5.15",
     "@tailwindcss/turbopack": "4.3.3",
